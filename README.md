@@ -23,7 +23,7 @@ SIKMA adalah aplikasi berbasis web untuk pencatatan dan monitoring kehadiran mah
 1. Clone repo ini :
 
 ```bash
-git clone https://github.com/username/sikma-app.git
+git clone https://github.com/rizkyromadhon/sikma-app.git
 cd sikma-app
 ```
 
