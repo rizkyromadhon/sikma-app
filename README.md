@@ -69,10 +69,10 @@ php artisan storage:link
 - public/storage/foto-profil – Tempat penyimpanan foto
 
 👨‍💻 Developer
-Nama: Mohammad Rizky Romadhon
-NIM: E32222530
-Tugas Akhir: Pengembangan Sistem Presensi Mahasiswa Menggunakan RFID untuk Monitoring dan Rekapitulasi Kehadiran Secara Real-Time
-POLITEKNIK NEGERI JEMBER
+- Nama: Mohammad Rizky Romadhon
+- NIM: E32222530
+- Tugas Akhir: Pengembangan Sistem Presensi Mahasiswa Menggunakan RFID untuk Monitoring dan Rekapitulasi Kehadiran Secara Real-Time
+- POLITEKNIK NEGERI JEMBER
 
 📄 Lisensi
 Proyek ini dibuat untuk keperluan pembelajaran / Tugas Akhir. Tidak untuk digunakan secara komersial.
