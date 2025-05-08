@@ -8,12 +8,15 @@ use Illuminate\Contracts\View\View;
 
 class Layout extends Component
 {
+    public $hideNavbar;
+    public $isAdmin;
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct($hideNavbar = false, $isAdmin = false)
     {
-        //
+        $this->hideNavbar = $hideNavbar;
+        $this->isAdmin = $isAdmin;
     }
 
     /**

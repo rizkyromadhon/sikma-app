@@ -27,7 +27,7 @@ class LoginController extends Controller
                 return redirect('/profile/edit')->with('info', ' Silakan lengkapi profil Anda.');
             }
 
-            return redirect('/home')->with('success', 'Login berhasil!');
+            return redirect('/')->with('success', 'Login berhasil!');
         }
 
         return back()->withErrors(['email' => 'Email atau password salah'], 'login');

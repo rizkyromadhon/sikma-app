@@ -18,12 +18,12 @@
                 </div>
             @endif
 
-            <form class="space-y-4" action="/login" method="POST">
+            <form class="space-y-4" action="{{ route('login') }}" method="POST">
                 @csrf
                 <div>
                     <div class="mt-2">
                         <input type="email" name="email" id="email" autocomplete="email" required
-                            class="block w-full rounded-tl-md rounded-tr-md bg-white px-3 py-3 text-base text-gray-900 border-r-1 border-l-1 border-t-1 border-b-1 border-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                            class="block w-full rounded-tl-md rounded-tr-md bg-white px-3 py-3 text-base text-gray-900 border-r-1 border-l-1 border-t-1 border-b-1 border-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                             placeholder="Email address">
 
                     </div>
@@ -31,7 +31,7 @@
                     <div x-data="{ showPassword: false }" class="relative">
                         <input :type="showPassword ? 'text' : 'password'" name="password" id="password"
                             autocomplete="current-password" required
-                            class="block w-full rounded-bl-md rounded-br-md bg-white px-3 py-3 text-base text-gray-900 border-l-1 border-r-1 border-b-1 border-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                            class="block w-full rounded-bl-md rounded-br-md bg-white px-3 py-3 text-base text-gray-900 border-l-1 border-r-1 border-b-1 border-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                             placeholder="Password">
 
                         <button type="button" @click="showPassword = !showPassword"
@@ -54,20 +54,28 @@
                 </div>
 
                 <div class="text-sm">
-                    <a href="#" class="font-semibold text-blue-600 hover:text-blue-500">Lupa
+                    <a href="{{ route('password.request') }}" x-on:click="loading = true"
+                        class="font-semibold text-gray-700 hover:text-gray-900">Lupa
                         password?</a>
                 </div>
 
                 <div>
-                    <button type="submit"
-                        class="flex w-full justify-center rounded-md bg-blue-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Sign
+                    <button type="submit" x-on:click="loading = true"
+                        class="flex w-full justify-center rounded-md bg-gray-800 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 cursor-pointer">Sign
                         in</button>
                 </div>
             </form>
 
+            <a href="/auth/google" x-on:click="loading = true"
+                class="mt-5 mx-auto flex justify-center items-center gap-2 w-80 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100 shadow-sm transition">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="h-5 w-5">
+                Login dengan akun Google
+            </a>
+
             <p class="mt-6 text-center text-sm/6 text-gray-500">
                 Belum punya akun?
-                <a href="/register" class="font-semibold text-blue-600 hover:text-blue-500">Daftar disini.</a>
+                <a href="/register" x-on:click="loading = true"
+                    class="font-semibold text-gray-700 hover:text-gray-900">Daftar disini.</a>
             </p>
         </div>
     </div>

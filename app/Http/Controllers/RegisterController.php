@@ -11,10 +11,16 @@ use Illuminate\Validation\Rule;
 
 class RegisterController extends Controller
 {
-    public function register(Request $request) {
+    public function register(Request $request)
+    {
         $request->validateWithBag('register', [
             'fullname' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => [
+                'required',
+                'email',
+                'unique:users,email',
+                'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/'
+            ],
             'password' => [
                 'required',
                 'min:6',
@@ -28,6 +34,7 @@ class RegisterController extends Controller
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah terdaftar.',
+            'email.regex' => 'Hanya email Gmail yang diperbolehkan. Contoh: example@gmail.com.',
             'password.required' => 'Password wajib diisi.',
             'password.min' => 'Password minimal 6 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
@@ -38,8 +45,11 @@ class RegisterController extends Controller
             'name' => $request->fullname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'mahasiswa',
         ]);
 
-        return redirect('/login')->with('success', ' Silakan login.');
+        return redirect('/login')->with('success', 'Silakan login.');
     }
+
+
 }
