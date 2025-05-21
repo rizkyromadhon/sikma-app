@@ -117,33 +117,33 @@
                             <tr>
                                 @if ($index === 0)
                                     <!-- No. -->
-                                    <td class="px-4 py-2 text-center" rowspan="{{ $items->count() }}">
+                                    <td class="px-4 py-3 text-center" rowspan="{{ $items->count() }}">
                                         {{ $loop->parent->iteration }}.
                                     </td>
                                     <!-- Nama -->
-                                    <td class="px-4 py-2 text-center" rowspan="{{ $items->count() }}">
+                                    <td class="px-4 py-3 text-center" rowspan="{{ $items->count() }}">
                                         {{ $item->user->name }}
                                     </td>
                                     <!-- NIM -->
-                                    <td class="px-4 py-2 text-center" rowspan="{{ $items->count() }}">
+                                    <td class="px-4 py-3 text-center" rowspan="{{ $items->count() }}">
                                         {{ $item->user->nim }}
                                     </td>
                                 @endif
 
                                 <!-- Semester -->
-                                <td class="px-4 py-2 text-center">
+                                <td class="px-4 py-3 text-center">
                                     {{ explode(' ', $item->jadwalKuliah->semester->semester_name)[1] }}
                                 </td>
                                 <!-- Program Studi -->
-                                <td class="px-4 py-2 text-center">{{ $item->user->programStudi->name }}</td>
+                                <td class="px-4 py-3 text-center">{{ $item->user->programStudi->name }}</td>
                                 <!-- Golongan -->
-                                <td class="px-4 py-2 text-center">
+                                <td class="px-4 py-3 text-center">
                                     {{ $item->jadwalKuliah->golongan->nama_golongan }}
                                 </td>
                                 <!-- Mata Kuliah -->
-                                <td class="px-4 py-2 text-center">{{ $item->mataKuliah->name }}</td>
+                                <td class="px-4 py-3 text-center">{{ $item->mataKuliah->name }}</td>
                                 <!-- Ruangan -->
-                                <td class="px-4 py-2 text-center">{{ $item->jadwalKuliah->ruangan->name }}</td>
+                                <td class="px-4 py-3 text-center">{{ $item->jadwalKuliah->ruangan->name }}</td>
                                 <!-- Waktu Presensi -->
                                 <td class="px-4 py-2 text-center">
                                     {{ \Carbon\Carbon::parse($item->waktu_presensi)->format('H:i') }}

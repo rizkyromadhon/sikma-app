@@ -15,7 +15,7 @@
             </form>
             <div class="flex items-center justify-start"><a href="{{ route('admin.dosen.create') }}"
                     class="flex items-center gap-3 text-sm justify-center px-4 py-2 bg-gray-800 text-white font-semibold shadow-xl rounded-full cursor-pointer transition hover:bg-black">
-                    <span>Tambah Mahasiswa</span>
+                    <span>Tambah Dosen</span>
                 </a>
             </div>
         </div>
@@ -58,7 +58,8 @@
                 <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
                     @forelse ($datas as $data)
                         <tr>
-                            <td class="px-4 py-2 text-left">{{ $loop->iteration }}.</td>
+                            <td class="px-4 py-2 text-left">
+                                {{ ($datas->currentPage() - 1) * $datas->perPage() + $loop->iteration }}.</td>
                             <td class="px-4 py-2 text-left">{{ $data->name }}</td>
                             <td class="px-4 py-2 text-left">{{ $data->email }}</td>
                             <td class="px-4 py-2 text-left">{{ $data->nip }}</td>

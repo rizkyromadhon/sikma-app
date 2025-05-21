@@ -4,14 +4,15 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\User;
+use App\Models\Golongan;
 use App\Models\Presensi;
 use App\Models\Semester;
 use App\Models\MataKuliah;
 use App\Models\JadwalKuliah;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
-use App\Events\PresensiCreated;
 // use Illuminate\Container\Attributes\Log;
+use App\Events\PresensiCreated;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -28,11 +29,12 @@ class PresensiKuliahController extends Controller
     {
         $user = Auth::user();
         $presensi = [];
-        $mataKuliah = [];
+        $mata_kuliah = [];
         $bulanPilihan = [];
         $semesterTempuh = [];
         $bulanSekarang = [];
         $presensiGrouped = [];
+        $mingguRequest = [];
 
         if ($user) {
             $userId = Auth::id();
@@ -86,66 +88,98 @@ class PresensiKuliahController extends Controller
         ]);
     }
 
+    // public function store(Request $request)
+    // {
+    //     // Ambil UID dari request
+    //     $uid = $request->input('uid');
+
+    //     // Tulis UID ke log Laravel
+    //     Log::info('UID diterima dari ESP32:', ['uid' => $uid]);
+
+    //     // Kirim event ke channel lain
+    //     broadcast(new PresensiCreated($uid))->toOthers();
+
+    //     // Kirim respons balik
+    //     return response()->json([
+    //         'message' => 'UID diterima',
+    //         'uid' => $uid
+    //     ]);
+    // }
 
     public function store(Request $request)
     {
+        // $uid = $request->input('uid');
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            // 'id' => 'required',
+            'uid' => 'required'
         ]);
 
-        $userId = $validated['user_id'];
-        $user = User::findOrFail($userId);
+        $userUid = $validated['uid'];
+        $user = User::where('role', 'mahasiswa')->where('uid', $userUid)->first();
+        // $user = User::findOrFail($userId);
+        $parts = explode(' ', trim($user->name));
+        $lastName = end($parts);
         $now = Carbon::now();
         $hari = $now->translatedFormat('l');
         $jam = $now->format('H:i:s');
         $tanggal = now()->format('Y-m-d');
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User tidak terdaftar'
+            ], 404);
+        }
 
         $jadwal = JadwalKuliah::where('id_prodi', $user->id_prodi)
             ->where('id_golongan', $user->id_golongan)
             ->where('id_semester', $user->id_semester)
             ->where('hari', $hari)
             ->whereTime('jam_mulai', '<=', $jam)
+            ->whereTime('jam_selesai', '>=', $jam)
             ->orderBy('jam_mulai', 'desc') // untuk berjaga kalau ada dua jadwal yang tumpang tindih
             ->first();
 
         if (!$jadwal) {
             return response()->json([
-                'message' => 'Anda tidak memiliki jadwal kuliah saat ini.'
+                'message' => 'Maaf ' . $lastName . ', tidak ada jadwal kuliah saat ini.'
             ], 400);
         }
+        $toleransi = Carbon::parse($jadwal->jam_mulai)->addMinutes(15)->format('H:i:s');
 
-        if ($jam > $jadwal->jam_selesai) {
+        if ($toleransi > $now) {
             return response()->json([
-                'message' => 'Presensi gagal. Anda terlambat, jadwal kuliah sudah berakhir.'
+                'message' => 'Maaf ' . $lastName . ', Anda terlambat.'
             ], 400);
-        }
+        } else {
+            // Cek apakah sudah presensi sebelumnya
+            $sudahPresensi = Presensi::where('user_id', $user->id)
+                ->where('id_jadwal_kuliah', $jadwal->id)
+                ->where('tanggal', $tanggal)
+                ->exists();
 
-        // Cek apakah sudah presensi sebelumnya
-        $sudahPresensi = Presensi::where('user_id', $userId)
-            ->where('id_jadwal_kuliah', $jadwal->id)
-            ->where('tanggal', $tanggal)
-            ->exists();
+            if ($sudahPresensi) {
+                return response()->json([
+                    'message' => 'Maaf ' . $lastName . ', Anda sudah presensi untuk jadwal ini.'
+                ], 400);
+            }
 
-        if ($sudahPresensi) {
+            // Simpan presensi
+            $presensi = Presensi::create([
+                'user_id' => $user->id,
+                'id_matkul' => $jadwal->id_matkul,
+                'id_jadwal_kuliah' => $jadwal->id,
+                'waktu_presensi' => now(),
+                'tanggal' => today(),
+                'status' => 'Hadir'
+            ]);
+
+
+            broadcast(new PresensiCreated($presensi))->toOthers();
+
             return response()->json([
-                'message' => 'Anda sudah melakukan presensi untuk jadwal ini hari ini.'
-            ], 400);
+                'message' => 'Hai ' . $lastName  . ', Berhasil melakukan presensi.'
+            ], 200);
         }
-
-        // Simpan presensi
-        $presensi = Presensi::create([
-            'user_id' => $request->user_id,
-            'id_matkul' => $jadwal->id_matkul,
-            'id_jadwal_kuliah' => $jadwal->id,
-            'waktu_presensi' => now(),
-            'tanggal' => today(),
-            'status' => 'Hadir'
-        ]);
-
-
-        broadcast(new PresensiCreated($presensi))->toOthers();
-
-        return response()->json(['message' => 'Berhasil melakukan presensi.']);
     }
 
     public function download($format)

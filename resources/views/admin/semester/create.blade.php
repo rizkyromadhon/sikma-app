@@ -1,7 +1,3 @@
-@php
-    use Carbon\Carbon;
-@endphp
-
 @extends('admin.dashboard')
 
 @section('admin-content')

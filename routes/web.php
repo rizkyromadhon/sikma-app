@@ -7,13 +7,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PesanController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\Admin\RfidController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\Admin\DosenController;
 use App\Http\Controllers\Admin\ProdiController;
 use App\Http\Controllers\JadwalKelasController;
+use App\Http\Controllers\PusatBantuanController;
+use App\Http\Controllers\Admin\LaporanController;
 use App\Http\Controllers\Admin\RuanganController;
 use App\Http\Controllers\Admin\GolonganController;
 use App\Http\Controllers\Admin\SemesterController;
@@ -22,6 +26,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\MataKuliahController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Admin\AlatPresensiController;
 use App\Http\Controllers\Admin\JadwalKuliahController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
@@ -33,6 +38,8 @@ Route::get('/presensi-kuliah', [PresensiKuliahController::class, 'index'])->name
 Route::get('/presensi-kuliah/download/{format}', [PresensiKuliahController::class, 'download'])
     ->name('presensi.download');
 Route::get('/presensi-kuliah/preview-pdf', [PresensiKuliahController::class, 'previewPdf'])->name('presensi.preview');
+
+Route::get('/pusat-bantuan', [PusatBantuanController::class, 'index'])->name('pusat-bantuan');
 
 Route::get('/presensi/today', [HomeController::class, 'getPresensiToday']);
 Route::get('/rekap/presensi/json', [HomeController::class, 'rekapPresensiJson']);
@@ -68,7 +75,12 @@ Route::post('/update-password', [ProfileController::class, 'updatePassword'])->n
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 
+Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
 
+Route::get('/pesan', [PesanController::class, 'index'])->name('mahasiswa.pesan');
+
+
+// Routes Admin
 Route::middleware(['auth', 'admin'])->group(function () {
     // Dashboard
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
@@ -132,5 +144,26 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::put('/admin/jadwal-kuliah/{id}/update', [JadwalKuliahController::class, 'update'])->name('admin.jadwal-kuliah.update');
     Route::delete('/admin/jadwal-kuliah/{id}/destroy', [JadwalKuliahController::class, 'destroy'])->name('admin.jadwal-kuliah.destroy');
 
-    Route::get('/admin/presensi', [AdminController::class, 'presensi'])->name('admin.presensi');
+    // Alat Presensi Routes
+    Route::get('/admin/alat-presensi', [AlatPresensiController::class, 'index'])->name('admin.alat-presensi.index');
+    Route::get('/admin/alat-presensi/create', [AlatPresensiController::class, 'create'])->name('admin.alat-presensi.create');
+    Route::post('/admin/alat-presensi/store', [AlatPresensiController::class, 'store'])->name('admin.alat-presensi.store');
+    Route::get('/admin/alat-presensi/{id}/edit', [AlatPresensiController::class, 'edit'])->name('admin.alat-presensi.edit');
+    Route::put('/admin/alat-presensi/{id}/update', [AlatPresensiController::class, 'update'])->name('admin.alat-presensi.update');
+    Route::delete('/admin/alat-presensi/{id}/destroy', [AlatPresensiController::class, 'destroy'])->name('admin.alat-presensi.destroy');
+
+    // RFID Routes
+    Route::get('/admin/rfid', [RfidController::class, 'index'])->name('admin.rfid.index');
+    Route::get('/admin/rfid/{id}/registrasi', [RfidController::class, 'registrasi'])->name('admin.rfid.registrasi');
+    Route::get('/admin/rfid/{id}/edit', [RfidController::class, 'edit'])->name('admin.rfid.edit');
+    Route::post('/admin/rfid/{id}/store', [RfidController::class, 'store'])->name('admin.rfid.store');
+    Route::put('/admin/rfid/{id}/update', [RfidController::class, 'update'])->name('admin.rfid.update');
+
+    // Laporan Mahasiswa Routes
+    Route::get('/admin/laporan', [LaporanController::class, 'index'])->name('admin.laporan.index');
+    Route::get('/admin/laporan/{id}', [LaporanController::class, 'show'])->name('admin.laporan.show');
+    Route::post('/admin/laporan/{id}/update', [LaporanController::class, 'update'])->name('admin.laporan.update');
+    Route::post('/admin/laporan/aksi/{id}/{aksi}', [LaporanController::class, 'aksi'])->name('laporan.aksi');
+    Route::delete('/admin/laporan/{id}/destroy', [LaporanController::class, 'destroy'])->name('admin.laporan.destroy');
+    Route::post('/admin/laporan/{id}/balas', [LaporanController::class, 'balas'])->name('admin.laporan.balas');
 });

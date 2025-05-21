@@ -27,7 +27,8 @@
                 <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
                     @forelse ($datas as $data)
                         <tr>
-                            <td class="px-6 py-2 text-center">{{ $loop->iteration }}</td>
+                            <td class="px-6 py-2 text-center">
+                                {{ ($datas->currentPage() - 1) * $datas->perPage() + $loop->iteration }}.</td>
                             <td class="px-6 py-2 text-center">{{ $data->kode }}</td>
                             <td class="px-6 py-2 text-center">{{ $data->name }}</td>
                             <td class="px-6 py-2 text-center capitalize">{{ $data->type }}</td>
@@ -90,6 +91,8 @@
                 </tbody>
             </table>
 
+
         </div>
     </div>
+    <div class="px-8 py-2">{{ $datas->links() }}</div>
 @endsection

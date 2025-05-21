@@ -44,7 +44,8 @@
                 <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
                     @forelse ($datas as $data)
                         <tr>
-                            <td class="px-6 py-2 text-left">{{ $loop->iteration }}.</td>
+                            <td class="px-6 py-2 text-left">
+                                {{ ($datas->currentPage() - 1) * $datas->perPage() + $loop->iteration }}.</td>
                             <td class="px-6 py-2 text-left">{{ $data->programStudi->name }}</td>
                             <td class="px-6 py-2 text-center">{{ $data->nama_golongan }}</td>
                             <td class="px-6 py-2 text-center flex gap-2 items-center justify-center">

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use App\Models\ProgramStudi;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,13 +36,14 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultView('vendor.pagination.tailwind');
         View::composer('*', function ($view) {
             $user = Auth::user();
-    
+
             $isOldPassword = false;
             if ($user) {
                 $isOldPassword = Hash::check('passwordmahasiswa', $user->password);
             }
-    
+
             $view->with('isOldPassword', $isOldPassword);
+            $view->with('programStudi', ProgramStudi::all());
         });
     }
 }

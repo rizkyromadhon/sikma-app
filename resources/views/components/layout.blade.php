@@ -13,20 +13,26 @@
 
     <!-- Styles / Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    @if (config('livewire.broadcasting.enabled'))
+        <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.11.1/dist/echo.iife.js"></script>
+        <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+    @endif
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.11.1/dist/echo.iife.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 </head>
 
-<body class="h-full {{ !$hideNavbar ? '' : '' }}">
+<body class="h-full {{ !$hideNavbar ? '' : '' }} " x-data="{ showContactModal: false }">
 
     <!-- Navbar -->
     @unless ($hideNavbar)
         <x-navbar></x-navbar>
     @endunless
 
+    @livewireStyles
+    @livewireScripts
     <!-- Konten halaman -->
     <main>
         <div class="{{ !$isAdmin ? 'mx-auto max-w-11/12 py-3 sm:px-6 lg:px-2' : '' }}">
@@ -109,6 +115,86 @@
             </div>
         </div>
     </div>
+
+    @if (!request()->is('admin/*') && (!Auth::check() || (Auth::check() && Auth::user()->role != 'admin')))
+        <div class="fixed bottom-6 right-6 z-[9998]">
+            <button @click="showContactModal = true"
+                class="group bg-gray-800 text-white px-4 py-3 rounded-full shadow-lg hover:bg-gray-900 flex items-center justify-center gap-0 hover:gap-2 transition-all duration-500 ease-in-out cursor-pointer">
+
+                <i class="fas fa-envelope"></i>
+
+                <!-- Text with expanding effect -->
+                <span
+                    class="max-w-0 group-hover:max-w-[200px] overflow-hidden whitespace-nowrap transition-all duration-600 ease-in-out">
+                    Hubungi Admin
+                </span>
+            </button>
+        </div>
+    @endif
+
+    <div x-show="showContactModal" x-transition.opacity.duration.200
+        class="fixed inset-0 z-[9999] flex items-center justify-center">
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black/50" @click="showContactModal = false"></div>
+
+        <!-- Modal Box -->
+        <div x-show="showContactModal" x-transition.scale.duration.200
+            class="relative bg-white w-full max-w-md mx-auto rounded-md shadow-lg z-50 p-6">
+            <!-- Tombol Tutup -->
+            <button @click="showContactModal = false"
+                class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl">&times;</button>
+
+            <!-- Judul -->
+            <h2 class="text-xl font-semibold mb-4 text-center">Form Laporan ke Admin</h2>
+
+            <!-- Form -->
+            <form method="POST" action="{{ route('laporan.store') }}">
+                @csrf
+                @method('POST')
+                @guest
+                    <div class="mb-4 space-y-2 mt-6">
+                        <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                        <input type="text" name="nama_lengkap" required placeholder="Mohammad Rizky Romadhon"
+                            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-gray-500">
+                    </div>
+                    <div class="mb-4 space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">NIM</label>
+                        <input type="text" name="nim" required placeholder="E32222530"
+                            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-gray-500">
+                    </div>
+                    <div class="mb-4 space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Program Studi</label>
+                        <select name="id_prodi" required
+                            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-gray-500">
+                            @foreach ($programStudi as $prodi)
+                                <option value="{{ $prodi->id }}">{{ $prodi->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-4 space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" name="email" required placeholder="rizky@gmail.com"
+                            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-gray-500">
+                    </div>
+                @endguest
+
+                <div class="mb-4 space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Pesan / Laporan</label>
+                    <textarea name="pesan" rows="4" required placeholder="Kartu RFID Hilang / Rusak"
+                        class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-gray-500"></textarea>
+                </div>
+
+                <div class="text-right">
+                    <button type="submit"
+                        class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900 transition cursor-pointer">
+                        Kirim
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
 
     <script>
         document.addEventListener('alpine:init', () => {

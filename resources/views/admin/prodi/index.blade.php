@@ -10,7 +10,6 @@
         </div>
     </div>
 
-    <!-- Table Mahasiswa -->
     <div class="px-6">
         <div class="overflow-x-auto bg-white rounded-xl shadow mb-4">
             <table class="min-w-full divide-y divide-gray-200">
@@ -94,7 +93,8 @@
 
 
     <div class="hidden" id="modalCreateProdi">
-        <div class="p-6 py-10 bg-white fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow z-20 w-full max-w-md rounded">
+        <div
+            class="p-6 py-10 bg-white fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 shadow z-20 w-full max-w-md rounded">
             <div class="mb-6">
                 <h1 class="text-center uppercase font-semibold">Tambah Program Studi</h1>
             </div>

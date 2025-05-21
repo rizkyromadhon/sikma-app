@@ -10,7 +10,7 @@ class RuanganController extends Controller
 {
     public function index()
     {
-        $datas = Ruangan::all();
+        $datas = Ruangan::paginate(8);
         return view("admin.ruangan.index", compact("datas"));
     }
 

@@ -2,13 +2,13 @@
     <div id="home-page" class="bg-gray-50 py-2 sm:py-4 rounded-md" x-data
         x-bind:class="{ 'overflow-hidden': $store.loading.value }">
 
-        <div x-show="$store.loading.value" x-transition:enter="transition ease-out duration-300"
+        {{-- <div x-show="$store.loading.value" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             class="fixed inset-0 bg-gray-700/70 flex items-center justify-center z-[9999] h-screen">
             <div class="w-12 h-12 border-6 border-gray-800 border-t-transparent rounded-full animate-spin"></div>
-        </div>
+        </div> --}}
         <div class="mx-auto">
             <p
                 class="mx-auto text-center mt-6 lg:mt-0 text-3xl font-semibold tracking-tight text-balance text-gray-950 lg:text-4xl lg:w-120">
@@ -146,4 +146,117 @@
             </div>
         </div>
     </div>
+    <script>
+        const echo = new Echo({
+            broadcaster: 'pusher',
+            key: '{{ env('PUSHER_APP_KEY') }}',
+            cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
+            forceTLS: true,
+        });
+
+        echo.channel('presensi')
+            .listen('.eventPresensi', (e) => {
+                console.log(e);
+                refreshPresensi();
+            })
+            .error((error) => {
+                console.log("Error:", error);
+            });
+        let lastDataLength = 0;
+
+        function refreshPresensi() {
+            fetch('/presensi/today')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Data Presensi:', data);
+                    const presensiList = document.getElementById('presensi-list');
+                    if (!presensiList) return;
+
+                    presensiList.innerHTML = ''; // Clear presensi list sebelum menambahkan data baru
+
+                    if (data.length === 0) {
+                        presensiList.innerHTML = `
+                        <div class="flex justify-center items-center h-24 mt-25">
+                            <p class="text-gray-500 italic text-center">
+                                Belum ada yang melakukan presensi pada hari ini.
+                            </p>
+                        </div>
+                    `;
+                        return;
+                    }
+
+                    // Menambahkan data presensi ke dalam list
+                    data.reverse().forEach((item, index) => {
+                        const presensiItem = document.createElement('p');
+                        presensiItem.classList.add('mt-1', 'max-w-lg', 'text-sm/6', 'text-gray-600',
+                            'lg:text-start');
+                        presensiItem.innerHTML =
+                            `${index + 1}. <strong>${item.user.name}</strong>, telah melakukan presensi pada mata kuliah
+                    <strong>${item.mata_kuliah.name}</strong> di <strong>${item.jadwal_kuliah.ruangan.name}</strong>
+                    pada <strong>${new Date(item.waktu_presensi).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</strong>.`;
+
+                        presensiList.appendChild(presensiItem);
+                    });
+
+                    // Auto-scroll ke bawah jika data baru ditambahkan
+                    if (data.length > lastDataLength) {
+                        presensiList.scrollTop = presensiList.scrollHeight;
+                    }
+                    lastDataLength = data.length;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Fungsi untuk refresh rekap presensi
+        function refreshRekapPresensi() {
+            fetch('/rekap/presensi/json')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('rekap-container');
+                    if (!container) return;
+
+                    container.innerHTML = ''; // Clear rekap sebelum menambahkan data baru
+                    data.rekapPresensi.forEach(item => {
+                        container.innerHTML += `
+                    <div class="relative mt-5">
+                        <div class="absolute inset-px rounded-lg bg-white ring-1 shadow-sm ring-black/5 lg:rounded-lg"></div>
+                        <a href="/detail-presensi/${encodeURIComponent(item.program_studi)}" class="relative flex flex-col overflow-hidden lg:rounded-2xl cursor-pointer">
+                            <div class="px-6 p-3 lg:px-6 sm:p-3">
+                                <div class="flex justify-between">
+                                    <p class="text-lg font-medium tracking-tight text-black">
+                                        ${item.program_studi}
+                                    </p>
+
+                                    <div class="flex justify-between space-x-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-7 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <p class="text-lg text-gray-600 max-w-lg pr-5">${item.sudah}</p>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-7 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <p class="text-lg text-gray-600 max-w-lg pr-5">${item.belum}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `;
+                    });
+
+                    // Update total presensi
+                    const totalSudahEl = document.getElementById('total-sudah-value');
+                    const totalBelumEl = document.getElementById('total-belum-value');
+                    if (totalSudahEl) totalSudahEl.textContent = data.totalSudah;
+                    if (totalBelumEl) totalBelumEl.textContent = data.totalBelum;
+                })
+                .catch(err => console.error('Gagal ambil rekap:', err));
+        }
+        // Inisialisasi interval untuk refresh
+        setInterval(refreshPresensi, 3000); // Refresh setiap 5 detik
+        setInterval(refreshRekapPresensi, 3000); // Refresh setiap 5 detik
+
+        refreshPresensi();
+        refreshRekapPresensi();
+    </script>
 </x-layout>
