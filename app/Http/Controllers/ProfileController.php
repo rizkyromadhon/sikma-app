@@ -13,8 +13,27 @@ use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    public function index()
+    {
+        $profileComplete = '';
+        if (Auth::check()) {
+            $profileComplete = Auth::user()->is_profile_complete;
+        }
+        $isProfileCompleted = $profileComplete == "0";
+
+        if (!Auth::user()->is_profile_complete) {
+            return redirect()->route('profile.edit')->with('info', 'Mohon lengkapi profil Anda.');
+        }
+
+        return view("profile", compact('isProfileCompleted'));
+    }
+
     public function edit()
     {
+        $user = Auth::user();
+
+        // Cek jika profil belum lengkap
+
         return view('edit-profile', [
             'user' => Auth::user(),
         ]);
@@ -25,10 +44,14 @@ class ProfileController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        if (!$request->filled('no_hp') || !$request->filled('alamat')) {
+            return redirect('/profile/edit')->with('info', 'Mohon lengkapi profil Anda.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'no_hp' => 'nullable|string|max:20|regex:/^[0-9+]+$/',
-            'alamat' => 'nullable|string|max:255',
+            'no_hp' => 'required|string|max:20|regex:/^[0-9+]+$/',
+            'alamat' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 

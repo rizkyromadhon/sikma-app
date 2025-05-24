@@ -38,11 +38,14 @@ class AppServiceProvider extends ServiceProvider
             $user = Auth::user();
 
             $isOldPassword = false;
+            $isProfileCompleted = true;
             if ($user) {
                 $isOldPassword = Hash::check('passwordmahasiswa', $user->password);
+                $isProfileCompleted = $user->is_profile_complete == 1;
             }
 
             $view->with('isOldPassword', $isOldPassword);
+            $view->with('isProfileCompleted', $isProfileCompleted);
             $view->with('programStudi', ProgramStudi::all());
         });
     }

@@ -63,9 +63,10 @@ Route::get('/register', function () {
 });
 Route::post('/register', [RegisterController::class, 'register'])->name('register');
 
-Route::get('/profile', function () {
-    return view('profile');
-})->middleware('auth')->name('profile');
+// Route::get('/profile', function () {
+//     return view('profile');
+// })->middleware('auth')->name('profile');
+Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth')->name('profile');
 Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
 

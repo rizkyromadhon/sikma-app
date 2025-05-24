@@ -7,20 +7,34 @@
     <nav class="fixed top-0 left-0 w-full z-50">
         @if ($isOldPassword)
             <div id="headerOldPassword"
-                class="bg-red-100 border border-red-300 text-red-800 px-4 py-3 text-center flex items-center justify-center relative">
+                class="bg-red-100 border border-red-300 text-red-800 px-4 py-2 text-center flex items-center justify-center relative space-x-4 md:space-x-0">
                 <div class="flex items-center">
-                    <p class="font-normal text-sm sm:text-base">Anda masih menggunakan password lama. Demi keamanan
+                    <p class="font-normal text-sm">Anda masih menggunakan password lama. Demi keamanan
                         silahkan
                         ganti
                         password <a href="{{ route('ganti-password') }}" class="font-bold underline">disini.</a></p>
                 </div>
 
                 <button id="btnClosePassword"
-                    class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 cursor-pointer">
+                    class="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 cursor-pointer">
                     <i class="fa-regular fa-circle-xmark"></i>
                 </button>
             </div>
         @endif
+
+        {{-- @if ($isProfileCompleted == '0')
+            <div id="headerProfileCompleted"
+                class="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 text-center flex items-center justify-center relative space-x-4 md:space-x-0">
+                <div class="flex items-center">
+                    <p class="font-normal text-sm">Anda belum melengkapi profil. Demi kemudahan akses silahkan lengkapi
+                        profil anda <a href="{{ route('profile.edit') }}" class="font-bold underline">disini.</a></p>
+                </div>
+                <button id="btnCloseProfile"
+                    class="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 cursor-pointer">
+                    <i class="fa-regular fa-circle-xmark"></i>
+                </button>
+            </div>
+        @endif --}}
 
         <!-- Navbar -->
         <div class="shadow-md w-full bg-white z-50 h-16 flex items-center justify-between p-4 sm:p-6 lg:px-8"
@@ -74,6 +88,7 @@
                         <div class="relative">
                             <button @click="open = !open"
                                 class="flex items-center space-x-2 xl:space-x-3 focus:outline-none transition-all ease-in-out duration-100 transform hover:scale-105 cursor-pointer">
+
                                 <img src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('img/user.png') }}"
                                     alt="Foto Profil" class="w-7 h-7 xl:w-8 xl:h-8 rounded-full object-cover">
 
@@ -86,6 +101,12 @@
                                     <path x-show="open" stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"
                                         style="display: none;" />
                                 </svg>
+
+                                @if ($isProfileCompleted == '0')
+                                    <div class="px-1 py-1 rounded-full bg-red-500">
+
+                                    </div>
+                                @endif
                             </button>
 
                             <div x-show="open" @click.outside="open = false"
@@ -93,11 +114,17 @@
                                 x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
                                 x-transition:leave="transition ease-in duration-150"
                                 x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                                class="absolute right-0 mt-3 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none z-50"
+                                class="absolute right-0 mt-3 w-42 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-gray-300 ring-opacity-5 focus:outline-none z-50"
                                 style="display: none;">
                                 <div class="py-1">
                                     <a href="/profile" x-on:click="loading = true"
-                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">Profil</a>
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">Profil
+                                        @if (Auth::check() && !$isProfileCompleted)
+                                            <span
+                                                class="inline-block w-2 h-2 bg-red-500 rounded-full absolute right-4 mt-1.5"></span>
+                                        @endif
+                                    </a>
+
                                     @if (Auth::check() && Auth::user()->role !== 'admin')
                                         <a href="{{ route('mahasiswa.pesan') }}"
                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pesan</a>
@@ -182,8 +209,13 @@
 
 
                         </div>
+
                         <a href="/profile" x-on:click="loading = true; open = false"
-                            class="block px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-md">Profil</a>
+                            class="block px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-md">Profil
+                            @if (Auth::check() && !$isProfileCompleted)
+                                <span class="inline-block w-2 h-2 bg-red-500 rounded-full absolute right-6 mt-1.5"></span>
+                            @endif
+                        </a>
                         <a href="{{ route('mahasiswa.pesan') }}" x-on:click="loading = true; open = false"
                             class="block px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-md">Pesan</a>
                         @if (Auth::check() && Auth::user()->role === 'admin')
@@ -220,6 +252,17 @@
         if (btnClosePassword && headerOldPassword) {
             btnClosePassword.addEventListener('click', () => {
                 headerOldPassword.classList.add('hidden');
+            });
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const headerProfileCompleted = document.getElementById('headerProfileCompleted');
+        const btnCloseProfile = document.getElementById('btnCloseProfile');
+
+        if (btnCloseProfile && headerProfileCompleted) {
+            btnCloseProfile.addEventListener('click', () => {
+                headerProfileCompleted.classList.add('hidden');
             });
         }
     });

@@ -51,17 +51,25 @@
                     </div>
                 </div>
 
-
-                <div class="pt-4 flex items-center gap-4">
-                    <button type="submit"
-                        class="inline-block px-6 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-900 transition duration-200 cursor-pointer">
-                        Simpan Perubahan
-                    </button>
-                    <a href="{{ route('profile') }}"
-                        class="inline-block px-6 py-2 bg-white text-gray-800 border font-medium rounded-md hover:bg-gray-800 hover:text-white transition duration-200 cursor-pointer">
-                        Batal
-                    </a>
-                </div>
+                @if ($user->is_profile_complete == '1')
+                    <div class="pt-4 flex items-center justify-center md:justify-start gap-4 w-full">
+                        <button type="submit"
+                            class="inline-block px-6 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-900 transition duration-200 cursor-pointer">
+                            Simpan Perubahan
+                        </button>
+                        <a href="{{ route('profile') }}"
+                            class="inline-block px-6 py-2 bg-white text-gray-800 border font-medium rounded-md hover:bg-gray-800 hover:text-white transition duration-200 cursor-pointer">
+                            Batal
+                        </a>
+                    </div>
+                @else
+                    <div class="flex items-center justify-center md:justify-start w-full">
+                        <button type="submit"
+                            class="inline-block px-6 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-gray-900 transition duration-200 cursor-pointer">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                @endif
             </form>
         </div>
     </div>

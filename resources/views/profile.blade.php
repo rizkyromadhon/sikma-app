@@ -62,7 +62,7 @@
                         class="w-[120px] h-[150px] md:w-[130px] md:h-[170px] rounded object-cover my-8 md:my-0 md:mb-20">
 
                     <div class="hidden md:block">
-                        <a href="/profile/edit"
+                        <a href="{{ route('profile.edit') }}"
                             class="inline-block px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition">
                             Edit Profil
                         </a>
