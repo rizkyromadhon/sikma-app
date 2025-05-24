@@ -6,7 +6,7 @@ COPY . .
 RUN apk add --no-cache \
     libpng-dev \
     libjpeg-turbo-dev \
-    libfreetype-dev \
+    freetype-dev \
     zip \
     git \
     bash \
