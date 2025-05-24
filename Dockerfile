@@ -21,6 +21,11 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
     && npm install
 
+ENV PUSHER_APP_KEY=19a1b8036123d7352592
+ENV PUSHER_APP_SECRET=82ca957ce24e4c08616e
+ENV PUSHER_APP_ID=1977685
+ENV PUSHER_APP_CLUSTER=ap1
+
 RUN npm run build \
     && composer install --no-dev --working-dir=/var/www/html
 
