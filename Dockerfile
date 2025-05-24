@@ -12,6 +12,9 @@ RUN apk add --no-cache \
     bash \
     npm
 
+RUN apk add --no-cache libzip-dev zip \
+    && docker-php-ext-install zip
+
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd
 
