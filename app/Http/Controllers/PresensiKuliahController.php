@@ -66,6 +66,11 @@ class PresensiKuliahController extends Controller
                 $presensiQuery->where('id_matkul', $mataKuliahSelected);
             }
 
+            if ($mingguRequest) {
+                $tanggalAwal = Carbon::create(null, $bulanSekarang, 1)->startOfMonth();
+                $tanggalAkhir = $tanggalAwal->copy()->addWeeks($mingguRequest - 1)->endOfWeek();
+                $presensiQuery->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
+            }
 
             $presensi = $presensiQuery->get();
 
@@ -86,6 +91,49 @@ class PresensiKuliahController extends Controller
             'presensiGrouped' => $presensiGrouped,
             'mingguRequest' => $mingguRequest
         ]);
+    }
+    public function ajaxFilter(Request $request)
+    {
+        $user = Auth::user();
+        $userId = $user->id;
+
+        $semesterTempuh = $user->id_semester;
+        $isGanjil = $semesterTempuh % 2 != 0;
+        $bulanPilihan = $isGanjil ? range(7, 12) : range(1, 6);
+
+        $bulanRequest = (int) $request->input('bulan', $bulanPilihan[0]);
+        $bulanSekarang = in_array($bulanRequest, $bulanPilihan) ? $bulanRequest : $bulanPilihan[0];
+        $mingguRequest = (int) $request->input('minggu', Carbon::now()->weekOfMonth);
+        $mataKuliahSelected = $request->input('mata_kuliah');
+
+        $presensiQuery = Presensi::with('mataKuliah')
+            ->where('user_id', $userId)
+            ->whereMonth('tanggal', $bulanSekarang);
+
+        if ($mataKuliahSelected) {
+            $presensiQuery->where('id_matkul', $mataKuliahSelected);
+        }
+
+        if ($mingguRequest) {
+            $tanggalAwal = Carbon::create(null, $bulanSekarang, 1)->startOfMonth();
+            $tanggalAkhir = $tanggalAwal->copy()->addWeeks($mingguRequest - 1)->endOfWeek();
+            $presensiQuery->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
+        }
+
+        $presensi = $presensiQuery->get();
+
+        // Format ke bentuk JSON yang mudah di-render frontend
+        $result = $presensi->map(function ($item) {
+            return [
+                'tanggal' => Carbon::parse($item->tanggal)->locale('id')->translatedFormat('l, d-F-Y'),
+                'mata_kuliah' => $item->mataKuliah->name ?? '-',
+                'waktu' => $item->status === 'Hadir' ? Carbon::parse($item->waktu_presensi)->format('H:i') : '-',
+                'status' => $item->status,
+                'keterangan' => $item->keterangan ?? '-',
+            ];
+        });
+
+        return response()->json($result);
     }
 
     // public function store(Request $request)
@@ -146,7 +194,7 @@ class PresensiKuliahController extends Controller
         }
         $toleransi = Carbon::parse($jadwal->jam_mulai)->addMinutes(15)->format('H:i:s');
 
-        if ($toleransi > $now) {
+        if ($now->greaterThan($toleransi)) {
             return response()->json([
                 'message' => 'Maaf ' . $lastName . ', Anda terlambat.'
             ], 400);

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Semester;
+use App\Models\AlatPresensi;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -12,6 +13,8 @@ class SemesterController extends Controller
     {
         // Get unique semesters
         $semesters = Semester::whereNotNull('semester_name')->distinct()->get();
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
 
         // Pass only the unique semesters to the view
         return view('admin.semester.index', compact('semesters'));

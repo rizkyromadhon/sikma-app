@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <!-- Table Mahasiswa -->
+    <!-- Table Dosen -->
     <div class="px-6">
         <div class="overflow-x-auto bg-white rounded-xl shadow mb-2">
             <form action="{{ route('admin.dosen.index') }}" method="GET">

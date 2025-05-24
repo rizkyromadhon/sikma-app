@@ -6,7 +6,14 @@
             <p class="mt-2 text-lg">Temukan Jawaban dan Panduan Seputar Sistem Kehadiran Mahasiswa</p>
         </header>
 
-        <main x-data="{ showModalAkun: false, showModalJadwal: false, showModalPanduan: false, searchQuery: '' }" class="max-w-5xl mx-auto px-4 mb-20">
+        <main x-data="{
+            showModalAkun: false,
+            showModalJadwal: false,
+            showModalPanduan: false,
+            searchQuery: ''
+        }" x-init="$watch('showModalAkun || showModalJadwal || showModalPanduan', value => {
+            document.body.classList.toggle('overflow-hidden', value);
+        })" class="max-w-5xl mx-auto px-4 mb-20">
             <div class="mb-6">
                 <label for="search" class="block mb-2 text-xl font-semibold">Cari Pertanyaan</label>
                 <input x-model="searchQuery" id="search" type="text"
@@ -15,7 +22,7 @@
             </div>
             <!-- Categories -->
             <h2 class="text-xl font-semibold mb-4">Kategori Bantuan</h2>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 ">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div @click="showModalJadwal = true"
                     class="p-4 py-4 bg-white rounded shadow hover:shadow-md transition cursor-pointer">📋 Jadwal &
                     Presensi
@@ -31,67 +38,80 @@
 
             <div class="mx-auto mt-8">
                 <h2 class="text-xl font-semibold mb-4">Frequently Asked Questions (FAQ)</h2>
-
-                {{-- Presensi Mahasiswa --}}
                 <div class="mb-6">
                     <div class="space-y-2">
-                        <div x-data="{ openItems: [] }" class=" pb-10 space-y-4">
-                            <!-- Accordion -->
-                            <template
-                                x-for="item in [
-                                { id: 1, question: 'Bagaimana cara melakukan presensi?', answer: 'Mahasiswa cukup menempelkan kartu RFID ke alat presensi sesuai jadwal kuliah yang berlaku.' },
-                                { id: 2, question: 'Apa yang terjadi jika saya presensi di luar waktu yang ditentukan?', answer: 'Sistem akan menolak presensi jika dilakukan di luar waktu jadwal kuliah (misalnya sebelum 08.00 atau setelah 10.00).' },
-                                { id: 3, question: 'Bisakah saya presensi lebih dari satu kali dalam satu jadwal?', answer: 'Tidak. Sistem membatasi hanya satu kali presensi per mahasiswa dalam satu rentang waktu jadwal.' },
-                                { id: 4, question: 'Bagaimana saya bisa melihat rekap presensi saya?', answer: 'Silakan login terlebih dahulu, kemudian buka menu Presensi Kuliah untuk melihat detail kehadiran Anda.' },
-                                { id: 5, question: 'Apakah saya bisa mengunduh rekap presensi?', answer: 'Ya. Anda dapat mengunduh laporan dalam format PDF/Excel dari menu Presensi Kuliah.' },
-                                { id: 6, question: 'Apa yang harus dilakukan jika kartu RFID saya hilang?', answer: 'Silakan hubungi admin program studi untuk menghapus kartu lama dan registrasi kartu baru.' },
-                                { id: 7, question: 'Mengapa presensi saya tidak tercatat?', answer: 'Pastikan waktu presensi sesuai jadwal. Jika sudah benar namun tidak tercatat, hubungi admin program studi.' },
-                                { id: 8, question: 'Teknologi apa yang digunakan dalam sistem ini?', answer: 'Sistem kehadiran mahasiswa ini menggunakan ESP32 dengan RFID reader dan Laravel 12 sebagai backend untuk mencatat presensi secara real-time.' },
-                                { id: 9, question: 'Apakah sistem bisa digunakan tanpa internet?', answer: 'Untuk saat ini sistem ini hanya dapat digunakan melalui jaringan lokal.' },
-                                { id: 10, question: 'Apakah saya bisa presensi menggunakan kartu teman saya?', answer: 'Tidak. Sistem mencatat data berdasarkan NIM yang terhubung dengan RFID.' },
-                                { id: 11, question: 'Apa yang terjadi jika saya lupa membawa kartu RFID?', answer: 'Silakan laporkan ke dosen pengampu atau admin program studi. Presensi manual dapat dilakukan hanya dalam kondisi tertentu.' },
-                                { id: 12, question: 'Bagaimana cara mendaftarkan kartu RFID saya?', answer: 'Admin program studi akan melakukan proses pendaftaran kartu RFID Anda melalui alat presensi yang telah disiapkan.' },
-                                { id: 13, question: 'Apakah saya perlu login setiap kali ingin presensi?', answer: 'Tidak perlu. Presensi dilakukan otomatis saat Anda menempelkan kartu ke alat.' },
-                            ].filter(i => searchQuery
-                                .toLowerCase()
-                                .split(' ')
-                                .every(word =>
-                                    i.question.toLowerCase().includes(word) || i.answer.toLowerCase().includes(word)
-                                )
-                            )"
-                                :key="item.id">
-                                <div class="rounded">
-                                    <button
-                                        @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
-                                        class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md rounded-md">
-                                        <span x-text="item.id + '. ' + item.question"></span>
-                                        <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
-                                            class="w-5 h-5 transition-transform duration-200 text-gray-500"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </button>
-                                    <div x-show="openItems.includes(item.id)" x-transition
-                                        class="px-4 py-3 text-sm text-gray-700">
-                                        <span x-text="item.answer"></span>
+                        <div x-data="{
+                            openItems: [],
+                            searchQuery: '',
+                            get filteredItems() {
+                                return [
+                                    { id: 1, question: 'Bagaimana cara melakukan presensi?', answer: 'Mahasiswa cukup menempelkan kartu RFID ke alat presensi sesuai jadwal kuliah yang berlaku.' },
+                                    { id: 2, question: 'Apa yang terjadi jika saya presensi di luar waktu yang ditentukan?', answer: 'Sistem akan menolak presensi jika dilakukan di luar waktu jadwal kuliah (misalnya sebelum 08.00 atau setelah 10.00).' },
+                                    { id: 3, question: 'Bisakah saya presensi lebih dari satu kali dalam satu jadwal?', answer: 'Tidak. Sistem membatasi hanya satu kali presensi per mahasiswa dalam satu rentang waktu jadwal.' },
+                                    { id: 4, question: 'Bagaimana saya bisa melihat rekap presensi saya?', answer: 'Silakan login terlebih dahulu, kemudian buka menu Presensi Kuliah untuk melihat detail kehadiran Anda.' },
+                                    { id: 5, question: 'Apakah saya bisa mengunduh rekap presensi?', answer: 'Ya. Anda dapat mengunduh laporan dalam format PDF/Excel dari menu Presensi Kuliah.' },
+                                    { id: 6, question: 'Apa yang harus dilakukan jika kartu RFID saya hilang?', answer: 'Silakan hubungi admin program studi untuk menghapus kartu lama dan registrasi kartu baru.' },
+                                    { id: 7, question: 'Mengapa presensi saya tidak tercatat?', answer: 'Pastikan waktu presensi sesuai jadwal. Jika sudah benar namun tidak tercatat, hubungi admin program studi.' },
+                                    { id: 8, question: 'Teknologi apa yang digunakan dalam sistem ini?', answer: 'Sistem kehadiran mahasiswa ini menggunakan ESP32 dengan RFID reader dan Laravel 12 sebagai backend untuk mencatat presensi secara real-time.' },
+                                    { id: 9, question: 'Apakah sistem bisa digunakan tanpa internet?', answer: 'Untuk saat ini sistem ini hanya dapat digunakan melalui jaringan lokal.' },
+                                    { id: 10, question: 'Apakah saya bisa presensi menggunakan kartu teman saya?', answer: 'Tidak. Sistem mencatat data berdasarkan NIM yang terhubung dengan RFID.' },
+                                    { id: 11, question: 'Apa yang terjadi jika saya lupa membawa kartu RFID?', answer: 'Silakan laporkan ke dosen pengampu atau admin program studi. Presensi manual dapat dilakukan hanya dalam kondisi tertentu.' },
+                                    { id: 12, question: 'Bagaimana cara mendaftarkan kartu RFID saya?', answer: 'Admin program studi akan melakukan proses pendaftaran kartu RFID Anda melalui alat presensi yang telah disiapkan.' },
+                                    { id: 13, question: 'Apakah saya perlu login setiap kali ingin presensi?', answer: 'Tidak perlu. Presensi dilakukan otomatis saat Anda menempelkan kartu ke alat.' },
+                                ].filter(i => searchQuery
+                                    .toLowerCase()
+                                    .split(' ')
+                                    .every(word =>
+                                        i.question.toLowerCase().includes(word) ||
+                                        i.answer.toLowerCase().includes(word)
+                                    )
+                                );
+                            }
+                        }" class="space-y-4">
+                            <!-- Accordion list -->
+                            <template x-if="filteredItems.length">
+                                <template x-for="item in filteredItems" :key="item.id">
+                                    <div class="rounded">
+                                        <button
+                                            @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
+                                            class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md rounded-md">
+                                            <span x-text="item.id + '. ' + item.question"></span>
+                                            <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
+                                                class="w-5 h-5 transition-transform duration-200 text-gray-500"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                        <div x-show="openItems.includes(item.id)" x-transition
+                                            class="px-4 py-3 text-sm text-gray-700">
+                                            <span x-text="item.answer"></span>
+                                        </div>
                                     </div>
+                                </template>
+                            </template>
+
+                            <!-- Jika tidak ditemukan -->
+                            <template x-if="filteredItems.length === 0">
+                                <div class="text-center text-gray-500 py-4 italic">
+                                    Tidak ada pertanyaan yang cocok dengan pencarian Anda.
                                 </div>
                             </template>
                         </div>
+
                     </div>
                 </div>
             </div>
 
             <!-- Modal Akun -->
-            <div x-show="showModalJadwal" x-transition.opacity.duration.200
+            <div x-show="showModalJadwal" x-cloak x-transition.opacity.duration.200
                 class="fixed inset-0 z-50 flex items-center justify-center">
                 <!-- Overlay -->
                 <div class="absolute inset-0 bg-black/50" @click="showModalJadwal = false"></div>
 
                 <!-- Modal Box -->
                 <div x-show="showModalJadwal" x-transition.scale.duration.200
-                    class="relative bg-white w-full max-w-2xl rounded-md shadow min-h-[500px] z-50">
+                    class="relative bg-white w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
 
                     <!-- Tombol Tutup -->
                     <button @click="showModalJadwal = false"
@@ -101,7 +121,7 @@
 
                     <!-- Judul -->
                     <div class="px-6 pt-10 pb-4">
-                        <h1 class="text-center text-2xl font-semibold">Jadwal & Presensi</h1>
+                        <h1 class="text-center text-xl md:text-2xl font-semibold">Jadwal & Presensi</h1>
                     </div>
 
                     <!-- Konten scrollable -->
@@ -120,12 +140,12 @@
                             <div class="rounded border border-gray-200">
                                 <button
                                     @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
-                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-lg transition">
+                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md md:text-xl transition">
                                     <span x-text="item.id + '. ' + item.question"></span>
                                     <!-- Chevron -->
                                     <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
-                                        class="w-5 h-5 transition-transform duration-200 text-gray-500" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7" />
                                     </svg>
@@ -142,14 +162,14 @@
             </div>
 
             <!-- Modal Akun -->
-            <div x-show="showModalAkun" x-transition.opacity.duration.300
+            <div x-show="showModalAkun" x-cloak x-transition.opacity.duration.300
                 class="fixed inset-0 z-50 flex items-center justify-center">
                 <!-- Overlay -->
                 <div class="absolute inset-0 bg-black/50" @click="showModalAkun = false"></div>
 
                 <!-- Modal Box -->
                 <div x-show="showModalAkun" x-transition.scale.duration.300
-                    class="relative bg-white w-full max-w-2xl rounded-md shadow min-h-[500px] z-50">
+                    class="relative bg-white w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
 
                     <!-- Tombol Tutup -->
                     <button @click="showModalAkun = false"
@@ -159,7 +179,7 @@
 
                     <!-- Judul -->
                     <div class="px-6 pt-10 pb-4">
-                        <h1 class="text-center text-2xl font-semibold">Akun & Profil</h1>
+                        <h1 class="text-center text-xl md:text-2xl font-semibold">Akun & Profil</h1>
                     </div>
 
                     <!-- Konten scrollable -->
@@ -175,11 +195,11 @@
                             <div class="rounded">
                                 <button
                                     @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
-                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-lg">
+                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md md:text-xl">
                                     <span x-text="item.id + '. ' + item.question"></span>
                                     <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
-                                        class="w-5 h-5 transition-transform duration-200 text-gray-500" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7" />
                                     </svg>
@@ -194,14 +214,14 @@
                 </div>
             </div>
 
-            <div x-show="showModalPanduan" x-transition.opacity.duration.200
+            <div x-show="showModalPanduan" x-cloak x-transition.opacity.duration.200
                 class="fixed inset-0 z-50 flex items-center justify-center">
                 <!-- Overlay -->
                 <div class="absolute inset-0 bg-black/50" @click="showModalPanduan = false"></div>
 
                 <!-- Modal Box -->
                 <div x-show="showModalPanduan" x-transition.scale.duration.200
-                    class="relative bg-white w-full max-w-2xl rounded-md shadow min-h-[500px] z-50">
+                    class="relative bg-white w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
 
                     <!-- Tombol Tutup -->
                     <button @click="showModalPanduan = false"
@@ -211,7 +231,7 @@
 
                     <!-- Judul -->
                     <div class="px-6 pt-10 pb-4">
-                        <h1 class="text-center text-2xl font-semibold">Panduan Penggunaan</h1>
+                        <h1 class="text-center text-xl md:text-2xl font-semibold">Panduan Penggunaan</h1>
                     </div>
 
                     <!-- Konten scrollable -->
@@ -230,12 +250,12 @@
                             <div class="rounded border border-gray-200">
                                 <button
                                     @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
-                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-lg transition">
+                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md md:text-xl transition">
                                     <span x-text="item.id + '. ' + item.question"></span>
                                     <!-- Chevron -->
                                     <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
-                                        class="w-5 h-5 transition-transform duration-200 text-gray-500" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7" />
                                     </svg>
@@ -246,7 +266,6 @@
                                 </div>
                             </div>
                         </template>
-
                     </div>
                 </div>
             </div>

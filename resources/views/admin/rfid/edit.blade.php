@@ -4,9 +4,13 @@
     <div class="container mx-auto p-4">
         <div class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 mb-4 flex items-center gap-4">
             <h1 class="text-xl font-bold text-gray-800">
-                <a href="{{ route('admin.semester.index') }}" class="text-black hover:text-gray-700">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
+                <form action="{{ route('admin.rfid.resetMode') }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('POST')
+                    <button type="submit" class="text-black hover:text-gray-700 bg-transparent border-none cursor-pointer">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                </form>
             </h1>
             <h1 class="text-xl font-medium text-gray-800">Edit RFID <strong>{{ $mahasiswa->name }}</strong></h1>
         </div>

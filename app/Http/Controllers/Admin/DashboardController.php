@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Models\Semester;
+use App\Models\AlatPresensi;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -72,7 +73,7 @@ class DashboardController extends Controller
             ->orderBy('id_prodi')
             ->get();
 
-
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
 
         return view('admin.pages.dashboard', compact('jumlahMahasiswa', 'jumlahDosen', 'jumlahGenderLaki', 'jumlahGenderPerempuan', 'jumlahMahasiswaPerSemester', 'jumlahMahasiswaPerProdi', 'jumlahDosenPerProdi', 'tabelDosenPerProdi', 'semesters', 'prodis', 'persentaseLaki', 'persentasePerempuan'));
     }

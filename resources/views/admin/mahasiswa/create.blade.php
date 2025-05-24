@@ -17,9 +17,9 @@
                 @csrf
                 @method('POST')
 
-                <div class="bg-white p-4 shadow w-full h-[410px]">
+                <div class="bg-white p-4 shadow w-full h-[480px]">
                     <div class="flex gap-4">
-                        <div class="flex flex-col flex-1 gap-4">
+                        <div class="flex flex-col flex-1 gap-4 mb-4">
                             <div class="flex flex-col gap-2">
                                 <label for="name" class="block text-sm font-medium text-gray-700">Nama
                                     Lengkap</label>
@@ -28,17 +28,18 @@
                                     placeholder="Ahmad Sutedjo, S.Kom, M.Kom">
                             </div>
                             <div class="flex flex-col gap-2">
+                                <label for="nim" class="block text-sm font-medium text-gray-700">NIM</label>
+                                <input type="text" id="nim" name="nim"
+                                    class="text-sm px-2 py-2 rounded border border-gray-300 shadow h-10"
+                                    placeholder="12345678">
+                            </div>
+                            <div class="flex flex-col gap-2">
                                 <label for="no_hp" class="block text-sm font-medium text-gray-700">Email</label>
                                 <input type="email" id="email" name="email"
                                     class="text-sm px-2 py-2 rounded border border-gray-300 shadow h-10"
                                     placeholder="contoh@gmail.com">
                             </div>
-                            <div class="flex flex-col gap-2">
-                                <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat</label>
-                                <input type="text" id="alamat" name="alamat"
-                                    class="text-sm px-2 py-2 rounded border border-gray-300 shadow h-10"
-                                    placeholder="Jalan Raya 123, Jakarta">
-                            </div>
+
                             <div class="flex flex-col gap-2">
                                 <label for="no_hp" class="block text-sm font-medium text-gray-700">No. HP</label>
                                 <input type="varchar" id="no_hp" name="no_hp"
@@ -47,12 +48,7 @@
                             </div>
                         </div>
                         <div class="flex flex-col flex-1 gap-4">
-                            <div class="flex flex-col gap-2">
-                                <label for="nim" class="block text-sm font-medium text-gray-700">NIM</label>
-                                <input type="text" id="nim" name="nim"
-                                    class="text-sm px-2 py-2 rounded border border-gray-300 shadow h-10"
-                                    placeholder="12345678">
-                            </div>
+
                             <div class="flex flex-col gap-2">
                                 <label for="semester" class="block text-sm font-medium text-gray-700">Semester
                                     Tempuh</label>
@@ -83,16 +79,30 @@
                                     <option value="">Pilih Golongan</option>
                                 </select>
                             </div>
+                            <div class="flex flex-col gap-2">
+                                <label for="gender" class="block text-sm font-semibold text-gray-700">Gender</label>
+                                <select id="gender" name="gender"
+                                    class="text-sm px-2 py-2 border border-gray-300 rounded-md shadow h-10">
+                                    <option value="Laki-laki">Laki-laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
                         </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label for="alamat" class="block text-sm font-medium text-gray-700">Alamat</label>
+                        <input type="text" id="alamat" name="alamat"
+                            class="text-sm px-2 py-2 rounded border border-gray-300 shadow h-10"
+                            placeholder="Jalan Raya 123, Jakarta">
                     </div>
                     <button type="submit"
                         class="flex w-full items-center gap-3 text-sm justify-center px-4 py-2 bg-gray-800 text-white font-semibold shadow-xl mb-2 mt-4 rounded-full cursor-pointer transition hover:bg-black">Tambah</button>
                 </div>
-                <div class="bg-white p-4 shadow w-[350px] space-y-4 flex flex-col justify-between h-[410px]">
+                <div class="bg-white p-4 shadow w-[400px] space-y-4 flex flex-col justify-between h-[480px]">
                     <div class="bg-gray-200 w-full flex items-center justify-center">
                         <img id="preview-image"
                             src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('img/avatar-default.png') }}"
-                            alt="pas-photo" class="object-cover object-center h-[320px]">
+                            alt="pas-photo" class="object-cover object-center h-[350px]">
                     </div>
                     <div>
                         <input type="file" id="foto" name="foto" accept="image/*" class="hidden">

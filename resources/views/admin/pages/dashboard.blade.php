@@ -9,27 +9,39 @@
     <div class="container mx-auto p-6">
         <!-- Statistik Utama -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
-                <h2 class="text-sm text-gray-500 mb-2">Jumlah Mahasiswa</h2>
-                <p class="text-2xl font-bold text-blue-600">{{ $jumlahMahasiswa }}</p>
+            <div
+                class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition flex items-center gap-6 border-t-blue-300 border-t-4">
+                <div class="px-4.5 py-4 rounded-full bg-blue-100">
+                    <i class="fa-solid fa-user-graduate text-3xl text-blue-500"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm text-gray-500 mb-2">Total Mahasiswa</h2>
+                    <p class="text-2xl font-bold text-blue-600">{{ $jumlahMahasiswa }}</p>
+                </div>
             </div>
-            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition">
-                <h2 class="text-sm text-gray-500 mb-2">Jumlah Dosen</h2>
-                <p class="text-2xl font-bold text-blue-600">{{ $jumlahDosen }}</p>
+            <div
+                class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition flex items-center gap-6 border-t-green-300 border-t-4">
+                <div class="px-4.5 py-4 rounded-full bg-green-100">
+                    <i class="fa-solid fa-user-tie text-3xl text-green-500"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm text-gray-500 mb-2">Total Dosen</h2>
+                    <p class="text-2xl font-bold text-green-600">{{ $jumlahDosen }}</p>
+                </div>
             </div>
         </div>
 
         <!-- Chart dan Data -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <!-- Grafik Mahasiswa per Semester -->
-            <div class="bg-white rounded-lg shadow p-4">
+            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition border-t-blue-300 border-t-4">
                 <h3 class="font-semibold text-lg mb-4 text-gray-700">Jumlah Mahasiswa per Semester</h3>
                 <div id="chartSemester" class="h-48 rounded-lg flex items-center justify-center pr-4">
                 </div>
             </div>
 
             <!-- Grafik Mahasiswa per Program Studi -->
-            <div class="bg-white rounded-lg shadow">
+            <div class="bg-white rounded-lg shadow hover:shadow-lg transition border-t-blue-300 border-t-4">
                 <h3 class="font-semibold text-lg mb-4 text-gray-700 p-4">Jumlah Mahasiswa per Program Studi</h3>
                 <div class="flex items-center justify-center w-full">
                     <div id="chartProdi" class="h-48 pl-6"></div>
@@ -39,7 +51,7 @@
         </div>
 
         <!-- Data Dosen dan Program Studi -->
-        <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6 mb-8 hover:shadow-lg transition border-t-green-300 border-t-4">
             <h3 class="font-semibold text-lg mb-4 text-gray-700">Jumlah Dosen per Program Studi</h3>
             <div class="flex flex-col md:flex-row gap-8">
                 <div class="flex-1">
@@ -306,7 +318,7 @@
                 curve: 'smooth',
 
             },
-            colors: ['#3B82F6'],
+            colors: ['#00C941'],
             series: [{
                 name: 'Jumlah Dosen',
                 data: dosenDataProdi,
@@ -340,7 +352,7 @@
             grid: {
                 show: true,
                 padding: {
-                    left: 2,
+                    left: 4,
                     right: 2,
                     top: -30
                 },

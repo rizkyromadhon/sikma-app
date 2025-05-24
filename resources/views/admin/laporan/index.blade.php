@@ -34,15 +34,15 @@
                             <td class="px-6 py-3 text-center w-54">
                                 @if ($item->status == 'Belum Ditangani')
                                     <span
-                                        class="inline-block bg-red-200 text-red-500 px-4 py-2 rounded-full text-sm font-medium">Belum
+                                        class="inline-block bg-red-200 text-red-500 px-4 py-2 rounded-full text-sm font-medium w-38">Belum
                                         Ditangani</span>
                                 @elseif ($item->status == 'Sedang Diproses')
                                     <span
-                                        class="bg-yellow-200 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium">Sedang
+                                        class="inline-block bg-yellow-200 text-yellow-600 px-4 py-2 rounded-full text-sm font-medium w-38">Sedang
                                         Diproses</span>
                                 @elseif ($item->status == 'Selesai')
                                     <span
-                                        class="bg-green-200 text-green-600 px-4 py-2 rounded-full text-sm font-medium">Selesai</span>
+                                        class="inline-block bg-green-200 text-green-600 px-4 py-2 rounded-full text-sm font-medium w-38">Selesai</span>
                                 @endif
                             </td>
                             <td class="px-6 py-2 text-center flex gap-2 items-center justify-center">

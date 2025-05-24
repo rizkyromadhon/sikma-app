@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Golongan;
+use App\Models\AlatPresensi;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -24,6 +25,8 @@ class GolonganController extends Controller
         }
 
         $datas = $datas->paginate(8);
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
 
         return view('admin.golongan.index', compact('datas', 'programStudi'));
     }

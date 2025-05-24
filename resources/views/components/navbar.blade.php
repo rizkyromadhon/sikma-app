@@ -4,7 +4,7 @@
 
 <div x-data="{ open: false }" :class="open ? 'overflow-hidden' : ''" @toggle-sidebar.window="open = $event.detail.open"
     @keydown.escape.window="open = false">
-    <nav class="sticky top-0 left-0 w-full z-50">
+    <nav class="fixed top-0 left-0 w-full z-50">
         @if ($isOldPassword)
             <div id="headerOldPassword"
                 class="bg-red-100 border border-red-300 text-red-800 px-4 py-3 text-center flex items-center justify-center relative">
@@ -37,7 +37,7 @@
                     <span class="sr-only">Open main menu</span>
 
                     <!-- Ikon Hamburger -->
-                    <svg x-show="!open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    <svg x-show="!open" x-cloak class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -131,7 +131,6 @@
 
     <!-- Mobile Sidebar (Terpisah dari navbar) -->
     <div>
-
         <!-- Sidebar Overlay -->
         <div x-show="open" class="fixed inset-0 bg-black/50 z-[60]" @click="open = false"
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
@@ -145,7 +144,7 @@
             x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" x-cloak>
 
-            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between py-6 px-4 border-b border-gray-200">
                 <a href="/" class="text-xl font-bold text-gray-800">'SIKMA'</a>
                 <button @click="open = false" class="rounded-md p-2 text-gray-700 hover:bg-gray-100">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -155,7 +154,7 @@
                 </button>
             </div>
 
-            <div class="p-6">
+            <div class="px-4 py-6">
                 <div class="space-y-1">
                     <a href="/" x-on:click="loading = true; open = false"
                         class="block px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-md">Home</a>
@@ -173,13 +172,20 @@
 
                 <div class="mt-6 pt-6 border-t border-gray-200">
                     @auth
-                        <div class="flex items-center space-x-3 px-3 py-3 mb-4">
+                        <div class="flex space-x-3 px-3 py-3 mb-2 rounded-md bg-gray-100">
                             <img src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('img/user.png') }}"
-                                alt="Foto Profil" class="w-8 h-8 rounded-full object-cover">
-                            <span class="text-sm font-semibold text-gray-800">{{ Auth::user()->nim }}</span>
+                                alt="Foto Profil" class="w-10 h-10 rounded-full object-cover">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-semibold text-gray-800">{{ Auth::user()->name }}</span>
+                                <span class="text-sm font-semibold text-gray-800">{{ Auth::user()->nim }}</span>
+                            </div>
+
+
                         </div>
                         <a href="/profile" x-on:click="loading = true; open = false"
                             class="block px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-md">Profil</a>
+                        <a href="{{ route('mahasiswa.pesan') }}" x-on:click="loading = true; open = false"
+                            class="block px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-md">Pesan</a>
                         @if (Auth::check() && Auth::user()->role === 'admin')
                             <a href="{{ route('admin.dashboard') }}" x-on:click="loading = true; open = false"
                                 class="block px-3 py-2 text-base font-semibold text-gray-900 hover:bg-gray-100 rounded-md">Dashboard</a>

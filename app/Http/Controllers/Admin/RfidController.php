@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use Livewire\Livewire;
 use App\Models\Golongan;
 use App\Models\Semester;
 use App\Events\RfidScanned;
+use App\Models\AlatPresensi;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
-use Livewire\Livewire;
 
 class RfidController extends Controller
 {
@@ -45,15 +46,16 @@ class RfidController extends Controller
                 $query->where('nim', $request->search);
             })
             ->with(['programStudi', 'semester', 'golongan']) // tambahkan eager loading
-            ->orderBy('id_prodi', 'asc')
-            ->orderBy('id_semester', 'asc')
+            ->orderByRaw('uid IS NULL')
             ->orderBy('name', 'asc')
+            ->orderBy('id_semester', 'asc')
+            ->orderBy('id_prodi', 'asc')
             ->orderBy('id_golongan', 'asc')
             ->paginate(8)
             ->appends($request->query());
 
 
-
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
         // Kembalikan view dengan data mahasiswa
         return view('admin.rfid.index', compact('mahasiswa', 'semesters', 'programStudiData', 'golonganData'));
     }
@@ -61,6 +63,8 @@ class RfidController extends Controller
     public function registrasi($id)
     {
         $mahasiswa = User::where('role', 'mahasiswa')->where('id', $id)->first();
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'register']);
         return view('admin.rfid.registrasi', compact('mahasiswa'));
     }
 
@@ -76,12 +80,16 @@ class RfidController extends Controller
         $mahasiswa->update([
             'uid' => $request->uid
         ]);
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
         return redirect()->route('admin.rfid.index')->with('success', 'Berhasil mendaftarkan RFID');
     }
 
     public function edit($id)
     {
         $mahasiswa = User::where('role', 'mahasiswa')->where('id', $id)->first();
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'register']);
         return view('admin.rfid.edit', compact('mahasiswa'));
     }
 
@@ -98,6 +106,8 @@ class RfidController extends Controller
         $mahasiswa->update([
             'uid' => $request->uid
         ]);
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
         return redirect()->route('admin.rfid.index')->with('success', 'Berhasil mengubah RFID');
     }
 
@@ -109,5 +119,11 @@ class RfidController extends Controller
 
         broadcast(new RfidScanned($uid))->toOthers();
         return response()->json(['message' => 'UID diterima']);
+    }
+
+    public function resetMode()
+    {
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
+        return redirect()->route('admin.rfid.index')->with('success', 'Mode kembali ke attendance');
     }
 }

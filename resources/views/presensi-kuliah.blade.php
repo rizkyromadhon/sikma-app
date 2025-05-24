@@ -27,64 +27,61 @@
                     $mingguRequest = $mingguRequest ?? 1;
                 @endphp
 
-                <div class="flex items-center space-x-5 mb-4">
-                    <form action="/presensi-kuliah" method="GET">
-                        <div class="flex items-center space-x-5 mb-4">
-                            <!-- Semester -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Semester</label>
-                                <input type="text" value="{{ $semesterTempuh }}" disabled
-                                    class="mt-1 block w-30 px-2 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 cursor-not-allowed">
-                            </div>
+                {{-- <form action="/presensi-kuliah" method="GET" class="w-full flex items-center mb-4 md:mb-0"> --}}
+                <div
+                    class="flex flex-col md:flex-row w-full md:w-150 items-center space-x-0 space-y-3 md:space-y-0 md:space-x-5 mb-4">
+                    <!-- Semester -->
+                    {{-- <div class="w-full flex-1">
+                        <label class="text-sm font-medium text-gray-700">Semester</label>
+                        <input type="text" value="{{ $semesterTempuh }}" disabled
+                            class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm bg-gray-100 cursor-not-allowed">
+                    </div> --}}
 
-                            <!-- Mata Kuliah -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Mata Kuliah</label>
-                                <select name="mata_kuliah"
-                                    class="mt-1 block w-50 px-2 py-2 border border-gray-300 rounded-md text-sm"
-                                    onchange="this.form.submit()">
-                                    <option value="">Semua Mata Kuliah</option>
-                                    @foreach ($mata_kuliah as $mata_kuliahItem)
-                                        <option value="{{ $mata_kuliahItem->name }}"
-                                            {{ request('mata_kuliah') == $mata_kuliahItem->name ? 'selected' : '' }}>
-                                            {{ $mata_kuliahItem->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                    <!-- Mata Kuliah -->
+                    <div class="w-full flex-1">
+                        <label class="text-sm font-medium text-gray-700">Mata Kuliah</label>
+                        <select name="mata_kuliah" onchange="fetchData()"
+                            class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
+                            <option value="">Semua Mata Kuliah</option>
+                            @foreach ($mata_kuliah as $mata_kuliahItem)
+                                <option value="{{ $mata_kuliahItem->id }}"
+                                    {{ request('mata_kuliah') == $mata_kuliahItem->id ? 'selected' : '' }}>
+                                    {{ $mata_kuliahItem->name }}
+                                </option>
+                            @endforeach
 
-                            <!-- Bulan -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Bulan</label>
-                                <select name="bulan"
-                                    class="mt-1 block w-50 px-2 py-2 border border-gray-300 rounded-md text-sm"
-                                    onchange="this.form.submit()">
-                                    @foreach ($bulanPilihan as $i)
-                                        <option value="{{ $i }}" {{ $i == $bulanSekarang ? 'selected' : '' }}>
-                                            {{ \Carbon\Carbon::create()->month($i)->locale('id')->translatedFormat('F') }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        </select>
+                    </div>
 
-                            <!-- Minggu -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Minggu</label>
-                                <select name="minggu"
-                                    class="mt-1 block w-50 px-2 py-2 border border-gray-300 rounded-md text-sm"
-                                    onchange="this.form.submit()">
-                                    @for ($minggu = 1; $minggu <= 5; $minggu++)
-                                        <option value="{{ $minggu }}"
-                                            {{ $minggu == $mingguRequest ? 'selected' : '' }}>
-                                            Minggu {{ $minggu }}
-                                        </option>
-                                    @endfor
-                                </select>
-                            </div>
+                    <!-- Bulan -->
+                    <div class="w-full flex-1">
+                        <label class="text-sm font-medium text-gray-700">Bulan</label>
+                        <select name="bulan" onchange="fetchData()"
+                            class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
+                            <option value="">Semua Bulan</option>
+                            @foreach ($bulanPilihan as $i)
+                                <option value="{{ $i }}" {{ $i == $bulanSekarang ? 'selected' : '' }}>
+                                    {{ \Carbon\Carbon::create()->month($i)->locale('id')->translatedFormat('F') }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                        </div>
-                    </form>
+                    <!-- Minggu -->
+                    <div class="w-full flex-1">
+                        <label class="text-sm font-medium text-gray-700">Minggu</label>
+                        <select name="minggu" onchange="fetchData()"
+                            class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
+                            <option value="">Semua Minggu</option>
+                            @for ($minggu = 1; $minggu <= 5; $minggu++)
+                                <option value="{{ $minggu }}" {{ $minggu == $mingguRequest ? 'selected' : '' }}>
+                                    Minggu {{ $minggu }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
                 </div>
+                {{-- </form> --}}
 
                 <!-- Presensi Table -->
                 <div class="overflow-x-auto bg-white rounded-xl shadow mb-5">
@@ -119,7 +116,7 @@
                                                 -
                                             @endif
                                         </td>
-                                        <td class="px-4 py-2 text-center flex items-center justify-center">
+                                        <td class="px-4 py-2 text-center">
                                             <div
                                                 class="
                                             @if ($item->status == 'Tidak Hadir') bg-red-200 text-red-500 border
@@ -181,4 +178,91 @@
             </div>
         @endguest
     </div>
+
+    <script>
+        function fetchData() {
+            const mataKuliah = document.querySelector('[name="mata_kuliah"]').value;
+            const bulan = document.querySelector('[name="bulan"]').value;
+            const minggu = document.querySelector('[name="minggu"]').value;
+
+            const params = new URLSearchParams({
+                mata_kuliah: mataKuliah,
+                bulan,
+                minggu
+            });
+
+            fetch(`/presensi-kuliah/ajax?${params.toString()}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("HTTP error " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updateTable(data);
+                })
+                .catch(error => {
+                    console.error("Fetch error:", error);
+                    document.querySelector('table tbody').innerHTML = `
+                <tr><td colspan="5" class="text-center py-4 text-red-500">Terjadi kesalahan saat mengambil data.</td></tr>
+            `;
+                });
+        }
+
+        function updateTable(data) {
+            const tbody = document.querySelector('table tbody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center py-4 text-gray-500">Tidak ada data presensi.</td>
+            </tr>
+        `;
+                return;
+            }
+
+            // Group by tanggal
+            const grouped = {};
+            data.forEach(item => {
+                if (!grouped[item.tanggal]) {
+                    grouped[item.tanggal] = [];
+                }
+                grouped[item.tanggal].push(item);
+            });
+
+            // Render grouped rows
+            Object.entries(grouped).forEach(([tanggal, items]) => {
+                items.forEach((item, index) => {
+                    const statusColor =
+                        item.status === 'Hadir' ? 'bg-green-200 text-green-600' :
+                        item.status === 'Tidak Hadir' ? 'bg-red-200 text-red-600' :
+                        'bg-blue-200 text-blue-600';
+
+                    const row = document.createElement('tr');
+
+                    if (index === 0) {
+                        const tdTanggal = document.createElement('td');
+                        tdTanggal.className = 'px-6 py-3 text-center align-middle';
+                        tdTanggal.rowSpan = items.length;
+                        tdTanggal.textContent = tanggal;
+                        row.appendChild(tdTanggal);
+                    }
+
+                    row.innerHTML += `
+                <td class="px-4 py-2 text-center">${item.mata_kuliah}</td>
+                <td class="px-4 py-2 text-center">${item.waktu}</td>
+                <td class="px-4 py-2 text-center">
+                    <span class="px-4 py-2 text-sm font-medium rounded-full w-28 border ${statusColor} w-28">
+                        ${item.status}
+                    </span>
+                </td>
+                <td class="px-4 py-2 text-center">${item.keterangan}</td>
+            `;
+
+                    tbody.appendChild(row);
+                });
+            });
+        }
+    </script>
 </x-layout>

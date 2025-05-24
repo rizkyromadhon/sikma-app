@@ -18,7 +18,9 @@
                         <p class="font-semibold text-blue-900 mb-1">Anda</p>
                         <p>{{ $item->pesan }}</p>
                         <div class="flex items-center justify-between mt-1">
-                            <p class="text-xs text-gray-500">{{ $item->created_at->format('d M Y H:i') }}</p>
+                            <p class="text-xs text-gray-500">
+                                {{ $item->created_at->locale('id')->translatedFormat('l, d F Y H:i') }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -35,8 +37,8 @@
                             <p class="font-semibold text-gray-800 mb-1">Admin Program Studi</p>
                             <p>{{ $item->balasan }}</p>
                             <div class="flex items-center justify-between mt-1">
-                                <p class="text-xs text-gray-500">{{ $item->updated_at->format('d M Y H:i') }}</p>
-                                {{-- Status pesan admin bisa tambahkan ikon di sini --}}
+                                <p class="text-xs text-gray-500">
+                                    {{ $item->updated_at->locale('id')->translatedFormat('l, d M Y H:i') }}</p>
                             </div>
                         </div>
                     </div>
@@ -59,7 +61,7 @@
                 <div class="my-8 border-t border-gray-300 mx-auto w-9/10"></div>
             @endif
         @empty
-            <p class="text-gray-600">Belum ada pesan atau laporan.</p>
+            <p class="text-gray-600 text-center">Belum ada pesan atau laporan.</p>
         @endforelse
     </div>
 </x-layout>

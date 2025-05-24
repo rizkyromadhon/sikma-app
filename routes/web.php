@@ -42,6 +42,8 @@ Route::get('/presensi-kuliah/preview-pdf', [PresensiKuliahController::class, 'pr
 Route::get('/pusat-bantuan', [PusatBantuanController::class, 'index'])->name('pusat-bantuan');
 
 Route::get('/presensi/today', [HomeController::class, 'getPresensiToday']);
+Route::get('/presensi/filtered', [HomeController::class, 'getPresensiFiltered']);
+Route::get('/presensi-kuliah/ajax', [PresensiKuliahController::class, 'ajaxFilter']);
 Route::get('/rekap/presensi/json', [HomeController::class, 'rekapPresensiJson']);
 Route::get('/detail-presensi/{program_studi}', [HomeController::class, 'showDetail'])->name('detail.presensi');
 
@@ -76,6 +78,7 @@ Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 
 Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');
+Route::match(['GET', 'POST'], '/check-nim', [LaporanController::class, 'checkNIM']);
 
 Route::get('/pesan', [PesanController::class, 'index'])->name('mahasiswa.pesan');
 
@@ -158,6 +161,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/rfid/{id}/edit', [RfidController::class, 'edit'])->name('admin.rfid.edit');
     Route::post('/admin/rfid/{id}/store', [RfidController::class, 'store'])->name('admin.rfid.store');
     Route::put('/admin/rfid/{id}/update', [RfidController::class, 'update'])->name('admin.rfid.update');
+    Route::post('/admin/rfid/reset-mode', [RfidController::class, 'resetMode'])->name('admin.rfid.resetMode');
 
     // Laporan Mahasiswa Routes
     Route::get('/admin/laporan', [LaporanController::class, 'index'])->name('admin.laporan.index');

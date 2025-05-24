@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Ruangan;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\AlatPresensi;
 
 class RuanganController extends Controller
 {
     public function index()
     {
         $datas = Ruangan::paginate(8);
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
         return view("admin.ruangan.index", compact("datas"));
     }
 

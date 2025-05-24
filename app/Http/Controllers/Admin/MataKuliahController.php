@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Golongan;
 use App\Models\Semester;
 use App\Models\MataKuliah;
+use App\Models\AlatPresensi;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -14,6 +15,8 @@ class MataKuliahController extends Controller
     public function index()
     {
         $datas = MataKuliah::all();
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
         return view('admin.mata-kuliah.index', compact('datas'));
     }
 

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Presensi;
 use App\Models\User;
 use App\Models\Golongan;
+use App\Models\Presensi;
 use App\Models\Semester;
+use App\Models\AlatPresensi;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -49,6 +50,8 @@ class MahasiswaController extends Controller
             ->paginate(8)
             ->appends($request->query());
 
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
+
         return view('admin.mahasiswa.index', compact('mahasiswa', 'semesters', 'programStudiData', 'golonganData'));
     }
 
@@ -79,6 +82,7 @@ class MahasiswaController extends Controller
             'program_studi' => 'required',
             'golongan' => 'required',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'gender' => 'required'
         ], [
             'name.required' => 'Nama wajib diisi.',
             'email.required' => 'Email wajib diisi.',
@@ -106,7 +110,8 @@ class MahasiswaController extends Controller
             'role' => 'mahasiswa',
             'password' => Hash::make($defaultPassword),
             'foto' => $path,
-            'nim' => $request->nim
+            'nim' => $request->nim,
+            'gender' => $request->gender
         ]);
 
         return redirect()->route('admin.mahasiswa.index')->with('success', 'Berhasil menambahkan mahasiswa baru!');
@@ -143,6 +148,7 @@ class MahasiswaController extends Controller
             'id_golongan' => 'required|exists:golongan,id',
             'id_prodi' => 'required|exists:program_studi,id',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'gender' => 'required'
         ], [
             'name.required' => 'Nama wajib diisi.',
             'email.required' => 'Email wajib diisi.',
@@ -160,6 +166,7 @@ class MahasiswaController extends Controller
         $user->alamat = $request->alamat;
         $user->id_semester = $request->id_semester; // Pastikan sesuai dengan form
         $user->id_golongan = $request->id_golongan; // Pastikan sesuai dengan form
+        $user->gender = $request->gender;
 
         // Cari ID dari program studi berdasarkan nama
         $prodi = ProgramStudi::where('id', $request->id_prodi)->first();

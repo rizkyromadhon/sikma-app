@@ -18,6 +18,17 @@
                 @method('POST')
 
                 <div class="bg-white px-8 py-4 shadow w-full max-w-4xl h-fit">
+                    @if ($errors->any())
+                        <div class="p-4 bg-red-100 border-2 text-red-500 rounded flex items-center gap-2 w-full mb-4">
+                            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                            <div>
+                                @foreach ($errors->all() as $error)
+                                    <p class="text-red-500 text-xs ml-2 py-1">{{ $error }}</p>
+                                @endforeach
+                            </div>
+
+                        </div>
+                    @endif
                     <div class="flex gap-6">
                         <div class="flex flex-col flex-1 gap-4">
                             <div class="flex flex-col gap-2">

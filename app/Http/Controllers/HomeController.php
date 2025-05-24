@@ -9,6 +9,7 @@ use App\Models\Golongan;
 use App\Models\Presensi;
 use App\Models\Semester;
 use App\Models\MataKuliah;
+use App\Models\AlatPresensi;
 use App\Models\JadwalKuliah;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
@@ -60,6 +61,8 @@ class HomeController extends Controller
             ];
         }
 
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
+
         return view('home', compact('presensi', 'daftarProdi', 'rekapPresensi', 'totalSudahPresensiSemua', 'totalBelumPresensiSemua', 'isOldPassword'));
     }
 
@@ -103,101 +106,225 @@ class HomeController extends Controller
     }
 
 
-    public function getPresensiToday()
+    public function getPresensiToday(Request $request)
     {
+        $programStudi = $request->query('program_studi');
+
         $presensi = Presensi::with([
-            'user',
-            'mataKuliah',
-            'jadwalKuliah.ruangan'
+            'user:id,name,nim,id_prodi',
+            'user.programStudi:id,name', // include relasi program studi
+            'mataKuliah:id,kode,name',
+            'jadwalKuliah:id,hari,jam_mulai,jam_selesai,id_semester,id_ruangan,id_matkul,id_golongan',
+            'jadwalKuliah.semester:id,semester_name',
+            'jadwalKuliah.ruangan:id,name',
+            'jadwalKuliah.golongan:id,nama_golongan'
         ])
+            ->when($programStudi, function ($query) use ($programStudi) {
+                $query->whereHas('user.programStudi', function ($q) use ($programStudi) {
+                    $q->where('name', $programStudi);
+                });
+            })
             ->whereDate('waktu_presensi', Carbon::today())
             ->where('status', 'Hadir')
             ->orderBy('waktu_presensi', 'desc')
             ->get();
 
-        Log::info('Presensi Hari Ini:', [
-            'count' => $presensi->count(),
-            'data' => $presensi
-        ]);
+        // Struktur respons yang disesuaikan untuk frontend
+        $result = $presensi->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'id_jadwal_kuliah' => $item->id_jadwal_kuliah,
+                'waktu_presensi' => $item->waktu_presensi,
+                'tanggal' => $item->tanggal,
+                'status' => $item->status,
+                'user' => [
+                    'id' => $item->user->id,
+                    'name' => $item->user->name,
+                    'nim' => $item->user->nim ?? null,
+                    'programStudi' => [
+                        'id' => $item->user->programStudi->id ?? null,
+                        'name' => $item->user->programStudi->name ?? null,
+                    ],
+                ],
+                'mataKuliah' => [
+                    'id' => $item->mataKuliah->id ?? null,
+                    'kode' => $item->mataKuliah->kode ?? null,
+                    'name' => $item->mataKuliah->name ?? null,
+                ],
+                'jadwalKuliah' => [
+                    'id' => $item->jadwalKuliah->id ?? null,
+                    'hari' => $item->jadwalKuliah->hari ?? null,
+                    'jam_mulai' => $item->jadwalKuliah->jam_mulai ?? null,
+                    'jam_selesai' => $item->jadwalKuliah->jam_selesai ?? null,
+                    'semester' => [
+                        'id' => $item->jadwalKuliah->semester->id ?? null,
+                        'semester_name' => $item->jadwalKuliah->semester->semester_name ?? null,
+                    ],
+                    'ruangan' => [
+                        'id' => $item->jadwalKuliah->ruangan->id ?? null,
+                        'name' => $item->jadwalKuliah->ruangan->name ?? null,
+                    ],
+                    'golongan' => [
+                        'id' => $item->jadwalKuliah->golongan->id ?? null,
+                        'nama_golongan' => $item->jadwalKuliah->golongan->nama_golongan ?? null,
+                    ],
+                ],
+            ];
+        });
 
-        return response()->json($presensi);
+        return response()->json($result);
     }
+
+    public function getPresensiFiltered(Request $request)
+    {
+        $programStudi = $request->query('program_studi');
+        $semester = $request->query('semester');
+        $golongan = $request->query('golongan');
+        $ruangan = $request->query('ruangan');
+        $mataKuliah = $request->query('mata_kuliah');
+        $search = $request->query('search');
+
+        $presensi = Presensi::with([
+            'user:id,name,nim,id_prodi',
+            'user.programStudi:id,name', // include relasi program studi
+            'mataKuliah:id,kode,name',
+            'jadwalKuliah:id,hari,jam_mulai,jam_selesai,id_semester,id_ruangan,id_matkul,id_golongan',
+            'jadwalKuliah.semester:id,semester_name',
+            'jadwalKuliah.ruangan:id,name',
+            'jadwalKuliah.golongan:id,nama_golongan'
+        ])
+            ->when($programStudi, function ($query) use ($programStudi) {
+                $query->whereHas('user.programStudi', function ($q) use ($programStudi) {
+                    $q->where('name', $programStudi);
+                });
+            })
+            ->when($search, function ($query) use ($search) {
+                $query->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('nim', 'like', "%$search%");
+                });
+            })
+            ->when($semester, function ($query) use ($semester) {
+                $query->whereHas('jadwalKuliah', function ($q) use ($semester) {
+                    $q->where('id_semester', $semester);
+                });
+            })
+            ->when($golongan, function ($query) use ($golongan) {
+                $query->whereHas('jadwalKuliah', function ($q) use ($golongan) {
+                    $q->where('id_golongan', $golongan);
+                });
+            })
+            ->when($ruangan, function ($query) use ($ruangan) {
+                $query->whereHas('jadwalKuliah', function ($q) use ($ruangan) {
+                    $q->where('id_ruangan', $ruangan);
+                });
+            })
+            ->when($mataKuliah, function ($query) use ($mataKuliah) {
+                $query->where('id_matkul', $mataKuliah);
+            })
+            ->whereDate('waktu_presensi', today())
+            ->where('status', 'Hadir')
+            ->orderBy('waktu_presensi', 'desc')
+            ->get();
+
+        $result = $presensi->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'id_jadwal_kuliah' => $item->id_jadwal_kuliah,
+                'waktu_presensi' => $item->waktu_presensi,
+                'tanggal' => $item->tanggal,
+                'status' => $item->status,
+                'user' => [
+                    'id' => $item->user->id,
+                    'name' => $item->user->name,
+                    'nim' => $item->user->nim ?? null,
+                    'programStudi' => [
+                        'id' => $item->user->programStudi->id ?? null,
+                        'name' => $item->user->programStudi->name ?? null,
+                    ],
+                ],
+                'mataKuliah' => [
+                    'id' => $item->mataKuliah->id ?? null,
+                    'kode' => $item->mataKuliah->kode ?? null,
+                    'name' => $item->mataKuliah->name ?? null,
+                ],
+                'jadwalKuliah' => [
+                    'id' => $item->jadwalKuliah->id ?? null,
+                    'hari' => $item->jadwalKuliah->hari ?? null,
+                    'jam_mulai' => $item->jadwalKuliah->jam_mulai ?? null,
+                    'jam_selesai' => $item->jadwalKuliah->jam_selesai ?? null,
+                    'semester' => [
+                        'id' => $item->jadwalKuliah->semester->id ?? null,
+                        'semester_name' => preg_replace('/[^0-9]/', '', $item->jadwalKuliah->semester->semester_name) ?? null,
+                    ],
+                    'ruangan' => [
+                        'id' => $item->jadwalKuliah->ruangan->id ?? null,
+                        'name' => $item->jadwalKuliah->ruangan->name ?? null,
+                    ],
+                    'golongan' => [
+                        'id' => $item->jadwalKuliah->golongan->id ?? null,
+                        'nama_golongan' => $item->jadwalKuliah->golongan->nama_golongan ?? null,
+                    ],
+                ],
+            ];
+        });
+
+        return response()->json($result);
+    }
+
+
 
     public function showDetail(Request $request, $program_studi)
     {
-        $prodi = ProgramStudi::where('name', $program_studi)->first();
+        // Ambil data program studi berdasarkan name dari URL
+        $prodi = ProgramStudi::where('name', $program_studi)->firstOrFail();
 
-        $search = $request->get("search");
+        // Ambil parameter pencarian
+        $search = $request->get('search');
 
+        // Ambil semua data presensi sesuai filter dan program studi
+        $presensi = Presensi::with([
+            'user.programStudi',
+            'mataKuliah',
+            'jadwalKuliah.ruangan',
+            'jadwalKuliah.semester',
+            'jadwalKuliah.golongan'
+        ])
+            ->whereHas('user', function ($query) use ($prodi, $search) {
+                $query->where('id_prodi', $prodi->id);
 
-        if ($search) {
-            $search = $request->get("search");
+                if ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%')
+                            ->orWhere('nim', 'like', '%' . $search . '%');
+                    });
+                }
+            })
+            ->when($request->semester, function ($query, $semesterId) {
+                $query->whereHas('jadwalKuliah', function ($q) use ($semesterId) {
+                    $q->where('id_semester', $semesterId);
+                });
+            })
+            ->when($request->golongan, function ($query, $golonganId) {
+                $query->whereHas('jadwalKuliah', function ($q) use ($golonganId) {
+                    $q->where('id_golongan', $golonganId);
+                });
+            })
+            ->when($request->ruangan, function ($query, $ruanganId) {
+                $query->whereHas('jadwalKuliah', function ($q) use ($ruanganId) {
+                    $q->where('id_ruangan', $ruanganId);
+                });
+            })
+            ->when($request->mata_kuliah, function ($query, $matkulId) {
+                $query->where('id_matkul', $matkulId);
+            })
+            ->whereDate('waktu_presensi', today())
+            ->where('status', 'Hadir')
+            ->orderBy('waktu_presensi', 'asc')
+            ->get()
+            ->groupBy('user_id');
 
-            $presensi = Presensi::with(['user', 'mataKuliah', 'jadwalKuliah.ruangan', 'jadwalKuliah.semester', 'jadwalKuliah.golongan'])
-                ->whereHas('user', function ($query) use ($prodi, $search) {
-                    $query->where('id_prodi', $prodi->id);
-
-                    if ($search) {
-                        $query->where(function ($q) use ($search) {
-                            $q->where('name', 'like', '%' . $search . '%')
-                                ->orWhere('nim', 'like', '%' . $search . '%');
-                        });
-                    }
-                })
-                ->when($request->semester, function ($query, $semesterId) {
-                    $query->whereHas('jadwalKuliah', function ($q) use ($semesterId) {
-                        $q->where('id_semester', $semesterId);
-                    });
-                })
-                ->when($request->golongan, function ($query, $golonganId) {
-                    $query->whereHas('jadwalKuliah', function ($q) use ($golonganId) {
-                        $q->where('id_golongan', $golonganId);
-                    });
-                })
-                ->when($request->ruangan, function ($query, $ruanganId) {
-                    $query->whereHas('jadwalKuliah', function ($q) use ($ruanganId) {
-                        $q->where('id_ruangan', $ruanganId);
-                    });
-                })
-                ->when($request->mata_kuliah, function ($query, $matkulId) {
-                    $query->where('id_matkul', $matkulId);
-                })
-                ->whereDate('waktu_presensi', today())
-                ->where('status', 'Hadir')
-                ->orderBy('waktu_presensi', 'asc')
-                ->get()
-                ->groupBy('user_id');
-        } else {
-            $presensi = Presensi::with(['user', 'mataKuliah', 'jadwalKuliah.ruangan', 'jadwalKuliah.semester', 'jadwalKuliah.golongan'])
-                ->whereHas('user', function ($query) use ($prodi) {
-                    $query->where('id_prodi', $prodi->id);
-                })
-                ->when($request->semester, function ($query, $semesterId) {
-                    $query->whereHas('jadwalKuliah', function ($q) use ($semesterId) {
-                        $q->where('id_semester', $semesterId);
-                    });
-                })
-                ->when($request->golongan, function ($query, $golonganId) {
-                    $query->whereHas('jadwalKuliah', function ($q) use ($golonganId) {
-                        $q->where('id_golongan', $golonganId);
-                    });
-                })
-                ->when($request->ruangan, function ($query, $ruanganId) {
-                    $query->whereHas('jadwalKuliah', function ($q) use ($ruanganId) {
-                        $q->where('id_ruangan', $ruanganId);
-                    });
-                })
-                ->when($request->mata_kuliah, function ($query, $matkulId) {
-                    $query->where('id_matkul', $matkulId);
-                })
-                ->whereDate('waktu_presensi', today())
-                ->where('status', 'Hadir')
-                ->orderBy('waktu_presensi', 'asc')
-                ->get()
-                ->groupBy('user_id');
-        }
-
-        // Untuk isian dropdown
+        // Data untuk dropdown filter
         $golonganOptions = Golongan::where('id_prodi', $prodi->id)->get();
         $ruanganOptions = Ruangan::all();
         $mataKuliahOptions = MataKuliah::all();

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\User;
 use App\Models\Laporan;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,7 +17,7 @@ class LaporanController extends Controller
      */
     public function index()
     {
-        $laporan = Laporan::with('programStudi')->paginate(8);
+        $laporan = Laporan::with('programStudi')->orderByRaw("FIELD(status, 'Belum Ditangani', 'Sedang Diproses', 'Selesai')")->paginate(8);
         return view('admin.laporan.index', compact('laporan'));
     }
 
@@ -43,7 +45,6 @@ class LaporanController extends Controller
                 'email' => $user->email,
             ];
         } else {
-            // Guest: ambil dari request form
             $request->validate([
                 'nama_lengkap' => 'required|string|max:100',
                 'nim' => 'required|string|max:20',
@@ -51,8 +52,10 @@ class LaporanController extends Controller
                 'email' => 'required|email|max:100',
             ]);
 
+            $matchedUser = User::where('nim', $request->nim)->first();
+
             $data = [
-                'user_id' => null,
+                'user_id' => $matchedUser->id,
                 'nama_lengkap' => $request->nama_lengkap,
                 'nim' => $request->nim,
                 'id_prodi' => $request->id_prodi,
@@ -107,7 +110,7 @@ class LaporanController extends Controller
         $laporan->balasan = $request->balasan;
         $laporan->save();
 
-        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil diperbarui.');
+        return redirect()->route('admin.laporan.index')->with('success', 'Laporan berhasil diperbarui.');
     }
 
     /**
@@ -118,7 +121,7 @@ class LaporanController extends Controller
         $laporan = Laporan::findOrFail($id);
         $laporan->delete();
 
-        return redirect()->route('laporan.index')->with('success', 'Laporan berhasil dihapus.');
+        return redirect()->route('admin.laporan.index')->with('success', 'Laporan berhasil dihapus.');
     }
 
     public function aksi(Request $request, $id, $aksi)
@@ -143,5 +146,29 @@ class LaporanController extends Controller
         $laporan->balasan = $request->balasan;
         $laporan->save();
         return back()->with('success', 'Balasan berhasil dikirim.');
+    }
+
+    public function checkNIM(Request $request)
+    {
+        $request->validate([
+            'nim' => 'required|string'
+        ]);
+
+        $nim = $request->input('nim');
+
+        Log::info('Checking NIM: ' . $nim);
+
+        $user = User::with('programStudi')->where('nim', $nim)->first();
+
+        return response()->json([
+            'exists' => !!$user,
+            'nim' => $nim,
+            'user' => $user ? [
+                'name' => $user->name,
+                'email' => $user->email,
+                'id_prodi' => $user->id_prodi,
+                'prodi_name' => $user->programStudi->name ?? null,
+            ] : null
+        ]);
     }
 }

@@ -12,6 +12,8 @@ class AlatPresensiController extends Controller
     public function index()
     {
         $alatPresensi = AlatPresensi::with('ruangan')->get();
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
         return view('admin.alat-presensi.index', compact('alatPresensi'));
     }
 
@@ -101,6 +103,7 @@ class AlatPresensiController extends Controller
             'jadwal_nyala' => $alat->jadwal_nyala,
             'jadwal_mati' => $alat->jadwal_mati,
             'status_aktif' => $alat->status_aktif,
+            'mode' => $alat->mode,
         ]);
     }
 }

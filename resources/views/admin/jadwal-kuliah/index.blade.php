@@ -12,7 +12,7 @@
 
     <!-- Table Mahasiswa -->
     <div class="px-6">
-        <div class="overflow-x-auto bg-white rounded-xl shadow mb-4">
+        <div class="overflow-x-auto bg-white rounded-xl shadow">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-100">
                     <tr class="border-b-2 border-gray-200">
@@ -32,7 +32,8 @@
                 <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
                     @forelse ($datas as $data)
                         <tr>
-                            <td class="px-4 py-2 text-center">{{ $loop->iteration }}.</td>
+                            <td class="px-4 py-2 text-left">
+                                {{ ($datas->currentPage() - 1) * $datas->perPage() + $loop->iteration }}.</td>
                             <td class="px-4 py-2 text-center">{{ $data->hari }}</td>
                             <td class="px-4 py-2 text-center">{{ $data->mataKuliah->name }}</td>
                             <td class="px-4 py-2 text-center">{{ $data->dosen->name }}</td>
@@ -106,7 +107,9 @@
                     @endforelse
                 </tbody>
             </table>
-
         </div>
+    </div>
+    <div class="px-8 py-3">
+        {{ $datas->links() }}
     </div>
 @endsection

@@ -104,23 +104,24 @@
                             <td class="px-6 py-2 text-left">{{ $student->programStudi->name }}</td>
                             </td>
                             <td class="px-6 py-2 text-center">{{ $student->golongan->nama_golongan }}</td>
-                            <td class="px-6 py-2 text-center">
+                            <td class="px-6 py-2 text-center w-54">
                                 @if ($student->uid)
                                     <span
-                                        class="bg-green-200 text-green-500 px-6 py-2 text-s font-medium rounded-full w-fit">
+                                        class="bg-green-200 text-green-500 px-4 py-2 text-s font-medium rounded-full w-fit inline-block">
                                         Sudah Registrasi</span>
                                 @else
-                                    <span class="bg-red-200 text-red-500 px-6 py-2 text-s font-medium rounded-full w-fit">
+                                    <span
+                                        class="bg-red-200 text-red-500 px-4 py-2 text-s font-medium rounded-full w-fit inline-block">
                                         Belum Registrasi</span>
                                 @endif
                             </td>
                             <td class="px-6 py-2 text-center flex gap-2 items-center justify-center">
                                 @if ($student->uid)
                                     <a href="{{ route('admin.rfid.edit', $student->id) }}"
-                                        class="text-sm text-white py-2 rounded-md w-18 bg-gray-800 hover:bg-black transition font-medium cursor-pointer">Edit</a>
+                                        class="text-sm text-white py-2 rounded-md bg-gray-800 hover:bg-black transition font-medium cursor-pointer w-24">Edit</a>
                                 @else
                                     <a href="{{ route('admin.rfid.registrasi', $student->id) }}"
-                                        class="text-sm text-white px-4 py-2 rounded-md bg-gray-800 hover:bg-black transition font-medium cursor-pointer">Registrasi</a>
+                                        class="text-sm text-white px-4 py-2 rounded-md bg-gray-800 hover:bg-black transition font-medium cursor-pointer w-24">Registrasi</a>
                                 @endif
 
                             </td>

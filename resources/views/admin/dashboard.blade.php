@@ -123,7 +123,7 @@
 
                 <li>
                     <button id="togglePresensi"
-                        class="flex items-center w-full px-3 py-2.5 {{ request()->routeIs('admin.alat-presensi.index') || request()->routeIs('admin.rfid.index') || request()->routeIs('admin.golongan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group cursor-pointer">
+                        class="flex items-center w-full px-3 py-2.5 {{ request()->routeIs('admin.alat-presensi.index') || request()->routeIs('admin.rfid.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group cursor-pointer">
                         <div class="min-w-[20px] flex items-center justify-center">
                             <i class="fas fa-clipboard-list  text-gray-500"></i>
                         </div>
@@ -156,7 +156,7 @@
                 </li>
                 <li>
                     <a href="{{ route('admin.laporan.index') }}"
-                        class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.laporan') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
+                        class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.laporan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
                         <div class="min-w-[20px] flex items-center justify-center">
                             <i class="fas fa-comment-dots text-gray-500"></i>
                         </div>

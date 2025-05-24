@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\AlatPresensi;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -26,6 +27,8 @@ class DosenController extends Controller
 
         $datas = $query->paginate(8)->appends($request->query()); // penting: mempertahankan query saat paginate
         $programStudi = ProgramStudi::all(); // ambil semua prodi untuk dropdown
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
 
         return view('admin.dosen.index', compact('datas', 'programStudi'));
     }

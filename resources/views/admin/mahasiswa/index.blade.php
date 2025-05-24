@@ -81,6 +81,7 @@
                     <tr class="border-b-2 border-gray-200">
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">NIM</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Nama</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Gender</th>
                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Program Studi</th>
                         <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Semester</th>
                         <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Golongan</th>
@@ -94,6 +95,7 @@
                             <tr class="student-row" data-program-studi="{{ $student->programStudi->name }}">
                                 <td class="px-6 py-2 text-left">{{ $student->nim }}</td>
                                 <td class="px-6 py-2 text-left">{{ $student->name }}</td>
+                                <td class="px-6 py-2 text-left">{{ $student->gender ?: '-' }}</td>
                                 <td class="px-6 py-2 text-left">{{ $student->programStudi->name }}</td>
                                 <td class="px-6 py-2 text-center">{{ explode(' ', $student->semester->semester_name)[1] }}
                                 </td>

@@ -34,14 +34,18 @@ class ProfileController extends Controller
 
         $path = null;
         if ($request->hasFile('foto')) {
+            if ($user->foto && Storage::disk('public')->exists($user->foto)) {
+                Storage::disk('public')->delete($user->foto);
+            }
+
             $path = $request->file('foto')->store('foto-profil', 'public');
+            $user->foto = $path;
         }
 
         // Update data pengguna
         $user->name = $validated['name'];
         $user->no_hp = $validated['no_hp'];
         $user->alamat = $validated['alamat'];
-        $user->foto = $path;
 
         $user->is_profile_complete = true;
 

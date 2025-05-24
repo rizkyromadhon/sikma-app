@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\AlatPresensi;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,8 @@ class ProdiController extends Controller
     public function index()
     {
         $datas = ProgramStudi::all();
+
+        AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
         return view('admin.prodi.index', compact('datas'));
     }
 
@@ -27,14 +30,15 @@ class ProdiController extends Controller
         return redirect()->route('admin.prodi.index')->with("success", "Berhasil menambahkan program studi baru!");
     }
 
-    public function update(Request $request, $id) {
-        if(empty($request->name)) {
+    public function update(Request $request, $id)
+    {
+        if (empty($request->name)) {
             return redirect()->route('admin.prodi.index')->with("error", "Field nama prodi tidak boleh kosong!");
         }
 
         $existProdi = ProgramStudi::where('name', $request->name)->first();
 
-        if($existProdi) {
+        if ($existProdi) {
             return redirect()->route('admin.prodi.index')->with("error", "Prodi " . $request->name . " telah terdaftar!");
         }
 

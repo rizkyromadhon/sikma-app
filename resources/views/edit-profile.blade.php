@@ -1,33 +1,32 @@
 <x-layout>
-    <div id="edit-profile-page" class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div id="edit-profile-page" class="max-w-4xl mx-auto py-12 px-4 md:px-8">
         <div class="bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Edit Profil</h2>
+            <h2 class="text-xl md:text2xl font-bold text-gray-800 mb-6">Edit Profil</h2>
 
             <form action="/profile/update" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 @method('PUT')
 
-                <div class="flex items-center gap-6">
+                <div class="flex flex-col-reverse md:flex-row items-center gap-6 w-full">
                     <div class="flex flex-col gap-6 w-full">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                        <div class="flex-1 w-full">
+                            <label class="text-sm font-medium text-gray-700">Nama Lengkap</label>
                             <input type="text" name="name" value="{{ old('name', Auth::user()->name) }}"
-                                class="px-2 py-2 rounded-sm mt-1 block w-full border-gray-300 shadow-sm sm:text-sm">
+                                class="px-2 py-2 rounded-sm mt-1 w-full border-gray-300 shadow-sm sm:text-sm">
                             @error('name')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">No. Hp (WhatsApp)</label>
+                        <div class="flex-1 w-full">
+                            <label class="text-sm font-medium text-gray-700">No. Hp (WhatsApp)</label>
                             <input type="text" name="no_hp" value="{{ old('no_hp', Auth::user()->no_hp) }}"
-                                class="px-2 py-2 rounded-sm mt-1 block w-full border-gray-300 shadow-sm sm:text-sm">
+                                class="px-2 py-2 rounded-sm mt-1 w-full border-gray-300 shadow-sm sm:text-sm">
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Alamat</label>
-                            <textarea name="alamat" rows="3"
-                                class="px-2 py-2 rounded-sm mt-1 block w-full border-gray-300 shadow-sm sm:text-sm">{{ old('alamat', Auth::user()->alamat) }}</textarea>
+                        <div class="flex-1 w-full">
+                            <label class="text-sm font-medium text-gray-700">Alamat</label>
+                            <textarea name="alamat" rows="3" class="px-2 py-2 rounded-sm mt-1 w-full border-gray-300 shadow-sm sm:text-sm">{{ old('alamat', Auth::user()->alamat) }}</textarea>
                         </div>
 
 
