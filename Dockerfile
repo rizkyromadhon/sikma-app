@@ -1,14 +1,16 @@
-FROM richarvey/nginx-php-fpm:latest
-FROM node:16-alpine
-WORKDIR /var/www/html
-COPY . /var/www/html
+FROM php:8.2-fpm
 
-RUN apk add --no-cache python3 make g++
-RUN npm install --legacy-peer-deps
-RUN apk update && \
-    apk add --no-cache npm && \
+WORKDIR /var/www/html
+
+COPY . .
+
+RUN apt-get update && \
+    apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev zip git && \
+    docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install gd && \
+    curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
     npm install && \
     npm run build && \
     composer install --no-dev --working-dir=/var/www/html
 
-CMD ["/start.sh"]
+CMD ["php-fpm"]
