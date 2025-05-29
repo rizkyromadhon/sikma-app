@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Ruangan;
 use App\Models\AlatPresensi;
 use Illuminate\Http\Request;
+use App\Events\AlatStatusUpdated;
 use App\Http\Controllers\Controller;
 
 class AlatPresensiController extends Controller
@@ -12,6 +13,21 @@ class AlatPresensiController extends Controller
     public function index()
     {
         $alatPresensi = AlatPresensi::with('ruangan')->get();
+
+
+        foreach ($alatPresensi as $alat) {
+            $now = now()->format('H:i:s');
+            $nyala = $alat->jadwal_nyala;
+            $mati = $alat->jadwal_mati;
+
+            // Aktif jika sekarang di antara jadwal nyala dan mati
+            $isActive = ($now >= $nyala && $now < $mati) ? 1 : 0;
+
+            // Update status jika berbeda
+            if ($alat->status != $isActive) {
+                $alat->update(['status' => $isActive]);
+            }
+        }
 
         AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
         return view('admin.alat-presensi.index', compact('alatPresensi'));
@@ -60,6 +76,11 @@ class AlatPresensiController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->merge([
+            'jadwal_nyala' => date('H:i:s', strtotime($request->jadwal_nyala)),
+            'jadwal_mati' => date('H:i:s', strtotime($request->jadwal_mati)),
+        ]);
+
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:alat_presensi,name,' . $id,
             'id_ruangan' => 'required',

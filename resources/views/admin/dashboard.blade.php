@@ -1,194 +1,311 @@
 <x-layout hide-navbar is-admin>
     <!-- Sidebar -->
-    <div id="sidebar"
-        class="fixed top-0 left-0 h-screen bg-white shadow-lg text-gray-700 transition-all duration-300 ease-in-out w-64 border-r border-gray-200 flex flex-col">
+    <div id="sidebar" x-data="{
+        collapsed: localStorage.getItem('sidebarCollapsed') === 'true' || false,
+        akademikOpen: localStorage.getItem('akademikOpen') === 'true' || {{ request()->routeIs('admin.semester.index') || request()->routeIs('admin.prodi.index') || request()->routeIs('admin.golongan.index') || request()->routeIs('admin.dosen.index') || request()->routeIs('admin.mahasiswa.index') || request()->routeIs('admin.ruangan.index') || request()->routeIs('admin.mata-kuliah.index') || request()->routeIs('admin.jadwal-kuliah.index') ? 'true' : 'false' }},
+        presensiOpen: localStorage.getItem('presensiOpen') === 'true' || {{ request()->routeIs('admin.alat-presensi.index') || request()->routeIs('admin.rfid.index') ? 'true' : 'false' }}
+    }" x-init="$watch('collapsed', value => localStorage.setItem('sidebarCollapsed', value));
+    $watch('akademikOpen', value => localStorage.setItem('akademikOpen', value));
+    $watch('presensiOpen', value => localStorage.setItem('presensiOpen', value));" x-cloak
+        class="fixed top-0 left-0 h-screen bg-white shadow-lg text-gray-700 transition-all duration-300 ease-in-out border-r border-gray-200 flex flex-col z-30"
+        :style="{ width: collapsed ? '4rem' : '16rem' }">
         <!-- Sidebar Header -->
-        <div class="flex items-center justify-between p-4 border-b border-gray-100">
-            <a href="/"
-                class="text-xl font-semibold truncate transition-all duration-300 ease-in-out sidebar-text text-gray-800 cursor-pointer">
+        <div class="flex items-center justify-between p-4 border-b border-gray-100 h-16">
+            <a href="/" x-show="!collapsed" x-transition:enter="transition ease-out duration-300 delay-200"
+                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95" class="text-xl font-semibold text-gray-800 cursor-pointer">
                 'SIKMA'
             </a>
-            <button id="toggleButton"
-                class="p-2 rounded-lg hover:bg-gray-100 focus:outline-none text-gray-500 cursor-pointer">
-                <i class="fas fa-bars"></i>
+            <button @click="collapsed = !collapsed; $dispatch('sidebar-toggle', { collapsed: collapsed })"
+                class="p-2 rounded-lg hover:bg-gray-100 focus:outline-none text-gray-500 cursor-pointer transition-all duration-300 hover:scale-110 flex items-center justify-center"
+                :class="collapsed ? 'mx-auto' : ''">
+                <i :class="collapsed ? 'fas fa-chevron-right' : 'fas fa-bars'"
+                    class="transition-all duration-300 ease-in-out w-4 h-4 flex items-center justify-center"></i>
             </button>
         </div>
 
         <nav
             class="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-            <ul class="space-y-1 px-2">
+            <ul class="space-y-1 px-2 py-2">
                 <!-- Dashboard Link -->
                 <li>
                     <a href="{{ route('admin.dashboard') }}"
-                        class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                        <div class="min-w-[20px] flex items-center justify-center">
-                            <i class="fas fa-home text-gray-500"></i>
+                        class="flex items-center px-3 py-3 hover:bg-gray-50 transition-all duration-300 ease-in-out text-gray-700 rounded-lg group relative overflow-hidden {{ request()->routeIs('admin.dashboard') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                        <div class="w-5 h-5 flex items-center justify-center relative z-10 flex-shrink-0">
+                            <i
+                                class="fas fa-home text-gray-500 transition-colors duration-300 group-hover:text-blue-600"></i>
                         </div>
-                        <span
-                            class="ml-3 transition-all duration-300 transform sidebar-text text-sm whitespace-nowrap">Dashboard</span>
+                        <span x-show="!collapsed" x-transition:enter="transition ease-out duration-300 delay-150"
+                            x-transition:enter-start="opacity-0 translate-x-4"
+                            x-transition:enter-end="opacity-100 translate-x-0"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 translate-x-0"
+                            x-transition:leave-end="opacity-0 translate-x-4"
+                            class="ml-3 text-sm whitespace-nowrap relative z-10">Dashboard</span>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                        </div>
                     </a>
                 </li>
 
                 <!-- Manajemen Akademik -->
                 <li>
-                    <button id="toggleAkademik"
-                        class="flex items-center w-full px-3 py-2.5 {{ request()->routeIs('admin.semester.index') || request()->routeIs('admin.prodi.index') || request()->routeIs('admin.golongan.index') || request()->routeIs('admin.dosen.index') || request()->routeIs('admin.mahasiswa.index') || request()->routeIs('admin.ruangan.index') || request()->routeIs('admin.mata-kuliah.index') || request()->routeIs('admin.jadwal-kuliah.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group cursor-pointer">
-                        <div class="min-w-[20px] flex items-center justify-center">
-                            <i class="fas fa-university  text-gray-500"></i>
+                    <button @click="akademikOpen = !akademikOpen"
+                        class="flex items-center w-full px-3 py-3 hover:bg-gray-50 transition-all duration-300 ease-in-out text-gray-700 rounded-lg group relative overflow-hidden cursor-pointer {{ request()->routeIs('admin.semester.index') || request()->routeIs('admin.prodi.index') || request()->routeIs('admin.golongan.index') || request()->routeIs('admin.dosen.index') || request()->routeIs('admin.mahasiswa.index') || request()->routeIs('admin.ruangan.index') || request()->routeIs('admin.mata-kuliah.index') || request()->routeIs('admin.jadwal-kuliah.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                        <div class="w-5 h-5 flex items-center justify-center relative z-10 flex-shrink-0">
+                            <i
+                                class="fas fa-university text-gray-500 transition-colors duration-300 group-hover:text-blue-600"></i>
                         </div>
-                        <span
-                            class="ml-3 transition-all duration-300 transform sidebar-text text-sm whitespace-nowrap">Manajemen
+                        <span x-show="!collapsed" x-transition:enter="transition ease-out duration-300 delay-150"
+                            x-transition:enter-start="opacity-0 translate-x-4"
+                            x-transition:enter-end="opacity-100 translate-x-0"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 translate-x-0"
+                            x-transition:leave-end="opacity-0 translate-x-4"
+                            class="ml-3 text-sm whitespace-nowrap flex-1 text-left relative z-10">Manajemen
                             Akademik</span>
-                        <i id="chevronAkademikIcon" class="fas fa-chevron-down ml-auto text-gray-500"></i>
+                        <i x-show="!collapsed" :class="akademikOpen ? 'rotate-180' : 'rotate-0'"
+                            x-transition:enter="transition ease-out duration-300 delay-150"
+                            x-transition:enter-start="opacity-0 scale-75" x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-75"
+                            class="fas fa-chevron-down text-gray-500 transition-all duration-300 ease-in-out relative z-10 text-sm flex-shrink-0"></i>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                        </div>
                     </button>
-                    <ul id="akademikSubmenu"
-                        class="space-y-1 mt-1 pl-6 hidden overflow-hidden transition-all duration-300 ease-in-out">
-                        <li>
-                            <a href="{{ route('admin.dosen.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.dosen.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-chalkboard-teacher text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Dosen</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.mahasiswa.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.mahasiswa.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-user-graduate text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Mahasiswa</span>
-                            </a>
-                        </li>
 
-                        <li>
-                            <a href="{{ route('admin.semester.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.semester.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-graduation-cap text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Semester</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.prodi.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.prodi.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-building text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Program Studi</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.golongan.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.golongan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-layer-group text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Golongan</span>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="{{ route('admin.ruangan.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.ruangan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-door-open text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Ruangan</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.mata-kuliah.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.mata-kuliah.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-book-open text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Mata Kuliah</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.jadwal-kuliah.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.jadwal-kuliah.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-calendar-alt text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Jadwal Kuliah</span>
-                            </a>
-                        </li>
-
-                    </ul>
+                    <div :class="akademikOpen && !collapsed ? 'open' : 'closed'" x-show="!collapsed"
+                        x-transition:enter-start="opacity-0 translate-x-4"
+                        x-transition:enter-end="opacity-100 translate-x-0"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100 translate-x-0"
+                        x-transition:leave-end="opacity-0 translate-x-4" class="submenu-container pl-6">
+                        <ul class="space-y-1">
+                            <li x-show="akademikOpen" x-transition:enter="transition ease-out duration-300 delay-100"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.dosen.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.dosen.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i
+                                            class="fas fa-chalkboard-teacher text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Dosen</span>
+                                </a>
+                            </li>
+                            <li x-show="akademikOpen" x-transition:enter="transition ease-out duration-300 delay-150"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.mahasiswa.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.mahasiswa.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i
+                                            class="fas fa-user-graduate text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Mahasiswa</span>
+                                </a>
+                            </li>
+                            <li x-show="akademikOpen" x-transition:enter="transition ease-out duration-300 delay-200"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.semester.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.semester.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i
+                                            class="fas fa-graduation-cap text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Semester</span>
+                                </a>
+                            </li>
+                            <li x-show="akademikOpen" x-transition:enter="transition ease-out duration-300 delay-200"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.prodi.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.prodi.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i
+                                            class="fas fa-building text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Program
+                                        Studi</span>
+                                </a>
+                            </li>
+                            <li x-show="akademikOpen" x-transition:enter="transition ease-out duration-300 delay-200"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.golongan.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.golongan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i
+                                            class="fas fa-layer-group text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Golongan</span>
+                                </a>
+                            </li>
+                            <li x-show="akademikOpen" x-transition:enter="transition ease-out duration-300 delay-200"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.ruangan.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.ruangan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i
+                                            class="fas fa-door-open text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Ruangan</span>
+                                </a>
+                            </li>
+                            <li x-show="akademikOpen" x-transition:enter="transition ease-out duration-300 delay-200"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.mata-kuliah.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.mata-kuliah.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i
+                                            class="fas fa-book-open text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Mata
+                                        Kuliah</span>
+                                </a>
+                            </li>
+                            <li x-show="akademikOpen" x-transition:enter="transition ease-out duration-300 delay-200"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.jadwal-kuliah.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.jadwal-kuliah.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i
+                                            class="fas fa-calendar-alt text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
+                                    </div>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Jadwal
+                                        Kuliah</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </li>
 
                 <li>
-                    <button id="togglePresensi"
-                        class="flex items-center w-full px-3 py-2.5 {{ request()->routeIs('admin.alat-presensi.index') || request()->routeIs('admin.rfid.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group cursor-pointer">
-                        <div class="min-w-[20px] flex items-center justify-center">
-                            <i class="fas fa-clipboard-list  text-gray-500"></i>
+                    <button @click="presensiOpen = !presensiOpen"
+                        class="flex items-center w-full px-3 py-3 hover:bg-gray-50 transition-all duration-300 ease-in-out text-gray-700 rounded-lg group relative overflow-hidden cursor-pointer {{ request()->routeIs('admin.alat-presensi.index') || request()->routeIs('admin.rfid.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                        <div class="w-5 h-5 flex items-center justify-center relative z-10 flex-shrink-0">
+                            <i
+                                class="fas fa-clipboard-list text-gray-500 transition-colors duration-300 group-hover:text-blue-600"></i>
                         </div>
-                        <span
-                            class="ml-3 transition-all duration-300 transform sidebar-text text-sm whitespace-nowrap">Manajemen
+                        <span x-show="!collapsed" x-transition:enter="transition ease-out duration-300 delay-150"
+                            x-transition:enter-start="opacity-0 translate-x-4"
+                            x-transition:enter-end="opacity-100 translate-x-0"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 translate-x-0"
+                            x-transition:leave-end="opacity-0 translate-x-4"
+                            class="ml-3 text-sm whitespace-nowrap flex-1 text-left relative z-10">Manajemen
                             Presensi</span>
-                        <i id="chevronPresensiIcon" class="fas fa-chevron-down ml-auto text-gray-500"></i>
+                        <i x-show="!collapsed" :class="presensiOpen ? 'rotate-180' : 'rotate-0'"
+                            x-transition:enter="transition ease-out duration-300 delay-150"
+                            x-transition:enter-start="opacity-0 scale-75"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-75"
+                            class="fas fa-chevron-down text-gray-500 transition-all duration-300 ease-in-out relative z-10 text-sm flex-shrink-0"></i>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                        </div>
                     </button>
-                    <ul id="presensiSubmenu"
-                        class="space-y-1 mt-1 pl-6 hidden overflow-hidden transition-all duration-300 ease-in-out">
-                        <li>
-                            <a href="{{ route('admin.alat-presensi.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.alat-presensi.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-tools text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Alat Presensi</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.rfid.index') }}"
-                                class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.rfid.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                                <div class="min-w-[20px] flex items-center justify-center">
-                                    <i class="fas fa-credit-card text-gray-500"></i>
-                                </div>
-                                <span class="ml-3 text-sm">Registrasi RFID</span>
-                            </a>
-                        </li>
-                    </ul>
+
+                    <div :class="presensiOpen && !collapsed ? 'open' : 'closed'" x-show="!collapsed"
+                        x-transition:enter="transition-all ease-out duration-300"
+                        x-transition:enter-start="opacity-0 transform scale-y-0 -translate-y-2"
+                        x-transition:enter-end="opacity-100 transform scale-y-100 translate-y-0"
+                        x-transition:leave="transition-all ease-in duration-200"
+                        x-transition:leave-start="opacity-100 transform scale-y-100 translate-y-0"
+                        x-transition:leave-end="opacity-0 transform scale-y-0 -translate-y-2"
+                        class="submenu-container pl-6">
+                        <ul class="space-y-1">
+                            <li x-show="presensiOpen" x-transition:enter="transition ease-out duration-300 delay-100"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.alat-presensi.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.alat-presensi.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-tools text-gray-500 text-sm"></i>
+                                    </div>
+                                    <span class="ml-3 text-sm">Alat Presensi</span>
+                                </a>
+                            </li>
+                            <li x-show="presensiOpen" x-transition:enter="transition ease-out duration-300 delay-100"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.rfid.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.rfid.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-credit-card text-gray-500 text-sm"></i>
+                                    </div>
+                                    <span class="ml-3 text-sm">Registrasi RFID</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {{--  --}}
                 </li>
                 <li>
                     <a href="{{ route('admin.laporan.index') }}"
-                        class="flex items-center px-3 py-2.5 {{ request()->routeIs('admin.laporan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-all duration-300 ease-in-out text-gray-700 rounded-lg group">
-                        <div class="min-w-[20px] flex items-center justify-center">
-                            <i class="fas fa-comment-dots text-gray-500"></i>
+                        class="flex items-center px-3 py-3 hover:bg-gray-50 transition-all duration-300 ease-in-out text-gray-700 rounded-lg group relative overflow-hidden {{ request()->routeIs('admin.laporan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                        <div class="w-5 h-5 flex items-center justify-center relative z-10 flex-shrink-0">
+                            <i
+                                class="fas fa-comment-dots text-gray-500 transition-colors duration-300 group-hover:text-blue-600 text-sm"></i>
                         </div>
-                        <span
-                            class="ml-3 transition-all duration-300 transform sidebar-text text-sm whitespace-nowrap">Laporan
-                            Mahasiswa</span>
+                        <span x-show="!collapsed" x-transition:enter="transition ease-out duration-300 delay-150"
+                            x-transition:enter-start="opacity-0 translate-x-4"
+                            x-transition:enter-end="opacity-100 translate-x-0"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 translate-x-0"
+                            x-transition:leave-end="opacity-0 translate-x-4"
+                            class="ml-3 text-sm whitespace-nowrap relative z-10">Laporan Mahasiswa</span>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
+                        </div>
                     </a>
                 </li>
 
             </ul>
         </nav>
 
-
-        <!-- User Profile Section -->
         <div class="mt-auto border-t-2 border-gray-100">
             <div class="px-2 py-3">
-                <div x-data="{ showLogoutConfirm: false }"
-                    class="ml-auto transition-all duration-300 transform sidebar-text flex items-center overflow-hidden">
-                    <div class="flex items-center justify-between gap-8">
-                        <button @click="showLogoutConfirm = true" type="button"
-                            class="p-1 hover:bg-gray-100 rounded-lg text-gray-500 focus:outline-none transition-all duration-300">
-                            <span
-                                class="ml-3 mr-10 transition-all duration-300 transform sidebar-text text-sm whitespace-nowrap overflow-hidden">{{ Auth::user()->name }}</span>
-                            <i class="fas fa-sign-out-alt cursor-pointer"></i>
-                        </button>
+                <div x-data="{ showLogoutConfirm: false }" class="admin-profile" :class="collapsed ? 'collapsed' : ''">
+                    <div class="profile-content">
+                        <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user-circle text-gray-500 transition-colors duration-300 text-sm"></i>
+                        </div>
+                        <span x-show="!collapsed" x-transition:enter="transition ease-out duration-300 delay-150"
+                            x-transition:enter-start="opacity-0 translate-x-4"
+                            x-transition:enter-end="opacity-100 translate-x-0"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 translate-x-0"
+                            x-transition:leave-end="opacity-0 translate-x-4"
+                            class="ml-3 text-sm whitespace-nowrap">Admin Program Studi</span>
                     </div>
+                    <button @click="showLogoutConfirm = true" type="button"
+                        class="flex items-center px-3 py-2 hover:bg-gray-100 rounded-lg text-gray-500 focus:outline-none transition-all duration-300 group"
+                        :class="collapsed ? 'hidden' : ''">
+                        <i
+                            class="fas fa-sign-out-alt group-hover:text-red-500 transition-colors duration-300 text-sm"></i>
+                    </button>
 
-
-                    <!-- Template Alpine.js untuk modal -->
+                    <!-- Logout Modal -->
                     <template x-teleport="body">
                         <div x-show="showLogoutConfirm" class="fixed inset-0 z-[9999] overflow-y-auto">
-                            <!-- Backdrop dengan blur efek yang lebih kuat -->
                             <div x-show="showLogoutConfirm" x-transition:enter="transition ease-out duration-200"
                                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                                 x-transition:leave="transition ease-in duration-150"
@@ -220,13 +337,10 @@
                                                 class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none transition-colors duration-200 cursor-pointer">
                                                 Cancel
                                             </button>
-                                            <form method="POST" action="{{ route('logout') }}" class="inline-flex">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none transition-colors duration-200 cursor-pointer">
-                                                    Logout
-                                                </button>
-                                            </form>
+                                            <button type="button" @click="showLogoutConfirm = false"
+                                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none transition-colors duration-200 cursor-pointer">
+                                                Logout
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -236,263 +350,102 @@
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- Main Content -->
-    <div id="main" class="ml-64 transition-all duration-300 ease-in-out bg-gray-50 min-h-screen z-20">
+    <div id="main" x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' || false }" x-cloak
+        @sidebar-toggle.window="sidebarCollapsed = $event.detail.collapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)"
+        class="bg-gray-50 min-h-screen z-20 transition-none"
+        x-bind:style="{
+            'padding-left': sidebarCollapsed ? '4rem' : '16rem',
+            'transition': 'padding-left 0.3s ease-in-out'
+        }">
         @yield('admin-content')
     </div>
+
     <style>
-        /* Sembunyikan scrollbar default dari browser */
+        /* Custom scrollbar */
         .scrollbar-thin::-webkit-scrollbar {
-            width: 5px;
+            width: 6px;
         }
 
-        /* Track scrollbar */
         .scrollbar-track-transparent::-webkit-scrollbar-track {
             background: transparent;
         }
 
-        /* Thumb scrollbar */
         .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
             background: #d1d5db;
-            border-radius: 20px;
+            border-radius: 3px;
         }
 
-        /* Sembunyikan scrollbar ketika tidak di-hover (opsional) */
-        .scrollbar-thin {
-            scrollbar-width: thin;
-            scrollbar-color: #d1d5db transparent;
-        }
-
-        /* Tampilkan scrollbar saat hover (opsional) */
-        .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+        .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb:hover {
             background: #9ca3af;
         }
 
-        /* Force backdrop filter to work with higher specificity */
+        /* Smooth animations */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Enhanced backdrop blur */
         .backdrop-blur-sm {
-            -webkit-backdrop-filter: blur(4px) !important;
-            backdrop-filter: blur(4px) !important;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
-        /* Force charts to respect z-index context */
-        #chartSemester,
-        #chartProdi,
-        #pie-chart,
-        #chartDosen {
-            position: relative;
-            z-index: 1;
+        /* Improved hover states */
+        .group:hover .group-hover\:scale-110 {
+            transform: scale(1.1);
         }
 
-        /* Ensure modal is always on top */
-        [x-show="showLogoutConfirm"] {
-            isolation: isolate;
+        /* Ensure smooth transitions for main content */
+        #main {
+            will-change: padding-left;
+        }
+
+        /* Fix submenu animations */
+        .submenu-container {
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .submenu-container.closed {
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        .submenu-container.open {
+            max-height: 500px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Fix admin profile positioning */
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            transition: all 0.3s ease-in-out;
+            min-height: 48px;
+        }
+
+        .admin-profile.collapsed {
+            justify-content: center;
+            padding: 0.5rem 0.25rem;
+        }
+
+        .admin-profile .profile-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .admin-profile.collapsed .profile-content {
+            justify-content: center;
         }
     </style>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mencari semua chart container
-            const chartContainers = [
-                document.getElementById('chartSemester'),
-                document.getElementById('chartProdi'),
-                document.getElementById('pie-chart'),
-                document.getElementById('chartDosen')
-            ];
-
-            // Fungsi untuk mengontrol blur pada chart
-            Alpine.effect(() => {
-                // Berikut ini akan berjalan setiap kali nilai showLogoutConfirm berubah
-                const isModalOpen = Alpine.store('modalState')?.isOpen || false;
-
-                chartContainers.forEach(container => {
-                    if (container) {
-                        if (isModalOpen) {
-                            // Tambahkan class filter blur pada SVG elemen chart
-                            const svgElements = container.querySelectorAll('svg');
-                            svgElements.forEach(svg => {
-                                svg.style.filter = 'blur(4px)';
-                            });
-                        } else {
-                            // Hapus class filter blur
-                            const svgElements = container.querySelectorAll('svg');
-                            svgElements.forEach(svg => {
-                                svg.style.filter = '';
-                            });
-                        }
-                    }
-                });
-            });
-
-            // Inisialisasi Alpine store untuk melacak status modal
-            if (!Alpine.store('modalState')) {
-                Alpine.store('modalState', {
-                    isOpen: false
-                });
-            }
-
-            // Implementasikan observer untuk memantau perubahan modal
-            const body = document.body;
-            const observer = new MutationObserver(mutations => {
-                for (const mutation of mutations) {
-                    if (mutation.type === 'attributes' || mutation.type === 'childList') {
-                        // Cek apakah modal logout terlihat
-                        const modalBackdrop = document.querySelector('.backdrop-blur-sm');
-                        Alpine.store('modalState').isOpen = !!modalBackdrop && window.getComputedStyle(
-                            modalBackdrop).display !== 'none';
-                    }
-                }
-            });
-
-            observer.observe(body, {
-                attributes: true,
-                childList: true,
-                subtree: true
-            });
-        });
-        // Script untuk menghandle sidebar
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const main = document.getElementById('main');
-            const toggleButton = document.getElementById('toggleButton');
-            const sidebarNav = document.querySelector('#sidebar nav'); // Elemen scrollable
-
-            // Akademik
-            const toggleAkademik = document.getElementById('toggleAkademik');
-            const akademikSubmenu = document.getElementById('akademikSubmenu');
-            const chevronIcon = document.getElementById('chevronAkademikIcon');
-            let isOpenDropdownAkademik = localStorage.getItem("isOpenDropdownAkademik") === "true";
-
-            // Presensi
-            const togglePresensi = document.getElementById('togglePresensi');
-            const presensiSubmenu = document.getElementById('presensiSubmenu');
-            const chevronPresensiIcon = document.getElementById('chevronPresensiIcon');
-            let isOpenDropdownPresensi = localStorage.getItem("isOpenDropdownPresensi") === "true";
-
-            const sidebarTexts = document.querySelectorAll('.sidebar-text');
-            let isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
-            // Fungsi toggle sidebar
-            if (isCollapsed) {
-                sidebar.classList.remove('w-64');
-                sidebar.classList.add('w-16');
-                main.classList.remove('ml-64');
-                main.classList.add('ml-16');
-                sidebarTexts.forEach(text => {
-                    text.classList.add('opacity-0', 'translate-x-[-50px]');
-                    setTimeout(() => {
-                        text.classList.add('w-0');
-                    }, 150);
-                });
-                toggleButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                akademikSubmenu.classList.add('hidden');
-                chevronIcon.style.display = 'none';
-                presensiSubmenu.classList.add('hidden');
-                chevronPresensiIcon.style.display = 'none';
-            } else {
-                sidebar.classList.remove('w-16');
-                sidebar.classList.add('w-64');
-                main.classList.remove('ml-16');
-                main.classList.add('ml-64');
-                sidebarTexts.forEach(text => {
-                    text.classList.remove('w-0');
-                    setTimeout(() => {
-                        text.classList.remove('opacity-0', 'translate-x-[-50px]');
-                    }, 150);
-                });
-                toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
-                chevronIcon.style.display = 'block';
-                chevronPresensiIcon.style.display = 'block';
-
-                // Tampilkan submenu jika terbuka
-                if (isOpenDropdownAkademik) akademikSubmenu.classList.remove('hidden');
-                else akademikSubmenu.classList.add('hidden');
-
-                if (isOpenDropdownPresensi) presensiSubmenu.classList.remove('hidden');
-                else presensiSubmenu.classList.add('hidden');
-            }
-
-            toggleButton.addEventListener('click', () => {
-                isCollapsed = !isCollapsed;
-                localStorage.setItem("sidebarCollapsed", isCollapsed);
-                if (isCollapsed) {
-                    sidebar.classList.remove('w-64');
-                    sidebar.classList.add('w-16');
-                    main.classList.remove('ml-64');
-                    main.classList.add('ml-16');
-                    sidebarTexts.forEach(text => {
-                        text.classList.add('opacity-0', 'translate-x-[-50px]');
-                        setTimeout(() => {
-                            text.classList.add('w-0');
-                        }, 150);
-                    });
-                    toggleButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
-                    akademikSubmenu.classList.add('hidden');
-                    presensiSubmenu.classList.add('hidden');
-                    chevronIcon.style.display = 'none';
-                    chevronPresensiIcon.style.display = 'none';
-                } else {
-                    sidebar.classList.remove('w-16');
-                    sidebar.classList.add('w-64');
-                    main.classList.remove('ml-16');
-                    main.classList.add('ml-64');
-                    sidebarTexts.forEach(text => {
-                        text.classList.remove('w-0');
-                        setTimeout(() => {
-                            text.classList.remove('opacity-0', 'translate-x-[-50px]');
-                        }, 150);
-                    });
-                    toggleButton.innerHTML = '<i class="fas fa-bars"></i>';
-                    chevronIcon.style.display = 'block';
-                    chevronPresensiIcon.style.display = 'block';
-                    if (isOpenDropdownAkademik) akademikSubmenu.classList.remove('hidden');
-                    if (isOpenDropdownPresensi) presensiSubmenu.classList.remove('hidden');
-                }
-
-                // Memastikan scroll tetap berfungsi saat toggle sidebar
-                setTimeout(() => {
-                    sidebarNav.scrollTop = sidebarNav.scrollTop;
-                }, 300);
-            });
-
-            // Toggle menu akademik
-            toggleAkademik.addEventListener('click', () => {
-                isOpenDropdownAkademik = !isOpenDropdownAkademik;
-                localStorage.setItem("isOpenDropdownAkademik", isOpenDropdownAkademik);
-                akademikSubmenu.classList.toggle('hidden');
-                chevronIcon.classList.toggle('rotate-180');
-            });
-
-            // Toggle menu presensi
-            togglePresensi.addEventListener('click', () => {
-                isOpenDropdownPresensi = !isOpenDropdownPresensi;
-                localStorage.setItem("isOpenDropdownPresensi", isOpenDropdownPresensi);
-                presensiSubmenu.classList.toggle('hidden');
-                chevronPresensiIcon.classList.toggle('rotate-180');
-            });
-
-            // Aktifkan link sidebar
-            function updateActiveLink(url) {
-                const sidebarLinks = document.querySelectorAll('.sidebar-link');
-                sidebarLinks.forEach(link => {
-                    link.classList.remove('bg-gray-100');
-                    if (link.getAttribute('href') === url) {
-                        link.classList.add('bg-gray-100');
-                    }
-                });
-            }
-
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const url = this.getAttribute('href');
-                    window.history.pushState({}, '', url);
-                    updateActiveLink(url);
-                    document.getElementById('main').load(url);
-                });
-            });
-        });
-    </script>
 </x-layout>
