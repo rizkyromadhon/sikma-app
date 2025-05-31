@@ -253,11 +253,21 @@
                                     <span class="ml-3 text-sm">Registrasi RFID</span>
                                 </a>
                             </li>
+                            <li x-show="presensiOpen" x-transition:enter="transition ease-out duration-300 delay-100"
+                                x-transition:enter-start="opacity-0 translate-x-4"
+                                x-transition:enter-end="opacity-100 translate-x-0">
+                                <a href="{{ route('admin.rekapitulasi.index') }}"
+                                    class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.rekapitulasi.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
+                                    <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-credit-card text-gray-500 text-sm"></i>
+                                    </div>
+                                    <span class="ml-3 text-sm">Rekapitulasi Kehadiran</span>
+                                </a>
+                            </li>
                         </ul>
                     </div>
-
-                    {{--  --}}
                 </li>
+
                 <li>
                     <a href="{{ route('admin.laporan.index') }}"
                         class="flex items-center px-3 py-3 hover:bg-gray-50 transition-all duration-300 ease-in-out text-gray-700 rounded-lg group relative overflow-hidden {{ request()->routeIs('admin.laporan.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
@@ -277,7 +287,6 @@
                         </div>
                     </a>
                 </li>
-
             </ul>
         </nav>
 

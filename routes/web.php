@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\MataKuliahController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\AlatPresensiController;
 use App\Http\Controllers\Admin\JadwalKuliahController;
+use App\Http\Controllers\Admin\RekapitulasiController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -163,6 +164,17 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/rfid/{id}/store', [RfidController::class, 'store'])->name('admin.rfid.store');
     Route::put('/admin/rfid/{id}/update', [RfidController::class, 'update'])->name('admin.rfid.update');
     Route::post('/admin/rfid/reset-mode', [RfidController::class, 'resetMode'])->name('admin.rfid.resetMode');
+
+    // Rekapitulasi Kehadiran Routes
+    Route::get('/admin/rekapitulasi', [RekapitulasiController::class, 'index'])->name('admin.rekapitulasi.index');
+    Route::get('/admin/rekapitulasi/filter', [RekapitulasiController::class, 'filterStudents'])->name('admin.rekapitulasi.filter');
+    Route::post('/admin/rekapitulasi/bulk-action', [RekapitulasiController::class, 'bulkAction'])->name('admin.rekapitulasi.bulk_action');
+    Route::get('/admin/rekapitulasi/export/excel', [RekapitulasiController::class, 'exportExcel'])
+        ->name('admin.rekapitulasi.export.excel');
+    Route::get('/admin/rekapitulasi/export/pdf', [RekapitulasiController::class, 'exportPDF'])
+        ->name('admin.rekapitulasi.export.pdf');
+
+    Route::get('/admin/pdf-preview', [RekapitulasiController::class, 'pdfPreview'])->name('admin.rekapitulasi.pdf_preview');
 
     // Laporan Mahasiswa Routes
     Route::get('/admin/laporan', [LaporanController::class, 'index'])->name('admin.laporan.index');
