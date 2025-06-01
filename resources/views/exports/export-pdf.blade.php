@@ -256,7 +256,7 @@
 
         /* --- Footer --- */
         .footer-pdf {
-            background: #f9fafb;
+            background: #ffffff;
             padding: 12px 20px;
             border-top: 2px solid #1f2937;
             margin-top: auto;

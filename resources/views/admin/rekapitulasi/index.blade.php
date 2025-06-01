@@ -18,7 +18,7 @@
                         <i class="fas fa-file-pdf"></i>
                         <span>Export PDF</span>
                     </button>
-                    <button @click="exportExcel()"
+                    <button @click="showExportExcelModal = true"
                         class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200 flex items-center space-x-2 hover-scale">
                         <i class="fas fa-file-excel text-green-600"></i>
                         <span>Export Excel</span>
@@ -543,6 +543,94 @@
                 {{-- Akhir Konten Modal --}}
             </div>
         </div>
+
+        <div x-show="showExportExcelModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto"
+            @click.self="closeExportExcelModal()" style="display: none;">
+
+            <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 transform scale-95"
+                x-transition:enter-end="opacity-100 transform scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 transform scale-100"
+                x-transition:leave-end="opacity-0 transform scale-95" @click.stop>
+
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+                    <h3 class="text-xl font-semibold text-gray-900">Export Rekapitulasi Kehadiran ke Excel</h3>
+                    <button @click="closeExportExcelModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-4 overflow-y-auto flex-grow">
+                    <div>
+                        <label for="exportProgram" class="block text-sm font-medium text-gray-700 mb-2">Program
+                            Studi</label>
+                        <select id="exportProgram" x-model="exportFilters.program"
+                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                            <option value="">Semua Program Studi</option>
+                            <template x-for="prodi in programStudis" :key="prodi.id">
+                                <option :value="prodi.id" x-text="prodi.name"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="exportSemester" class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                        <select id="exportSemester" x-model="exportFilters.semester" @change="updateMonthRangeOptions()"
+                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                            <option value="">Semua Semester</option>
+                            <template x-for="semester in semesters" :key="semester.id">
+                                <option :value="semester.id" x-text="semester.semester_name"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div x-show="exportFilters.semester">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rentang Bulan</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="exportMonthFrom" class="sr-only">Bulan Mulai</label>
+                                <select id="exportMonthFrom" x-model="exportFilters.monthFrom"
+                                    class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                                    <option value="">Pilih Bulan Mulai</option>
+                                    {{-- Menggunakan filteredMonthOptions --}}
+                                    <template x-for="month in filteredMonthOptions" :key="month.value">
+                                        <option :value="month.value" x-text="month.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="exportMonthTo" class="sr-only">Bulan Akhir</label>
+                                <select id="exportMonthTo" x-model="exportFilters.monthTo"
+                                    class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                                    <option value="">Pilih Bulan Akhir</option>
+                                    {{-- Menggunakan filteredMonthOptions --}}
+                                    <template x-for="month in filteredMonthOptions" :key="month.value">
+                                        <option :value="month.value" x-text="month.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <p x-show="!exportFilters.semester" class="text-sm text-gray-500 mt-2">Pilih semester terlebih
+                            dahulu untuk menentukan rentang bulan.</p>
+                    </div>
+
+                </div>
+
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 flex-shrink-0">
+                    <button @click="closeExportExcelModal()"
+                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+                    <button @click="triggerExportExcel()"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Export</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -552,6 +640,7 @@
                 showDetailModal: false,
                 selectedStudent: null,
                 selectedStudents: [], // student IDs
+                showExportExcelModal: false,
 
                 // Data Stats (loaded from PHP initially)
                 stats: {
@@ -575,12 +664,24 @@
                     dateTo: '' // Consider setting default, e.g., today
                 },
 
+                exportFilters: {
+                    program: '',
+                    semester: '',
+                    monthFrom: '',
+                    monthTo: '',
+                },
+
                 // Data Arrays
                 students: [], // This will be populated by API
                 programStudis: [], // Populated by loadServerData
                 semesters: [], // Populated by loadServerData
                 topStudents: [], // Placeholder
                 recentActivities: [], // Placeholder
+
+                monthNames: [
+                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                ],
 
                 // Pagination
                 pagination: {
@@ -649,6 +750,10 @@
                             dateTo: '{{ $filters['dateTo'] ?? '' }}'
                         };
                     @endif
+
+                    this.exportFilters.program = this.filters.program;
+                    this.exportFilters.semester = this.filters.semester;
+                    this.updateMonthRangeOptions();
                 },
 
                 async loadStudents() {
@@ -873,6 +978,78 @@
                     setTimeout(() => {
                         this.selectedStudent = null;
                     }, 250);
+                },
+
+                closeExportExcelModal() {
+                    this.showExportExcelModal = false;
+                    this.exportFilters.program = ''; // Reset filters when closing
+                    this.exportFilters.semester = ''; // Reset filters when closing
+                    this.exportFilters.monthFrom = ''; // Reset month filters
+                    this.exportFilters.monthTo = ''; // Reset month filters
+                },
+
+                updateMonthRangeOptions() {
+                    this.exportFilters.monthFrom = ''; // Reset current month selection
+                    this.exportFilters.monthTo = ''; // Reset current month selection
+
+                    // If a semester is selected, try to set default month range to the semester's full range
+                    if (this.exportFilters.semester) {
+                        const selectedSemester = this.semesters.find(s => s.id == this.exportFilters.semester);
+                        if (selectedSemester) {
+                            // Extract month number from date string
+                            const startMonthNum = new Date(selectedSemester.start_month).getMonth() + 1;
+                            const endMonthNum = new Date(selectedSemester.end_month).getMonth() + 1;
+
+                            this.exportFilters.monthFrom = startMonthNum;
+                            this.exportFilters.monthTo = endMonthNum;
+                        }
+                    }
+                },
+
+                getMinMonth() {
+                    if (!this.exportFilters.semester) return 1; // If no semester selected, allow all months (1-12)
+                    const selectedSemester = this.semesters.find(s => s.id == this.exportFilters.semester);
+                    // Extract month number from date string
+                    return selectedSemester ? new Date(selectedSemester.start_month).getMonth() + 1 : 1;
+                },
+
+                getMaxMonth() {
+                    if (!this.exportFilters.semester) return 12; // If no semester selected, allow all months (1-12)
+                    const selectedSemester = this.semesters.find(s => s.id == this.exportFilters.semester);
+                    // Extract month number from date string
+                    return selectedSemester ? new Date(selectedSemester.end_month).getMonth() + 1 : 12;
+                },
+
+                get filteredMonthOptions() {
+                    const minMonth = this.getMinMonth();
+                    const maxMonth = this.getMaxMonth();
+
+                    // If no semester is selected, show all months
+                    if (!this.exportFilters.semester) {
+                        return this.monthNames.map((name, index) => ({
+                            name: name,
+                            value: index + 1
+                        }));
+                    }
+
+                    // Otherwise, filter based on min/max month
+                    return this.monthNames.map((name, index) => ({
+                            name: name,
+                            value: index + 1
+                        }))
+                        .filter(month => month.value >= minMonth && month.value <= maxMonth);
+                },
+
+                triggerExportExcel() {
+                    const params = new URLSearchParams({
+                        program: this.exportFilters.program,
+                        semester: this.exportFilters.semester,
+                        monthFrom: this.exportFilters.monthFrom,
+                        monthTo: this.exportFilters.monthTo,
+                    }).toString();
+
+                    window.open(`{{ route('admin.rekapitulasi.export.excel') }}?${params}`, '_blank');
+                    this.closeExportExcelModal();
                 },
 
                 exportPDF() {

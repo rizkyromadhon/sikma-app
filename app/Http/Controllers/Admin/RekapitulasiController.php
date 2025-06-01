@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Presensi;
 use App\Models\Semester;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Str;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ use Spatie\Browsershot\Browsershot;
 use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel; // Import Excel Facade
 use App\Exports\RekapitulasiKehadiranExport; // Import Export Class Anda
+use San103\Phpholidayapi\HolidayClient;
 
 class RekapitulasiController extends Controller
 {
@@ -621,13 +623,200 @@ class RekapitulasiController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $filters = $request->only(['search', 'program', 'semester']); // Tambah filter lain jika ada
-        // Anda bisa menambahkan nama prodi dan semester ke $filters untuk ditampilkan di judul sheet/export
-        // $filters['program_nama'] = $request->program ? ProgramStudi::find($request->program)->name : 'Semua';
-        // $filters['semester_nama'] = $request->semester ? Semester::find($request->semester)->name : 'Semua';
+        // PENTING: Gunakan try-catch di sekitar seluruh logika untuk menangkap error
+        // dan mengembalikannya ke halaman sebelumnya. Excel::download() akan menghentikan eksekusi
+        // jika berhasil, sehingga return redirect() hanya akan terpanggil saat ada error.
+        try {
+            // --- 1. Validasi Input dan Dapatkan Informasi Filter ---
+            $selectedSemesterId = $request->input('semester');
+            $selectedProgramId = $request->input('program');
+            $requestedMonthFrom = (int) $request->input('monthFrom');
+            $requestedMonthTo = (int) $request->input('monthTo');
 
-        // Menggunakan RekapitulasiKehadiranExport yang sudah memiliki logika prepareData
-        return Excel::download(new RekapitulasiKehadiranExport($filters), 'rekapitulasi_kehadiran_mahasiswa.xlsx');
+            if (!$selectedSemesterId) {
+                return back()->with('error', 'Silakan pilih semester terlebih dahulu untuk export Excel rekapitulasi semesteran.');
+            }
+
+            $semesterModel = Semester::find($selectedSemesterId);
+
+            // Validasi keberadaan semester dan format tanggal awal/akhir
+            if (!$semesterModel || empty($semesterModel->start_month) || empty($semesterModel->end_month)) {
+                return back()->with('error', 'Data semester tidak valid atau tanggal mulai/selesai semester tidak ditemukan.');
+            }
+
+            // Tentukan Tahun Dasar Semester
+            // Ini adalah tahun ketika semester yang dipilih (misal Ganjil 2024/2025) dimulai.
+            // Ambil dari kolom 'kode' atau 'semester_name' jika ada format tahun di dalamnya.
+            $baseYear = Carbon::now()->year; // Default ke tahun sekarang
+            if (!empty($semesterModel->kode) && is_numeric(substr($semesterModel->kode, 0, 4))) {
+                $baseYear = (int) substr($semesterModel->kode, 0, 4);
+            } elseif (Str::contains($semesterModel->semester_name, '/')) {
+                $parts = explode('/', $semesterModel->semester_name);
+                $baseYear = (int) $parts[0]; // Ambil tahun awal (e.g., 2024 dari 2024/2025)
+            }
+
+            // Dapatkan nomor bulan dari kolom start_month dan end_month di DB (yang berupa string 'YYYY-MM-DD')
+            $semesterDbStartMonthNum = Carbon::parse($semesterModel->start_month)->month;
+            $semesterDbEndMonthNum = Carbon::parse($semesterModel->end_month)->month;
+
+            // Tentukan bulan awal dan akhir yang efektif untuk periode ekspor
+            // Prioritaskan input dari request modal, fallback ke bulan dari data semester DB
+            $effectiveStartMonth = $requestedMonthFrom ?: $semesterDbStartMonthNum;
+            $effectiveEndMonth = $requestedMonthTo ?: $semesterDbEndMonthNum;
+
+            // --- Logika Penentuan Tanggal Awal & Akhir Periode Export (Carbon Objects) ---
+            $startDate = Carbon::create($baseYear, $effectiveStartMonth, 1)->startOfDay();
+            $endDate = Carbon::create($baseYear, $effectiveEndMonth, 1)->endOfMonth()->endOfDay();
+
+            // Penyesuaian tahun jika rentang bulan melewati batas tahun (misal: Sept - Feb)
+            // Ini akan membuat endDate di tahun berikutnya jika startMonth > endMonth
+            if ($effectiveStartMonth > $effectiveEndMonth) {
+                $endDate->addYear();
+            }
+
+            // Jika $startDate yang sudah di-adjust tahunnya masih lebih besar dari $endDate
+            // ini bisa terjadi jika $effectiveStartMonth berasal dari tahun depan (semester ganjil di tahun berikutnya)
+            // sedangkan $baseYear adalah tahun semester saat ini.
+            if ($startDate->greaterThan($endDate)) {
+                $startDate->subYear(); // Misal, Sept di tahun sebelumnya
+                // Periksa lagi setelah subYear, jika masih belum benar, tambahkan tahun ke endDate
+                if ($startDate->greaterThan($endDate)) {
+                    $endDate->addYear(); // Ini harusnya tidak terjadi jika logic awal sudah benar
+                }
+            }
+
+            Log::info('DEBUG: Final Start Date: ' . $startDate->toDateString());
+            Log::info('DEBUG: Final End Date: ' . $endDate->toDateString());
+
+
+            // Informasi Filter untuk Display di Excel Header
+            $namaInstitusi = 'POLITEKNIK NEGERI JEMBER';
+            $appName = config('app.name', 'SIKMA');
+            $namaSemesterFilter = $semesterModel->semester_name;
+            $namaProgramStudiFilter = 'Semua Program Studi';
+            if ($selectedProgramId) {
+                $programStudiModel = ProgramStudi::find($selectedProgramId);
+                if ($programStudiModel) {
+                    $namaProgramStudiFilter = $programStudiModel->name;
+                }
+            }
+
+            $filtersForExport = [
+                'program_id' => $selectedProgramId,
+                'program_nama' => $namaProgramStudiFilter,
+                'semester_id' => $selectedSemesterId,
+                'semester_nama' => $namaSemesterFilter,
+                'tahun_ajaran_display' => $semesterModel->tahun_ajaran ?? ($baseYear . '/' . ($baseYear + 1)), // Ambil dari model jika ada, fallback ke baseYear
+                'rentang_bulan_display' => $startDate->translatedFormat('F Y') . ' - ' . $endDate->translatedFormat('F Y'),
+            ];
+
+            // --- 2. Kumpulkan Tanggal Kolom yang Relevan (untuk Header Excel) ---
+            $period = CarbonPeriod::create($startDate, $endDate);
+            $dateColumns = [];
+            foreach ($period as $date) {
+                // Opsional: filter hanya hari kerja
+                // if ($date->isWeekday()) {
+                $dateColumns[$date->toDateString()] = [
+                    'day_number' => $date->format('j'),
+                    'day_name_short' => $date->translatedFormat('D')
+                ];
+                // }
+            }
+
+            Log::info('DEBUG: Number of date columns: ' . count($dateColumns));
+
+            if (empty($dateColumns)) {
+                return back()->with('info', 'Tidak ada tanggal yang valid dalam rentang bulan yang dipilih untuk diexport. Rentang tanggal: ' . $startDate->toDateString() . ' sampai ' . $endDate->toDateString());
+            }
+
+            // --- 3. Kumpulkan Data Mahasiswa yang Sudah Difilter dengan Benar ---
+            $mahasiswaQuery = User::where('role', 'Mahasiswa');
+
+            // FILTER UTAMA: MAHASISWA BERDASARKAN SEMESTER ASAL MEREKA
+            $mahasiswaQuery->where('id_semester', $selectedSemesterId);
+
+            if ($selectedProgramId) {
+                $mahasiswaQuery->where('id_prodi', $selectedProgramId);
+            }
+
+            if ($request->filled('search')) {
+                $mahasiswaQuery->where(function ($q) use ($request) {
+                    $q->where('name', 'like', "%{$request->search}%")
+                        ->orWhere('nim', 'like', "%{$request->search}%");
+                });
+            }
+
+            $mahasiswaCollection = $mahasiswaQuery->orderBy('name')->get();
+            Log::info('DEBUG: Number of students found: ' . $mahasiswaCollection->count());
+
+            if ($mahasiswaCollection->isEmpty()) {
+                return back()->with('info', 'Tidak ada data mahasiswa yang sesuai dengan filter untuk diexport.');
+            }
+
+            // --- 4. Kumpulkan Data Presensi yang Relevan ---
+            $mahasiswaIds = $mahasiswaCollection->pluck('id')->all();
+            $presensiData = Presensi::whereIn('user_id', $mahasiswaIds)
+                ->whereBetween('tanggal', [$startDate->toDateString(), $endDate->toDateString()])
+                ->get()
+                ->groupBy('user_id')
+                ->map(function ($presencesForUser) {
+                    return $presencesForUser->keyBy(function ($p) {
+                        return Carbon::parse($p->tanggal)->toDateString();
+                    });
+                });
+
+            Log::info('DEBUG: Total unique users with presensi data: ' . $presensiData->count());
+
+            if ($presensiData->isNotEmpty()) {
+                $firstUserId = $presensiData->keys()->first();
+                Log::info('DEBUG: Presensi for first user (' . $firstUserId . '): ' . $presensiData->get($firstUserId)->toJson());
+            }
+
+            // --- 5. Siapkan Data Mahasiswa per Prodi untuk Multi-Sheet Export ---
+            $mahasiswaPerProdi = $mahasiswaCollection->groupBy('id_prodi');
+
+            $prodiIdsInCollection = $mahasiswaPerProdi->keys()->filter(fn($key) => $key !== null && $key !== '')->all();
+            $programStudisForSheets = ProgramStudi::whereIn('id', $prodiIdsInCollection)->orderBy('name')->get();
+
+            if ($mahasiswaPerProdi->has('') || $mahasiswaPerProdi->has(null)) {
+                $programStudisForSheets->prepend((object)['id' => '', 'name' => 'Tanpa Prodi']);
+            }
+
+            // Jika ada filter program studi spesifik, pastikan hanya prodi itu yang ada di list
+            if ($selectedProgramId && $programStudisForSheets->isNotEmpty()) {
+                $programStudisForSheets = $programStudisForSheets->filter(fn($prodi) => $prodi->id == $selectedProgramId);
+            }
+
+            // --- 6. Finalisasi Data Export ---
+            $exportData = [
+                'namaInstitusi' => $namaInstitusi,
+                'appName' => $appName,
+                'filters' => $filtersForExport,
+                'dateColumns' => $dateColumns,
+                'presensiData' => $presensiData,
+                'programStudis' => $programStudisForSheets,
+                'mahasiswaPerProdi' => $mahasiswaPerProdi,
+                'bulanRange' => [
+                    'monthFrom' => $effectiveStartMonth,
+                    'monthTo' => $effectiveEndMonth,
+                    'year' => $baseYear,
+                ],
+            ];
+
+            $fileName = 'Rekap_Kehadiran_' . Str::slug($namaSemesterFilter) . '_' . Str::slug($namaProgramStudiFilter) . '_' . Carbon::now()->format('YmdHis') . '.xlsx';
+
+            return Excel::download(new RekapitulasiKehadiranExport($exportData), $fileName);
+        } catch (\Exception $e) {
+            // Log error secara detail untuk debugging server-side
+            Log::error('Error generating Excel Rekapitulasi: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'request_input' => $request->all() // Log input request untuk debugging
+            ]);
+            // Redirect kembali ke halaman sebelumnya dengan pesan error
+            return back()->with('error', 'Gagal membuat file Excel: Terjadi kesalahan pada server. Silakan hubungi administrator.');
+        }
     }
 
     public function exportPDF(Request $request)
@@ -651,7 +840,8 @@ class RekapitulasiController extends Controller
             $semester = null;
             if ($request->filled('semester')) {
                 $semester = Semester::find($request->semester);
-                $filters['semester_nama'] = $semester ? ($semester->semester_ke ?? $semester->name) : 'N/A';
+                // PERBAIKAN: Gunakan kolom 'semester_name'
+                $filters['semester_nama'] = $semester ? $semester->semester_name : 'N/A';
             } else {
                 $filters['semester_nama'] = 'Semua Semester';
             }
@@ -717,7 +907,7 @@ class RekapitulasiController extends Controller
                 // Footer/Signature Information
                 'namaKaprodi' => $programStudi ? ($programStudi->kepala_prodi ?? '(....................................)') : '(..................................)',
                 'infoDosenPengampu' => '(..................................)',
-                'kotaTtd' => 'Surabaya',
+                'kotaTtd' => 'Jember',
                 'tanggalTtd' => Carbon::now()->translatedFormat('d F Y'),
             ];
 
@@ -747,8 +937,8 @@ class RekapitulasiController extends Controller
 
             // Generate PDF menggunakan Browsershot dengan MARGIN NOL
             $pdf = Browsershot::html($html)
-                ->setNodeBinary(env('NODE_BINARY_PATH', '/usr/bin/node'))
-                ->setNpmBinary(env('NPM_BINARY_PATH', '/usr/bin/npm'))
+                ->setNodeBinary(env('NODE_BINARY_PATH', "C:/Program Files/nodejs/node.exe"))
+                ->setNpmBinary(env('NPM_BINARY_PATH', "C:/Program Files/nodejs/npm.cmd"))
                 ->noSandbox()
                 ->format('A4')
                 ->margins(0, 0, 0, 0)

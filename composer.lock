@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "35b8c9a3b8173371e5ab142fde176049",
+    "content-hash": "642845a0486d64c8555947929a4b39ea",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -6023,6 +6023,46 @@
                 "source": "https://github.com/MyIntervals/PHP-CSS-Parser/tree/v8.8.0"
             },
             "time": "2025-03-23T17:59:05+00:00"
+        },
+        {
+            "name": "san103/php-holiday-api",
+            "version": "v1.3.9",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/San103/HolidayDates-Package.git",
+                "reference": "351df5361f30378a14d15ae1b06859f833c66328"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/San103/HolidayDates-Package/zipball/351df5361f30378a14d15ae1b06859f833c66328",
+                "reference": "351df5361f30378a14d15ae1b06859f833c66328",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "San103\\Phpholidayapi\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "San103",
+                    "email": "palbanjessan16@gmail.com"
+                }
+            ],
+            "description": "An holiday API for php",
+            "support": {
+                "issues": "https://github.com/San103/HolidayDates-Package/issues",
+                "source": "https://github.com/San103/HolidayDates-Package/tree/v1.3.9"
+            },
+            "time": "2024-04-04T00:33:12+00:00"
         },
         {
             "name": "spatie/browsershot",
