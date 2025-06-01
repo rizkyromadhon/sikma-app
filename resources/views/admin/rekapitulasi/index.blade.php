@@ -13,7 +13,7 @@
                 </div>
 
                 <div class="flex items-center space-x-3">
-                    <button @click="exportPDF()"
+                    <button @click="showExportPdfModal = true"
                         class="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-all duration-200 flex items-center space-x-2 hover-scale">
                         <i class="fas fa-file-pdf"></i>
                         <span>Export PDF</span>
@@ -544,12 +544,12 @@
             </div>
         </div>
 
-        <div x-show="showExportExcelModal" x-transition:enter="transition ease-out duration-300"
+        <div x-show="showExportPdfModal" x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
             class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto"
-            @click.self="closeExportExcelModal()" style="display: none;">
+            @click.self="closeExportPdfModal()" style="display: none;">
 
             <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col"
                 x-transition:enter="transition ease-out duration-300"
@@ -560,8 +560,8 @@
                 x-transition:leave-end="opacity-0 transform scale-95" @click.stop>
 
                 <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-                    <h3 class="text-xl font-semibold text-gray-900">Export Rekapitulasi Kehadiran ke Excel</h3>
-                    <button @click="closeExportExcelModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <h3 class="text-xl font-semibold text-gray-900">Export Rekapitulasi Kehadiran ke Pdf</h3>
+                    <button @click="closeExportPdfModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -623,10 +623,99 @@
                 </div>
 
                 <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 flex-shrink-0">
+                    <button @click="closeExportPdfModal()"
+                        class="px-4 py-2 bg-transparent text-sm text-gray-800 border rounded-lg hover:bg-gray-800 hover:text-white transition-colors">Batal</button>
+                    <button @click="triggerExportPdf()"
+                        class="px-4 py-2 bg-red-600 text-sm text-white rounded-lg hover:bg-red-700 transition-colors">Export</button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="showExportExcelModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto"
+            @click.self="closeExportExcelModal()" style="display: none;">
+
+            <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 transform scale-95"
+                x-transition:enter-end="opacity-100 transform scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 transform scale-100"
+                x-transition:leave-end="opacity-0 transform scale-95" @click.stop>
+
+                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+                    <h3 class="text-xl font-semibold text-gray-900">Export Rekapitulasi Kehadiran ke Excel</h3>
+                    <button @click="closeExportExcelModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-4 overflow-y-auto flex-grow">
+                    <div>
+                        <span class="text-red-800 text-xs mb-2">* Filter export excel
+                            tidak bisa
+                            menggunakan semua semester.</span>
+                    </div>
+                    <div>
+                        <label for="exportProgram" class="block text-sm font-medium text-gray-700 mb-2">Program
+                            Studi</label>
+                        <select id="exportProgram" x-model="exportFilters.program"
+                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                            <option value="">Semua Program Studi</option>
+                            <template x-for="prodi in programStudis" :key="prodi.id">
+                                <option :value="prodi.id" x-text="prodi.name"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="exportSemester" class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                        <select id="exportSemester" x-model="exportFilters.semester" @change="updateMonthRangeOptions()"
+                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                            <template x-for="semester in semesters" :key="semester.id">
+                                <option :value="semester.id" x-text="semester.semester_name"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div x-show="exportFilters.semester">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rentang Bulan</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="exportMonthFrom" class="sr-only">Bulan Mulai</label>
+                                <select id="exportMonthFrom" x-model="exportFilters.monthFrom"
+                                    class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                                    <option value="">Pilih Bulan Mulai</option>
+                                    <template x-for="month in filteredMonthOptions" :key="month.value">
+                                        <option :value="month.value" x-text="month.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="exportMonthTo" class="sr-only">Bulan Akhir</label>
+                                <select id="exportMonthTo" x-model="exportFilters.monthTo"
+                                    class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                                    <option value="">Pilih Bulan Akhir</option>
+                                    <template x-for="month in filteredMonthOptions" :key="month.value">
+                                        <option :value="month.value" x-text="month.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <p x-show="!exportFilters.semester" class="text-sm text-gray-500 mt-2">Pilih semester terlebih
+                            dahulu untuk menentukan rentang bulan.</p>
+                    </div>
+
+                </div>
+
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 flex-shrink-0">
                     <button @click="closeExportExcelModal()"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">Batal</button>
+                        class="px-4 py-2 bg-transparent border text-sm text-gray-800 rounded-lg hover:bg-gray-800 hover:text-white transition-colors">Batal</button>
                     <button @click="triggerExportExcel()"
-                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Export</button>
+                        class="px-4 py-2 bg-green-600 text-sm text-white rounded-lg hover:bg-green-800 transition-colors">Export</button>
                 </div>
             </div>
         </div>
@@ -640,6 +729,7 @@
                 showDetailModal: false,
                 selectedStudent: null,
                 selectedStudents: [], // student IDs
+                showExportPdfModal: false,
                 showExportExcelModal: false,
 
                 // Data Stats (loaded from PHP initially)
@@ -700,13 +790,52 @@
                     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
                     this.filters.dateTo = today.toISOString().split('T')[0];
                     this.filters.dateFrom = firstDayOfMonth.toISOString().split('T')[0];
+                    this.$watch('showExportExcelModal', (isShown) => {
+                        if (isShown) {
+                            this.prepareExcelExportFilters();
+                        }
+                    });
+                },
+
+                prepareExcelExportFilters() {
+                    const currentSemesterIsValidForExcel = this.semesters.some(s => s.id == this.exportFilters.semester &&
+                        this.exportFilters.semester !== "");
+
+                    if (!currentSemesterIsValidForExcel) {
+                        if (this.semesters.length > 0) {
+                            const semester1 = this.semesters.find(s => s.semester_name === 'Semester 1');
+                            if (semester1) {
+                                this.exportFilters.semester = semester1.id;
+                            } else {
+                                this.exportFilters.semester = this.semesters[0].id;
+                            }
+                        } else {
+                            this.exportFilters.semester = '';
+                        }
+                    }
+                    this.updateMonthRangeOptions();
                 },
 
                 async loadInitialData() {
                     this.isLoading = true;
                     try {
-                        this.loadServerData(); // Load static data and initial filters from PHP
-                        await this.loadStudents(); // Load student data via AJAX
+                        this.loadServerData();
+                        this.$nextTick(() => {
+                            if (this.semesters.length > 0) {
+                                const semester1 = this.semesters.find(s => s.semester_name === 'Semester 1');
+
+                                if (semester1) {
+                                    this.exportFilters.semester = semester1.id;
+                                    this
+                                        .updateMonthRangeOptions();
+                                } else {
+
+                                    this.exportFilters.semester = this.semesters[0].id;
+                                    this.updateMonthRangeOptions();
+                                }
+                            }
+                        });
+                        await this.loadStudents();
                         // await this.loadTopStudents(); // Placeholder
                         // await this.loadRecentActivities(); // Placeholder
                     } catch (error) {
@@ -718,7 +847,6 @@
                 },
 
                 loadServerData() {
-                    // Load data from PHP variables passed to the view
                     @if (isset($programStudis))
                         this.programStudis = @json($programStudis);
                     @endif
@@ -788,9 +916,8 @@
                         const data = await response.json();
 
                         this.students = data.students.data.map(student => ({
-                            ...student, // Spread all properties from backend student object
+                            ...student,
                             initials: this.getInitials(student.name),
-                            // program_studi_display and semester_display are now program_studi_name and semester_name from backend
                         }));
 
                         this.pagination = {
@@ -803,8 +930,6 @@
                             perPage: parseInt(data.students.per_page) // Ensure perPage is an int
                         };
 
-                        // If your API returns updated global stats, update them here:
-                        // if (data.stats) { this.stats = { ...this.stats, ...data.stats }; }
 
                     } catch (error) {
                         console.error('Error loading students:', error);
@@ -972,7 +1097,6 @@
 
                 },
 
-
                 closeDetailModal() {
                     this.showDetailModal = false;
                     setTimeout(() => {
@@ -980,12 +1104,22 @@
                     }, 250);
                 },
 
-                closeExportExcelModal() {
-                    this.showExportExcelModal = false;
+                closeExportPdfModal() {
+                    this.showExportPdfModal = false;
                     this.exportFilters.program = ''; // Reset filters when closing
                     this.exportFilters.semester = ''; // Reset filters when closing
                     this.exportFilters.monthFrom = ''; // Reset month filters
                     this.exportFilters.monthTo = ''; // Reset month filters
+                },
+
+                closeExportExcelModal() {
+                    this.showExportExcelModal = false;
+                    setTimeout(() => {
+                        this.exportFilters.program = ''; // Reset filters when closing
+                        this.exportFilters.semester = ''; // Reset filters when closing
+                        this.exportFilters.monthFrom = ''; // Reset month filters
+                        this.exportFilters.monthTo = ''; // Reset month filters
+                    }, 250);
                 },
 
                 updateMonthRangeOptions() {
@@ -1040,6 +1174,17 @@
                         .filter(month => month.value >= minMonth && month.value <= maxMonth);
                 },
 
+                triggerExportPdf() {
+                    const params = new URLSearchParams({
+                        program: this.exportFilters.program,
+                        semester: this.exportFilters.semester,
+                        monthFrom: this.exportFilters.monthFrom,
+                        monthTo: this.exportFilters.monthTo,
+                    }).toString();
+
+                    window.open(`{{ route('admin.rekapitulasi.export.pdf') }}?${params}`, '_blank');
+                    this.closeExportPdfModal();
+                },
                 triggerExportExcel() {
                     const params = new URLSearchParams({
                         program: this.exportFilters.program,
@@ -1050,30 +1195,6 @@
 
                     window.open(`{{ route('admin.rekapitulasi.export.excel') }}?${params}`, '_blank');
                     this.closeExportExcelModal();
-                },
-
-                exportPDF() {
-                    const params = new URLSearchParams({
-                        search: this.filters.search,
-                        program: this.filters.program,
-                        semester: this.filters.semester,
-                        // dateFrom: this.filters.dateFrom, // Jika ada filter tanggal yang relevan untuk export
-                        // dateTo: this.filters.dateTo,     // Jika ada filter tanggal yang relevan untuk export
-                    }).toString();
-                    // Ganti dengan nama route yang benar jika berbeda
-                    window.open(`{{ route('admin.rekapitulasi.export.pdf') }}?${params}`, '_blank');
-                },
-
-                exportExcel() {
-                    const params = new URLSearchParams({
-                        search: this.filters.search,
-                        program: this.filters.program,
-                        semester: this.filters.semester,
-                        // dateFrom: this.filters.dateFrom,
-                        // dateTo: this.filters.dateTo,
-                    }).toString();
-                    // Ganti dengan nama route yang benar jika berbeda
-                    window.open(`{{ route('admin.rekapitulasi.export.excel') }}?${params}`, '_blank');
                 },
             }
         }

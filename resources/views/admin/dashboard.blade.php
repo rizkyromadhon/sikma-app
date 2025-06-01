@@ -42,7 +42,7 @@
                             x-transition:leave="transition ease-in duration-200"
                             x-transition:leave-start="opacity-100 translate-x-0"
                             x-transition:leave-end="opacity-0 translate-x-4"
-                            class="ml-3 text-sm whitespace-nowrap relative z-10">Dashboard</span>
+                            class="ml-3 text-sm whitespace-nowrap relative z-10 group-hover:text-blue-700 transition-colors duration-300">Dashboard</span>
                         <div
                             class="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
                         </div>
@@ -63,7 +63,7 @@
                             x-transition:leave="transition ease-in duration-200"
                             x-transition:leave-start="opacity-100 translate-x-0"
                             x-transition:leave-end="opacity-0 translate-x-4"
-                            class="ml-3 text-sm whitespace-nowrap flex-1 text-left relative z-10">Manajemen
+                            class="ml-3 text-sm whitespace-nowrap flex-1 text-left relative z-10 group-hover:text-blue-700 transition-colors duration-300">Manajemen
                             Akademik</span>
                         <i x-show="!collapsed" :class="akademikOpen ? 'rotate-180' : 'rotate-0'"
                             x-transition:enter="transition ease-out duration-300 delay-150"
@@ -207,7 +207,7 @@
                             x-transition:leave="transition ease-in duration-200"
                             x-transition:leave-start="opacity-100 translate-x-0"
                             x-transition:leave-end="opacity-0 translate-x-4"
-                            class="ml-3 text-sm whitespace-nowrap flex-1 text-left relative z-10">Manajemen
+                            class="ml-3 text-sm whitespace-nowrap flex-1 text-left relative z-10 group-hover:text-blue-700 transition-colors duration-300">Manajemen
                             Presensi</span>
                         <i x-show="!collapsed" :class="presensiOpen ? 'rotate-180' : 'rotate-0'"
                             x-transition:enter="transition ease-out duration-300 delay-150"
@@ -237,9 +237,12 @@
                                 <a href="{{ route('admin.alat-presensi.index') }}"
                                     class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.alat-presensi.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
                                     <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-tools text-gray-500 text-sm"></i>
+                                        <i
+                                            class="fas fa-tools text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
                                     </div>
-                                    <span class="ml-3 text-sm">Alat Presensi</span>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Alat
+                                        Presensi</span>
                                 </a>
                             </li>
                             <li x-show="presensiOpen" x-transition:enter="transition ease-out duration-300 delay-100"
@@ -248,9 +251,12 @@
                                 <a href="{{ route('admin.rfid.index') }}"
                                     class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.rfid.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
                                     <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-credit-card text-gray-500 text-sm"></i>
+                                        <i
+                                            class="fas fa-credit-card text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
                                     </div>
-                                    <span class="ml-3 text-sm">Registrasi RFID</span>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Registrasi
+                                        RFID</span>
                                 </a>
                             </li>
                             <li x-show="presensiOpen" x-transition:enter="transition ease-out duration-300 delay-100"
@@ -259,9 +265,12 @@
                                 <a href="{{ route('admin.rekapitulasi.index') }}"
                                     class="flex items-center px-3 py-2.5 hover:bg-blue-50 transition-all duration-300 ease-in-out text-gray-600 rounded-lg group {{ request()->routeIs('admin.rekapitulasi.index') ? 'bg-gray-100' : 'hover:bg-gray-50' }}">
                                     <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-credit-card text-gray-500 text-sm"></i>
+                                        <i
+                                            class="fas fa-chart-line text-gray-500 group-hover:text-blue-500 transition-colors duration-300 text-sm"></i>
                                     </div>
-                                    <span class="ml-3 text-sm">Rekapitulasi Kehadiran</span>
+                                    <span
+                                        class="ml-3 text-sm group-hover:text-blue-700 transition-colors duration-300">Rekapitulasi
+                                        Kehadiran</span>
                                 </a>
                             </li>
                         </ul>
@@ -281,7 +290,8 @@
                             x-transition:leave="transition ease-in duration-200"
                             x-transition:leave-start="opacity-100 translate-x-0"
                             x-transition:leave-end="opacity-0 translate-x-4"
-                            class="ml-3 text-sm whitespace-nowrap relative z-10">Laporan Mahasiswa</span>
+                            class="ml-3 text-sm whitespace-nowrap relative z-10 group-hover:text-blue-700 transition-colors duration-300">Laporan
+                            Mahasiswa</span>
                         <div
                             class="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
                         </div>

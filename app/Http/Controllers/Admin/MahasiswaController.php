@@ -47,7 +47,7 @@ class MahasiswaController extends Controller
             ->orderBy('id_semester', 'asc')
             ->orderBy('name', 'asc')
             ->orderBy('id_golongan', 'asc')
-            ->paginate(8)
+            ->paginate(9)
             ->appends($request->query());
 
         AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
