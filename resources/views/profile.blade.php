@@ -33,7 +33,7 @@
                         <div>
                             <label class="block text-sm font-extrabold text-gray-700">Semester tempuh</label>
                             <p class="mt-1 text-gray-900 text-sm">
-                                {{ isset(Auth::user()->semester?->semester_name) ? explode(' ', Auth::user()->semester->semester_name)[1] ?? '' : '-' }}
+                                {{ isset(Auth::user()->semester?->display_name) ? explode(' ', Auth::user()->semester->display_name)[1] ?? '' : '-' }}
                             </p>
                         </div>
                     </div>

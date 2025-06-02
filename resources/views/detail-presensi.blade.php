@@ -22,7 +22,7 @@
                                 @foreach ($semesterOptions as $semester)
                                     <option value="{{ $semester->id }}"
                                         {{ request('semester') == $semester->id ? 'selected' : '' }}>
-                                        {{ $semester->semester_name }}
+                                        {{ $semester->display_name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -123,7 +123,7 @@
 
                                 <!-- Semester -->
                                 <td class="px-4 py-3 text-center">
-                                    {{ explode(' ', $item->jadwalKuliah->semester->semester_name)[1] }}
+                                    {{ $item->jadwalKuliah?->semester?->display_name ?? '-' }}
                                 </td>
                                 <!-- Program Studi -->
                                 <td class="px-4 py-3 text-center">{{ $item->user->programStudi->name }}</td>
@@ -209,7 +209,7 @@
 
             data.forEach((item, index) => {
                 const semesterName = (item.jadwalKuliah && item.jadwalKuliah.semester) ?
-                    item.jadwalKuliah.semester.semester_name :
+                    item.jadwalKuliah.semester.display_name :
                     'N/A';
 
                 const golonganNama = (item.jadwalKuliah && item.jadwalKuliah.golongan) ?

@@ -39,7 +39,7 @@
                             @foreach ($semesters as $semester)
                                 <option value="{{ $semester->id }}"
                                     {{ old('semester', request('semester')) == $semester->id ? 'selected' : '' }}>
-                                    {{ $semester->semester_name }}
+                                    {{ $semester->display_name }}
                                 </option>
                             @endforeach
                         </select>
@@ -100,7 +100,8 @@
                             <td class="px-6 py-2 text-center">{{ $student->uid ?? '-' }}</td>
                             <td class="px-6 py-2 text-left">{{ $student->nim }}</td>
                             <td class="px-6 py-2 text-left">{{ $student->name }}</td>
-                            <td class="px-6 py-2 text-center">{{ explode(' ', $student->semester->semester_name)[1] }}
+                            <td class="px-6 py-2 text-center">
+                                {{ $student->semester->display_name ? explode(' ', $student->semester->display_name)[1] : '-' }}
                             <td class="px-6 py-2 text-left">{{ $student->programStudi->name }}</td>
                             </td>
                             <td class="px-6 py-2 text-center">{{ $student->golongan->nama_golongan }}</td>

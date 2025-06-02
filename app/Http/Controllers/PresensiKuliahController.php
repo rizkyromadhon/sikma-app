@@ -249,7 +249,7 @@ class PresensiKuliahController extends Controller
 
         // Mengambil nama semester
         $semester = Semester::find($semesterTempuh);
-        $semesterText = $semester ? $semester->semester_name : '0';
+        $semesterText = $semester ? $semester->display_name : '0';
         $semesterNumber = explode(' ', $semesterText)[1] ?? $semesterText;
 
         $prodi = ProgramStudi::find($prodiId);

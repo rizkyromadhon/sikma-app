@@ -35,7 +35,7 @@
                             @foreach ($semesters as $semester)
                                 <option value="{{ $semester->id }}"
                                     {{ old('semester', request('semester')) == $semester->id ? 'selected' : '' }}>
-                                    {{ $semester->semester_name }}
+                                    {{ $semester->display_name }}
                                 </option>
                             @endforeach
                         </select>
@@ -97,7 +97,8 @@
                                 <td class="px-6 py-2 text-left">{{ $student->name }}</td>
                                 <td class="px-6 py-2 text-left">{{ $student->gender ?: '-' }}</td>
                                 <td class="px-6 py-2 text-left">{{ $student->programStudi->name }}</td>
-                                <td class="px-6 py-2 text-center">{{ explode(' ', $student->semester->semester_name)[1] }}
+                                <td class="px-6 py-2 text-center">
+                                    {{ $student->semester->display_name ? explode(' ', $student->semester->display_name)[1] : '-' }}
                                 </td>
                                 <td class="px-6 py-2 text-center">{{ $student->golongan->nama_golongan }}</td>
                                 <td class="px-6 py-2 text-center flex gap-2 items-center justify-center">
@@ -155,7 +156,7 @@
                         </script>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">Tidak ada data mahasiswa</td>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">Tidak ada data mahasiswa</td>
                         </tr>
                     @endforelse
                 </tbody>

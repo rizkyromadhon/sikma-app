@@ -26,6 +26,17 @@ class RekapitulasiController extends Controller
 {
     public function index(Request $request)
     {
+        $allSemestersForFilter = Semester::orderBy('id')->get();
+
+        $semesters = $allSemestersForFilter->sortBy(function ($semester) {
+            if (preg_match('/(\d+)$/', $semester->display_name, $matches)) {
+                return (int) $matches[1]; // Kembalikan angka sebagai integer
+            }
+            if (empty($semester->display_name)) {
+                return PHP_INT_MAX;
+            }
+            return $semester->display_name;
+        })->values();
         $today = Carbon::today();
         $mahasiswaQuery = User::where('role', 'Mahasiswa');
         $totalMahasiswa = $mahasiswaQuery->count();
@@ -46,7 +57,7 @@ class RekapitulasiController extends Controller
             if (!$presensiMahasiswaHariIni->isEmpty()) {
                 $hadirCount = $presensiMahasiswaHariIni->where('status', 'Hadir')->count();
                 $tidakHadirCount = $presensiMahasiswaHariIni->where('status', 'Tidak Hadir')->count();
-                $izinCount = $presensiMahasiswaHariIni->whereIn('status', ['Izin', 'Sakit', 'Izin/Sakit'])->count(); // More robust check for Izin/Sakit
+                $izinCount = $presensiMahasiswaHariIni->whereIn('status', ['Izin', 'Sakit', 'Izin/Sakit'])->count();
 
                 $statusCounts = [
                     'Hadir' => $hadirCount,
@@ -83,16 +94,8 @@ class RekapitulasiController extends Controller
         $totalIzinToday = $izinSakitHariIniCount_students;
 
         $totalValidation = $totalHadirToday + $totalTidakHadirToday + $totalIzinToday;
-        if ($totalValidation !== $totalMahasiswa && $totalMahasiswa > 0) { // Avoid division by zero or incorrect validation if no students
-            // If there are students, but validation fails, then it's an issue.
-            // If totalMahasiswa is 0, totalValidation will also be 0, which is fine.
-            // If totalMahasiswa > 0 and totalValidation != totalMahasiswa, it's an issue.
-            // Special case: if totalMahasiswa > 0 but no one has any status (e.g., all are 'Belum Presensi' implicitly)
-            // then totalTidakHadirToday should actually be $totalMahasiswa.
-            // The current logic defaults to 'Tidak Hadir', so this validation check is slightly complex.
-            // For now, just logging is okay. A more robust check would ensure all students are accounted for.
+        if ($totalValidation !== $totalMahasiswa && $totalMahasiswa > 0) {
             if ($totalMahasiswa > 0 && $totalValidation < $totalMahasiswa) {
-                // This means some students were not categorized, implicitly they are 'Tidak Hadir'
                 $totalTidakHadirToday += ($totalMahasiswa - $totalValidation);
             }
             Log::warning("Total validation mismatch after adjustment: Total calculated = {$totalHadirToday} + {$totalTidakHadirToday} + {$totalIzinToday} = " . ($totalHadirToday + $totalTidakHadirToday + $totalIzinToday) . ", Total mahasiswa = {$totalMahasiswa}");
@@ -124,7 +127,6 @@ class RekapitulasiController extends Controller
                 $actualWeekDaysSoFar++;
             }
         }
-
 
         $totalHadirDaysInWeekForAverage = 0;
 
@@ -179,8 +181,48 @@ class RekapitulasiController extends Controller
 
 
         $programStudis = ProgramStudi::orderBy('name')->get();
-        $semesters = Semester::orderBy('id')->get();
         $filters = $request->only(['search', 'program', 'semester', 'dateFrom', 'dateTo']);
+
+        $allStudentsForRank = User::where('role', 'Mahasiswa')
+            ->select('id', 'name', 'nim') // Ambil field yang dibutuhkan
+            ->withCount([
+                'presensi as hadir_count' => function ($query) {
+                    $query->where('status', 'Hadir');
+                },
+                'presensi as total_relevant_days' => function ($query) {
+                    // Tentukan status apa saja yang dihitung sebagai hari absensi yang relevan
+                    // Ini bisa jadi semua status yang tercatat.
+                    $query->whereIn('status', ['Hadir', 'Tidak Hadir', 'Izin', 'Sakit', 'Izin/Sakit']);
+                }
+            ])
+            ->get();
+
+        $topStudentsData = $allStudentsForRank->map(function ($student) {
+            $student->attendance_percentage = ($student->total_relevant_days > 0)
+                ? round(($student->hadir_count / $student->total_relevant_days) * 100, 2)
+                : 0;
+
+            // Membuat inisial sederhana
+            $nameParts = explode(' ', trim($student->name));
+            $initials = '';
+            if (count($nameParts) > 0 && !empty($nameParts[0])) {
+                $initials .= strtoupper(substr($nameParts[0], 0, 1));
+            }
+            if (count($nameParts) > 1 && !empty($nameParts[count($nameParts) - 1])) {
+                $initials .= strtoupper(substr($nameParts[count($nameParts) - 1], 0, 1));
+            } elseif (strlen($nameParts[0]) > 1 && empty($initials)) { // Jika hanya satu kata, ambil 2 huruf jika memungkinkan
+                $initials = strtoupper(substr($nameParts[0], 0, 2));
+            } elseif (empty($initials) && !empty($nameParts[0])) {
+                $initials = strtoupper(substr($nameParts[0], 0, 1));
+            }
+
+
+            $student->initials = $initials;
+            return $student;
+        })
+            ->sortByDesc('attendance_percentage')
+            ->take(10) // Ambil 10 teratas
+            ->values(); // Reset array keys agar menjadi array JSON standar
 
         return view('admin.rekapitulasi.index', compact(
             'programStudis',
@@ -193,7 +235,8 @@ class RekapitulasiController extends Controller
             'persenTidakHadirToday',
             'persenIzinToday',
             'persenRataRataHadirMingguan',
-            'filters'
+            'filters',
+            'topStudentsData'
         ));
     }
 
@@ -351,7 +394,7 @@ class RekapitulasiController extends Controller
                 'nim' => $user->nim,
                 'initials' => $user->initials,
                 'program_studi_name' => $user->programStudi ? $user->programStudi->name : 'N/A',
-                'semester_name' => $user->semester ? ($user->semester->semester_ke ?? $user->semester->name ?? $user->id_semester) : 'N/A',
+                'semester_name' => $user->semester ? ($user->semester->semester_ke ?? $user->semester->display_name ?? $user->id_semester) : 'N/A',
 
                 // Untuk tabel utama
                 'status_kehadiran_hari_ini' => $statusUntukHariIni, // Ini akan jadi null jika belum presensi hari ini
@@ -360,7 +403,7 @@ class RekapitulasiController extends Controller
 
                 // Data untuk Modal Detail
                 'program' => $user->programStudi ? $user->programStudi->name : 'N/A', // untuk modal
-                'semester' => $user->semester ? ($user->semester->semester_ke ?? $user->semester->name ?? $user->id_semester) : 'N/A', // untuk modal
+                'semester' => $user->semester ? ($user->semester->semester_ke ?? $user->semester->display_name ?? $user->id_semester) : 'N/A', // untuk modal
 
                 'totalPresent' => $semesterDaysPresent,
                 'totalAbsent' => $semesterDaysAbsent,
@@ -621,20 +664,23 @@ class RekapitulasiController extends Controller
 
             $semesterModel = Semester::find($selectedSemesterId);
 
-            if (!$semesterModel || empty($semesterModel->start_month) || empty($semesterModel->end_month)) {
+            if (!$semesterModel || empty($semesterModel->start_date) || empty($semesterModel->end_date)) {
                 return back()->with('error', 'Data semester tidak valid atau tanggal mulai/selesai semester tidak ditemukan.');
             }
 
             $baseYear = Carbon::now()->year;
-            if (!empty($semesterModel->kode) && is_numeric(substr($semesterModel->kode, 0, 4))) {
-                $baseYear = (int) substr($semesterModel->kode, 0, 4);
-            } elseif (Str::contains($semesterModel->semester_name, '/')) {
-                $parts = explode('/', $semesterModel->semester_name);
-                $baseYear = (int) $parts[0];
+            if (!empty($semesterModel->start_year)) {
+                $baseYear = (int) $semesterModel->start_year;
+            } elseif (!empty($semesterModel->semester_code) && is_numeric(substr($semesterModel->semester_code, 0, 4))) {
+                // Fallback ke semester_code jika start_year mungkin kosong (seharusnya tidak)
+                $baseYear = (int) substr($semesterModel->semester_code, 0, 4);
+            } else {
+                // Fallback jika keduanya tidak ada, tapi ini idealnya tidak terjadi
+                $baseYear = Carbon::parse($semesterModel->start_date)->year;
             }
 
-            $semesterDbStartMonthNum = Carbon::parse($semesterModel->start_month)->month;
-            $semesterDbEndMonthNum = Carbon::parse($semesterModel->end_month)->month;
+            $semesterDbStartMonthNum = Carbon::parse($semesterModel->start_date)->month;
+            $semesterDbEndMonthNum = Carbon::parse($semesterModel->end_date)->month;
 
             $effectiveStartMonth = $requestedMonthFrom ?: $semesterDbStartMonthNum;
             $effectiveEndMonth = $requestedMonthTo ?: $semesterDbEndMonthNum;
@@ -680,7 +726,7 @@ class RekapitulasiController extends Controller
 
             $namaInstitusi = 'POLITEKNIK NEGERI JEMBER';
             $appName = config('app.name', 'SIKMA');
-            $namaSemesterFilter = $semesterModel->semester_name;
+            $namaSemesterFilter = $semesterModel->display_name;
             $namaProgramStudiFilter = 'Semua Program Studi';
             if ($selectedProgramId) {
                 $programStudiModel = ProgramStudi::find($selectedProgramId);
@@ -694,7 +740,7 @@ class RekapitulasiController extends Controller
                 'program_nama' => $namaProgramStudiFilter,
                 'semester_id' => $selectedSemesterId,
                 'semester_nama' => $namaSemesterFilter,
-                'tahun_ajaran_display' => $semesterModel->tahun_ajaran ?? ($baseYear . '/' . ($baseYear + 1)),
+                'tahun_ajaran_display' => $semesterModel->start_year ? ($semesterModel->start_year . '/' . ($semesterModel->start_year + 1)) : ($baseYear . '/' . ($baseYear + 1)),
                 'rentang_bulan_display' => $startDate->translatedFormat('F Y') . ' - ' . $endDate->translatedFormat('F Y'),
             ];
 
@@ -748,12 +794,6 @@ class RekapitulasiController extends Controller
                         return Carbon::parse($p->tanggal)->toDateString();
                     });
                 });
-
-            // Log::info('DEBUG: Total unique users with presensi data: ' . $presensiData->count());
-            // if ($presensiData->isNotEmpty()) {
-            //     $firstUserId = $presensiData->keys()->first();
-            //     Log::info('DEBUG: Presensi for first user (' . $firstUserId . '): ' . $presensiData->get($firstUserId)->toJson());
-            // }
 
             // --- 5. Siapkan Data Mahasiswa per Prodi untuk Multi-Sheet Export ---
             $mahasiswaPerProdi = $mahasiswaCollection->groupBy('id_prodi');
@@ -820,8 +860,8 @@ class RekapitulasiController extends Controller
             $semester = null;
             if ($request->filled('semester')) {
                 $semester = Semester::find($request->semester);
-                // PERBAIKAN: Gunakan kolom 'semester_name'
-                $filters['semester_nama'] = $semester ? $semester->semester_name : 'N/A';
+                // PERBAIKAN: Gunakan kolom 'display_name'
+                $filters['semester_nama'] = $semester ? $semester->display_name : 'N/A';
             } else {
                 $filters['semester_nama'] = 'Semua Semester';
             }
@@ -846,7 +886,7 @@ class RekapitulasiController extends Controller
                     'nim' => $mahasiswa->nim ?? '-',
                     'name' => $mahasiswa->name ?? '-',
                     'program_studi' => $mahasiswa->programStudi ? $mahasiswa->programStudi->name : 'N/A',
-                    'semester' => $mahasiswa->semester ? ($mahasiswa->semester->semester_ke ?? $mahasiswa->semester->name) : 'N/A',
+                    'semester' => $mahasiswa->semester ? ($mahasiswa->semester->semester_ke ?? $mahasiswa->semester->display_name) : 'N/A',
                     'totalhadir' => $mahasiswa->total_hadir ?? 0,
                     'totaltidakhadir' => $mahasiswa->total_tidak_hadir ?? 0,
                     'totalizinsakit' => $mahasiswa->total_izin_sakit ?? 0,
@@ -929,7 +969,7 @@ class RekapitulasiController extends Controller
             // Generate filename dengan timestamp
             $filename = 'rekapitulasi_kehadiran_' .
                 ($programStudi ? Str::slug($programStudi->name) . '_' : '') .
-                ($semester ? Str::slug($semester->semester_ke ?? $semester->name) . '_' : '') .
+                ($semester ? Str::slug($semester->semester_ke ?? $semester->display_name) . '_' : '') .
                 Carbon::now()->format('Y-m-d_H-i-s') . '.pdf';
 
             return response($pdf)
@@ -959,105 +999,5 @@ class RekapitulasiController extends Controller
         } else {
             return 'Semua Periode';
         }
-    }
-
-    public function pdfPreview(Request $request)
-    {
-        $mahasiswaDataCollection = $this->getFilteredMahasiswaData($request, true);
-
-        $filters = $request->only(['search', 'program', 'semester', 'dateFrom', 'dateTo']);
-
-        // Get Program Studi info
-        $programStudi = null;
-        if ($request->filled('program')) {
-            $programStudi = ProgramStudi::find($request->program);
-            $filters['program_nama'] = $programStudi ? $programStudi->name : 'N/A';
-        } else {
-            $filters['program_nama'] = 'Semua Program Studi';
-        }
-
-        // Get Semester info
-        $semester = null;
-        if ($request->filled('semester')) {
-            $semester = Semester::find($request->semester);
-            $filters['semester_nama'] = $semester ? ($semester->semester_ke ?? $semester->name) : 'N/A';
-        } else {
-            $filters['semester_nama'] = 'Semua Semester';
-        }
-
-        // Hitung statistik kehadiran - GUNAKAN FIELD YANG SUDAH DIHITUNG
-        $summaryHadir = 0;
-        $summaryTerlambat = 0;
-        $summaryTidakHadir = 0;
-        $summaryIzinSakit = 0;
-
-        foreach ($mahasiswaDataCollection as $mahasiswa) {
-            $summaryHadir += $mahasiswa->total_hadir ?? 0;
-            $summaryTerlambat += $mahasiswa->total_terlambat ?? 0;
-            $summaryTidakHadir += $mahasiswa->total_tidak_hadir ?? 0;
-            $summaryIzinSakit += $mahasiswa->total_izin_sakit ?? 0;
-        }
-
-        // Transform data mahasiswa untuk template
-        $studentsData = $mahasiswaDataCollection->map(function ($mahasiswa, $index) {
-            return [
-                'no' => $index + 1,
-                'nim' => $mahasiswa->nim ?? '-',
-                'name' => $mahasiswa->name ?? '-',
-                'program_studi' => $mahasiswa->programStudi ? $mahasiswa->programStudi->name : 'N/A',
-                'semester' => $mahasiswa->semester ? ($mahasiswa->semester->semester_ke ?? $mahasiswa->semester->name) : 'N/A',
-                'totalhadir' => $mahasiswa->total_hadir ?? 0,
-                'totaltidakhadir' => $mahasiswa->total_tidak_hadir ?? 0,
-                'totalizinsakit' => $mahasiswa->total_izin_sakit ?? 0,
-                'totalterlambat' => $mahasiswa->total_terlambat ?? 0,
-                'persentase_kehadiran' => $mahasiswa->persentase_kehadiran ?? 0,
-                'status_akhir' => $mahasiswa->status_kehadiran_keseluruhan ?? 'Kurang'
-            ];
-        })->toArray();
-
-        // Siapkan data untuk template sesuai dengan struktur HTML
-        $reportData = [
-            // Header Information
-            'title' => 'SIKMA - Rekapitulasi Presensi',
-            'logoChar' => 'S',
-            'namaSistem' => config('app.name', 'SIKMA'),
-            'namaInstitusi' => 'Sistem Kehadiran Mahasiswa',
-
-            // Report Title
-            'reportTitle' => 'Rekapitulasi Presensi',
-            'reportSubtitle' => 'Laporan Kehadiran Mahasiswa',
-
-            // Info Grid Data
-            'infoSemesterTahun' => $filters['semester_nama'] . ' / ' . date('Y'),
-            'infoKelas' => '-',
-            'infoProgramStudi' => $filters['program_nama'],
-            'infoPeriode' => $this->getPeriodeText($request),
-
-            // Summary Statistics
-            'summaryHadir' => $summaryHadir,
-            'summaryTerlambat' => $summaryTerlambat,
-            'summaryTidakHadir' => $summaryTidakHadir,
-            'summaryIzinSakit' => $summaryIzinSakit,
-            'summaryTotalMahasiswa' => $mahasiswaDataCollection->count(),
-
-            // Students Data
-            'students' => $studentsData,
-
-            // Footer/Signature Information
-            'namaKaprodi' => $programStudi ? ($programStudi->kepala_prodi ?? '(....................................)') : '(..................................)',
-            'infoDosenPengampu' => '(..................................)',
-            'kotaTtd' => 'Jember',
-            'tanggalTtd' => Carbon::now()->translatedFormat('d F Y'),
-        ];
-
-        // Data untuk view
-        $dataForView = [
-            'reportData' => $reportData,
-            'filters' => $filters,
-            'reportDate' => Carbon::now()->translatedFormat('l, d F Y'),
-            'reportTimestamp' => Carbon::now()->translatedFormat('H:i') . ' WIB',
-            'appName' => config('app.name', 'SIKMA')
-        ];
-        return view('exports.export-pdf', $dataForView);
     }
 }

@@ -14,6 +14,17 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $allSemestersForFilter = Semester::orderBy('id')->get(); // Ambil semua semester
+
+        $semesters = $allSemestersForFilter->sortBy(function ($semester) {
+            if (preg_match('/(\d+)$/', $semester->display_name, $matches)) {
+                return (int) $matches[1]; // Kembalikan angka sebagai integer
+            }
+            if (empty($semester->display_name)) {
+                return PHP_INT_MAX;
+            }
+            return $semester->display_name; // Fallback ke pengurutan string jika tidak ada angka
+        })->values(); // ->values() untuk mereset keys array setelah sorting
         $mahasiswa = User::where('role', 'mahasiswa')->get();
         $dosen = User::where('role', 'dosen')->get();
         $jumlahMahasiswa = $mahasiswa->count();
@@ -23,19 +34,16 @@ class DashboardController extends Controller
         $persentaseLaki = ($jumlahMahasiswa > 0) ? ($jumlahGenderLaki / $jumlahMahasiswa) * 100 : 0;
         $persentasePerempuan = ($jumlahMahasiswa > 0) ? ($jumlahGenderPerempuan / $jumlahMahasiswa) * 100 : 0;
 
-        $semesters = Semester::orderBy('id')->get();
-
         $mahasiswaPerSemester = User::with('semester')
             ->where('role', 'mahasiswa')
             ->whereNotNull('id_semester')
             ->get()
-            ->groupBy(fn($user) => optional($user->semester)->semester_name)
+            ->groupBy(fn($user) => optional($user->semester)->display_name)
             ->map(fn($group) => $group->count());
 
-        // Final output: key = angka semester, value = jumlah mahasiswa
         $jumlahMahasiswaPerSemester = $semesters->mapWithKeys(function ($semester) use ($mahasiswaPerSemester) {
-            $angkaSemester = (int) filter_var($semester->semester_name, FILTER_SANITIZE_NUMBER_INT);
-            $jumlah = $mahasiswaPerSemester->get($semester->semester_name, 0);
+            $angkaSemester = (int) filter_var($semester->display_name, FILTER_SANITIZE_NUMBER_INT);
+            $jumlah = $mahasiswaPerSemester->get($semester->display_name, 0);
             return [$angkaSemester => $jumlah];
         });
 

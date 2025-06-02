@@ -19,8 +19,26 @@ class RfidController extends Controller
     // Menampilkan daftar mahasiswa
     public function index(Request $request)
     {
+        $allSemestersForFilter = Semester::all(); // Ambil semua semester
+
+        $semesters = $allSemestersForFilter->sortBy(function ($semester) {
+            // Ekstrak angka dari string display_name, contoh "Semester 5" -> 5
+            // Menggunakan regular expression untuk mengambil angka di akhir string
+            if (preg_match('/(\d+)$/', $semester->display_name, $matches)) {
+                return (int) $matches[1]; // Kembalikan angka sebagai integer
+            }
+            // Jika format tidak cocok atau tidak ada angka, beri nilai default
+            // atau bisa juga berdasarkan kriteria lain jika display_name tidak selalu "Semester X"
+            // Untuk display_name yang tidak mengandung angka di akhir, mereka akan dikelompokkan
+            // berdasarkan nilai kembalian ini. PHP_INT_MAX akan menempatkannya di akhir.
+            // Jika display_name bisa null atau kosong, tambahkan pengecekan:
+            if (empty($semester->display_name)) {
+                return PHP_INT_MAX;
+            }
+            // Jika tidak ada angka tapi display_name ada, urutkan secara alfabetis setelah yang berangka
+            return $semester->display_name; // Fallback ke pengurutan string jika tidak ada angka
+        })->values(); // ->values() untuk mereset keys array setelah sorting
         // Ambil seluruh data mahasiswa
-        $semesters = Semester::all();
         $programStudiData = ProgramStudi::all();
         $golonganData = Golongan::select('nama_golongan')
             ->distinct()

@@ -56,7 +56,7 @@
                                     @foreach ($semesters as $semester)
                                         <option value="{{ $semester->id }}"
                                             {{ $user->id_semester == $semester->id ? 'selected' : '' }}>
-                                            {{ $semester->semester_name }}
+                                            {{ $semester->display_name }}
                                         </option>
                                     @endforeach
                                 </select>

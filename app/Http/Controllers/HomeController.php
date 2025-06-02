@@ -34,18 +34,17 @@ class HomeController extends Controller
         $totalBelumPresensiSemua = 0;
         // Mengambil presensi berdasarkan id_prodi yang terhubung ke program_studi
         $presensi = Presensi::with('user', 'jadwalKuliah')
-            ->whereDate('waktu_presensi', Carbon::today())
+            ->where('tanggal', Carbon::today())
             ->orderBy('waktu_presensi', 'desc')
             ->get();
 
         $daftarProdi = $daftarProdi = ProgramStudi::select('id', 'name')->distinct()->get();
-        // dd($daftarProdi);
 
         foreach ($daftarProdi as $programStudi) {
             $totalMahasiswa = User::where('id_prodi', $programStudi->id)->where('role', 'mahasiswa')->count();
-            $sudahPresensi = Presensi::whereDate('waktu_presensi', Carbon::today())
+            $sudahPresensi = Presensi::where('tanggal', Carbon::today())
                 ->whereHas('user', function ($query) use ($programStudi) {
-                    $query->where('id_prodi', $programStudi);
+                    $query->where('id_prodi', $programStudi->id);
                 })
                 ->whereNotNull('id_jadwal_kuliah')
                 ->distinct('user_id')
@@ -74,14 +73,14 @@ class HomeController extends Controller
         $totalBelumPresensiSemua = 0;
         // Mengambil presensi berdasarkan id_prodi yang terhubung ke program_studi
         $presensi = Presensi::with('user', 'jadwalKuliah')
-            ->whereDate('waktu_presensi', Carbon::today())
+            ->where('tanggal', Carbon::today())
             ->orderBy('waktu_presensi', 'desc')
             ->get();
 
         $daftarProdi = $daftarProdi = ProgramStudi::select('id', 'name')->distinct()->get();
         foreach ($daftarProdi as $programStudi) {
             $totalMahasiswa = User::where('id_prodi', $programStudi->id)->where('role', 'mahasiswa')->count();
-            $sudahPresensi = Presensi::whereDate('waktu_presensi', Carbon::today())
+            $sudahPresensi = Presensi::where('tanggal', Carbon::today())
                 ->whereHas('user', function ($query) use ($programStudi) {
                     $query->where('id_prodi', $programStudi->id);
                 })
@@ -115,7 +114,7 @@ class HomeController extends Controller
             'user.programStudi:id,name', // include relasi program studi
             'mataKuliah:id,kode,name',
             'jadwalKuliah:id,hari,jam_mulai,jam_selesai,id_semester,id_ruangan,id_matkul,id_golongan',
-            'jadwalKuliah.semester:id,semester_name',
+            'jadwalKuliah.semester:id,display_name',
             'jadwalKuliah.ruangan:id,name',
             'jadwalKuliah.golongan:id,nama_golongan'
         ])
@@ -124,7 +123,7 @@ class HomeController extends Controller
                     $q->where('name', $programStudi);
                 });
             })
-            ->whereDate('waktu_presensi', Carbon::today())
+            ->where('tanggal', Carbon::today())
             ->where('status', 'Hadir')
             ->orderBy('waktu_presensi', 'desc')
             ->get();
@@ -158,7 +157,7 @@ class HomeController extends Controller
                     'jam_selesai' => $item->jadwalKuliah->jam_selesai ?? null,
                     'semester' => [
                         'id' => $item->jadwalKuliah->semester->id ?? null,
-                        'semester_name' => $item->jadwalKuliah->semester->semester_name ?? null,
+                        'display_name' => $item->jadwalKuliah->semester->display_name ?? null,
                     ],
                     'ruangan' => [
                         'id' => $item->jadwalKuliah->ruangan->id ?? null,
@@ -189,7 +188,7 @@ class HomeController extends Controller
             'user.programStudi:id,name', // include relasi program studi
             'mataKuliah:id,kode,name',
             'jadwalKuliah:id,hari,jam_mulai,jam_selesai,id_semester,id_ruangan,id_matkul,id_golongan',
-            'jadwalKuliah.semester:id,semester_name',
+            'jadwalKuliah.semester:id,display_name',
             'jadwalKuliah.ruangan:id,name',
             'jadwalKuliah.golongan:id,nama_golongan'
         ])
@@ -222,7 +221,7 @@ class HomeController extends Controller
             ->when($mataKuliah, function ($query) use ($mataKuliah) {
                 $query->where('id_matkul', $mataKuliah);
             })
-            ->whereDate('waktu_presensi', today())
+            ->where('tanggal', today())
             ->where('status', 'Hadir')
             ->orderBy('waktu_presensi', 'desc')
             ->get();
@@ -255,7 +254,7 @@ class HomeController extends Controller
                     'jam_selesai' => $item->jadwalKuliah->jam_selesai ?? null,
                     'semester' => [
                         'id' => $item->jadwalKuliah->semester->id ?? null,
-                        'semester_name' => preg_replace('/[^0-9]/', '', $item->jadwalKuliah->semester->semester_name) ?? null,
+                        'display_name' => preg_replace('/[^0-9]/', '', $item->jadwalKuliah->semester->display_name) ?? null,
                     ],
                     'ruangan' => [
                         'id' => $item->jadwalKuliah->ruangan->id ?? null,
@@ -318,7 +317,7 @@ class HomeController extends Controller
             ->when($request->mata_kuliah, function ($query, $matkulId) {
                 $query->where('id_matkul', $matkulId);
             })
-            ->whereDate('waktu_presensi', today())
+            ->where('tanggal', today())
             ->where('status', 'Hadir')
             ->orderBy('waktu_presensi', 'asc')
             ->get()
@@ -328,7 +327,18 @@ class HomeController extends Controller
         $golonganOptions = Golongan::where('id_prodi', $prodi->id)->get();
         $ruanganOptions = Ruangan::all();
         $mataKuliahOptions = MataKuliah::all();
-        $semesterOptions = Semester::all();
+
+        $allSemestersForFilter = Semester::all(); // Ambil semua semester
+        $semesterOptions = $allSemestersForFilter->sortBy(function ($semesters) {
+            if (preg_match('/(\d+)$/', $semesters->display_name, $matches)) {
+                return (int) $matches[1]; // Kembalikan angka sebagai integer
+            }
+            if (empty($semester->display_name)) {
+                return PHP_INT_MAX;
+            }
+            return $semesters->display_name;
+        })->values();
+        // $semesterOptions = Semester::all();
 
         return view('detail-presensi', compact(
             'presensi',

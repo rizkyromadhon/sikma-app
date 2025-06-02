@@ -17,37 +17,68 @@ class MahasiswaController extends Controller
 {
     public function index(Request $request)
     {
-        $semesters = Semester::all();
+        // Mengambil dan mengurutkan data semester untuk dropdown filter
+        $allSemestersForFilter = Semester::all(); // Ambil semua semester
+
+        $semesters = $allSemestersForFilter->sortBy(function ($semester) {
+            // Ekstrak angka dari string display_name, contoh "Semester 5" -> 5
+            // Menggunakan regular expression untuk mengambil angka di akhir string
+            if (preg_match('/(\d+)$/', $semester->display_name, $matches)) {
+                return (int) $matches[1]; // Kembalikan angka sebagai integer
+            }
+            // Jika format tidak cocok atau tidak ada angka, beri nilai default
+            // atau bisa juga berdasarkan kriteria lain jika display_name tidak selalu "Semester X"
+            // Untuk display_name yang tidak mengandung angka di akhir, mereka akan dikelompokkan
+            // berdasarkan nilai kembalian ini. PHP_INT_MAX akan menempatkannya di akhir.
+            // Jika display_name bisa null atau kosong, tambahkan pengecekan:
+            if (empty($semester->display_name)) {
+                return PHP_INT_MAX;
+            }
+            // Jika tidak ada angka tapi display_name ada, urutkan secara alfabetis setelah yang berangka
+            return $semester->display_name; // Fallback ke pengurutan string jika tidak ada angka
+        })->values(); // ->values() untuk mereset keys array setelah sorting
+
         $programStudiData = ProgramStudi::all();
         $golonganData = Golongan::select('nama_golongan')
             ->distinct()
             ->orderBy('nama_golongan', 'asc')
             ->pluck('nama_golongan');
 
-        $mahasiswa = User::where('role', 'mahasiswa')
+        $mahasiswaQuery = User::where('role', 'mahasiswa')
             ->whereNotNull('id_prodi')
             ->whereNotNull('id_semester')
-            ->whereNotNull('id_golongan')
-            ->when($request->filled('semester') && $request->semester !== 'all', function ($query) use ($request) {
-                $query->where('id_semester', $request->semester);
-            })
-            ->when($request->filled('program_studi') && $request->program_studi !== 'all', function ($query) use ($request) {
-                $query->where('id_prodi', $request->program_studi);
-            })
-            ->when($request->filled('golongan') && $request->golongan !== 'all', function ($query) use ($request) {
-                $query->whereHas('golongan', function ($q) use ($request) {
-                    $q->where('nama_golongan', $request->golongan);
-                });
-            })
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $query->where('nim', $request->search);
-            })
-            ->with(['programStudi', 'semester', 'golongan']) // tambahkan eager loading
-            ->orderBy('id_prodi', 'asc')
-            ->orderBy('id_semester', 'asc')
+            ->whereNotNull('id_golongan');
+
+        if ($request->filled('semester') && $request->semester !== 'all') {
+            $mahasiswaQuery->where('id_semester', $request->semester);
+        }
+
+        if ($request->filled('program_studi') && $request->program_studi !== 'all') {
+            $mahasiswaQuery->where('id_prodi', $request->program_studi);
+        }
+
+        if ($request->filled('golongan') && $request->golongan !== 'all') {
+            $mahasiswaQuery->whereHas('golongan', function ($q) use ($request) {
+                $q->where('nama_golongan', $request->golongan);
+            });
+        }
+
+        if ($request->filled('search')) {
+            // Asumsi search berdasarkan NIM, nama, atau field lain yang relevan
+            $searchTerm = $request->search;
+            $mahasiswaQuery->where(function ($query) use ($searchTerm) {
+                $query->where('nim', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('name', 'like', '%' . $searchTerm . '%');
+                // Tambahkan field lain jika perlu ->orWhere('email', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        $mahasiswa = $mahasiswaQuery->with(['programStudi', 'semester', 'golongan'])
+            ->orderBy('id_prodi', 'asc') // Pertimbangkan urutan yang lebih intuitif
+            ->orderBy('id_semester', 'asc') // Mungkin ingin urutan berdasarkan tahun ajaran semester
             ->orderBy('name', 'asc')
-            ->orderBy('id_golongan', 'asc')
-            ->paginate(9)
+            // ->orderBy('id_golongan', 'asc') // Urutan golongan mungkin tidak terlalu signifikan di sini
+            ->paginate(9) // Anda bisa menyesuaikan jumlah item per halaman
             ->appends($request->query());
 
         AlatPresensi::where('id', 1)->update(['mode' => 'attendance']);
@@ -58,7 +89,17 @@ class MahasiswaController extends Controller
 
     public function create()
     {
-        $semesters = Semester::all();
+        $allSemestersForFilter = Semester::all(); // Ambil semua semester
+
+        $semesters = $allSemestersForFilter->sortBy(function ($semester) {
+            if (preg_match('/(\d+)$/', $semester->display_name, $matches)) {
+                return (int) $matches[1]; // Kembalikan angka sebagai integer
+            }
+            if (empty($semester->display_name)) {
+                return PHP_INT_MAX;
+            }
+            return $semester->display_name; 
+        })->values(); 
         $programStudi = ProgramStudi::all();
         $golonganData = Golongan::orderBy('nama_golongan')->get()->groupBy('id_prodi');
 
@@ -119,11 +160,20 @@ class MahasiswaController extends Controller
 
     public function edit($id)
     {
+        $allSemestersForFilter = Semester::all(); // Ambil semua semester
+
+        $semesters = $allSemestersForFilter->sortBy(function ($semester) {
+            if (preg_match('/(\d+)$/', $semester->display_name, $matches)) {
+                return (int) $matches[1]; // Kembalikan angka sebagai integer
+            }
+            if (empty($semester->display_name)) {
+                return PHP_INT_MAX;
+            }
+            return $semester->display_name; // Fallback ke pengurutan string jika tidak ada angka
+        })->values(); // ->values() untuk mereset keys array setelah sorting
         $user = User::where('role', 'mahasiswa')->where('id', $id)->first();
-        $semesters = Semester::all();
         $programStudi = ProgramStudi::all();
 
-        // Filter Golongan berdasarkan Program Studi yang terpilih
         $golonganData = Golongan::where('id_prodi', $user->id_prodi)->get();
 
         return view('admin.mahasiswa.edit', compact('user', 'semesters', 'programStudi', 'golonganData'));

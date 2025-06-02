@@ -31,15 +31,12 @@
         <div class="px-4 pb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div
-                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in">
-                    <div class="flex items-center justify-between">
+                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in flex items-center justify-between gap-8">
+                    <div class="flex items-center justify-between w-full">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Mahasiswa</p>
                             <p class="text-3xl font-bold text-gray-900 mt-2" x-text="stats.totalMahasiswa"></p>
-                            <div class="flex items-center mt-2">
-                                <i class="fas fa-arrow-up text-green-500 text-xs mr-1"></i>
-                                <p class="text-sm text-green-600">+12% dari tahun lalu</p>
-                            </div>
+
                         </div>
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 px-[18px] py-[15px] rounded-full shadow-lg">
                             <i class="fas fa-user-graduate text-2xl text-white"></i>
@@ -151,7 +148,7 @@
                             class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
                             <option value="">Semua Semester</option>
                             <template x-for="semester in semesters" :key="semester.id">
-                                <option :value="semester.id" x-text="semester.semester_name"></option>
+                                <option :value="semester.id" x-text="semester.display_name"></option>
                             </template>
                         </select>
                     </div>
@@ -278,10 +275,10 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-white px-6 py-3 border-t border-gray-200" x-show="pagination.totalPages > 1">
+                <div class="bg-white px-6 py-3 border-t border-gray-200"
+                    x-show="pagination.totalItems > 0 && students.length > 0">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-sm text-gray-700">Tampilkan</span>
+                        <div class="flex items-center space-x-2"> <span class="text-sm text-gray-700">Tampilkan</span>
                             <select x-model="pagination.perPage" @change="applyFilters()"
                                 class="border border-gray-300 rounded px-2 py-1 text-sm">
                                 <option value="10">10</option>
@@ -291,7 +288,7 @@
                             </select>
                             <span class="text-sm text-gray-700">per halaman</span>
                         </div>
-                        <div class="flex items-center space-x-1">
+                        <div class="flex items-center space-x-1" x-show="pagination.totalPages > 1">
                             <button @click="changePage(pagination.currentPage - 1)" :disabled="pagination.currentPage <= 1"
                                 :class="pagination.currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'"
                                 class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 transition-colors duration-200">
@@ -313,14 +310,14 @@
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-gray-500 mt-2 text-right">
+                    <div class="text-sm text-gray-500 mt-2 text-right"
+                        x-show="pagination.totalItems > 0 && students.length > 0">
                         Menampilkan <span x-text="pagination.from"></span> sampai <span x-text="pagination.to"></span>
                         dari <span x-text="pagination.totalItems"></span> hasil
                     </div>
                 </div>
             </div>
 
-            {{-- Bagian Tren Kehadiran, Top Students, Aktivitas Terbaru Tetap Sama --}}
             <div class="flex flex-col lg:flex-row gap-6">
                 <div class="lg:w-2/3">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 w-full">
@@ -354,19 +351,39 @@
 
                 <div class="lg:w-1/3 flex flex-col gap-6">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1">
-                        <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-white">
-                            <h3 class="text-md font-semibold text-gray-900 flex items-center gap-4">
-                                <i class="fas fa-trophy text-yellow-500"></i>
-                                Kehadiran Terbaik (Placeholder)
+                        <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-teal-50">
+                            <h3 class="text-md font-semibold text-gray-900 flex items-center gap-3">
+                                <i class="fas fa-trophy text-yellow-500 text-lg"></i>
+                                Kehadiran Terbaik Mahasiswa (Top 10)
                             </h3>
                         </div>
-                        <div class="p-4 space-y-3 max-h-64 overflow-y-auto">
-                            <template x-if="topStudents.length === 0">
+                        <div class="p-4 space-y-2 max-h-96 overflow-y-auto pretty-scrollbar">
+                            <template x-if="!topStudents || topStudents.length === 0">
                                 <p class="text-sm text-gray-500 text-center py-4">Data kehadiran terbaik belum tersedia.
                                 </p>
                             </template>
                             <template x-for="(student, index) in topStudents" :key="student.id">
-                                {{-- Konten Top Student akan dirender di sini jika ada data --}}
+                                <div
+                                    class="flex items-center justify-between p-3 hover:bg-gray-100/80 rounded-lg transition-colors duration-150 ease-in-out">
+                                    <div class="flex items-center">
+                                        <span class="text-xs font-semibold text-gray-500 w-7 text-center mr-2 tabular-nums"
+                                            x-text="index + 1 + '.'"></span>
+                                        <div class="h-9 w-9 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-semibold mr-3 flex-shrink-0"
+                                            x-text="student.initials ? student.initials : (student.name ? student.name.substring(0,1).toUpperCase() : '?')">
+                                        </div>
+                                        <div class="flex-grow">
+                                            <p class="text-sm text-gray-800 font-semibold leading-tight"
+                                                x-text="student.name"></p>
+                                            <p class="text-xs text-gray-500 leading-tight" x-text="student.nim"></p>
+                                            <p class="text-xs text-teal-700 leading-tight"
+                                                x-text="'Hadir: ' + student.hadir_count + ' dari ' + student.total_relevant_days + ' hari relevan'">
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-bold text-green-600 tabular-nums"
+                                        x-text="parseFloat(student.attendance_percentage).toFixed(1) + '%'">
+                                    </span>
+                                </div>
                             </template>
                         </div>
                     </div>
@@ -585,7 +602,7 @@
                             class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
                             <option value="">Semua Semester</option>
                             <template x-for="semester in semesters" :key="semester.id">
-                                <option :value="semester.id" x-text="semester.semester_name"></option>
+                                <option :value="semester.id" x-text="semester.display_name"></option>
                             </template>
                         </select>
                     </div>
@@ -676,7 +693,7 @@
                         <select id="exportSemester" x-model="exportFilters.semester" @change="updateMonthRangeOptions()"
                             class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
                             <template x-for="semester in semesters" :key="semester.id">
-                                <option :value="semester.id" x-text="semester.semester_name"></option>
+                                <option :value="semester.id" x-text="semester.display_name"></option>
                             </template>
                         </select>
                     </div>
@@ -803,7 +820,7 @@
 
                     if (!currentSemesterIsValidForExcel) {
                         if (this.semesters.length > 0) {
-                            const semester1 = this.semesters.find(s => s.semester_name === 'Semester 1');
+                            const semester1 = this.semesters.find(s => s.display_name === 'Semester 1');
                             if (semester1) {
                                 this.exportFilters.semester = semester1.id;
                             } else {
@@ -822,7 +839,7 @@
                         this.loadServerData();
                         this.$nextTick(() => {
                             if (this.semesters.length > 0) {
-                                const semester1 = this.semesters.find(s => s.semester_name === 'Semester 1');
+                                const semester1 = this.semesters.find(s => s.display_name === 'Semester 1');
 
                                 if (semester1) {
                                     this.exportFilters.semester = semester1.id;
@@ -853,6 +870,12 @@
 
                     @if (isset($semesters))
                         this.semesters = @json($semesters);
+                    @endif
+
+                    @if (isset($topStudentsData))
+                        this.topStudents = @json($topStudentsData);
+                    @else
+                        this.topStudents = [];
                     @endif
 
                     this.stats = {
@@ -949,14 +972,6 @@
                         .substring(0, 2);
                 },
 
-                async loadTopStudents() {
-                    // Placeholder - Implement API call if needed
-                    this.topStudents = [{
-                        id: 1,
-                        name: 'Student A',
-                        attendance: 98
-                    }, ];
-                },
 
                 async loadRecentActivities() {
                     // Placeholder - Implement API call if needed
@@ -1123,16 +1138,14 @@
                 },
 
                 updateMonthRangeOptions() {
-                    this.exportFilters.monthFrom = ''; // Reset current month selection
-                    this.exportFilters.monthTo = ''; // Reset current month selection
+                    this.exportFilters.monthFrom = '';
+                    this.exportFilters.monthTo = '';
 
-                    // If a semester is selected, try to set default month range to the semester's full range
                     if (this.exportFilters.semester) {
                         const selectedSemester = this.semesters.find(s => s.id == this.exportFilters.semester);
-                        if (selectedSemester) {
-                            // Extract month number from date string
-                            const startMonthNum = new Date(selectedSemester.start_month).getMonth() + 1;
-                            const endMonthNum = new Date(selectedSemester.end_month).getMonth() + 1;
+                        if (selectedSemester && selectedSemester.start_date && selectedSemester.end_date) {
+                            const startMonthNum = new Date(selectedSemester.start_date).getMonth() + 1;
+                            const endMonthNum = new Date(selectedSemester.end_date).getMonth() + 1;
 
                             this.exportFilters.monthFrom = startMonthNum;
                             this.exportFilters.monthTo = endMonthNum;
@@ -1141,24 +1154,23 @@
                 },
 
                 getMinMonth() {
-                    if (!this.exportFilters.semester) return 1; // If no semester selected, allow all months (1-12)
+                    if (!this.exportFilters.semester) return 1;
                     const selectedSemester = this.semesters.find(s => s.id == this.exportFilters.semester);
-                    // Extract month number from date string
-                    return selectedSemester ? new Date(selectedSemester.start_month).getMonth() + 1 : 1;
+                    // Pastikan start_date ada sebelum mencoba parse
+                    return selectedSemester && selectedSemester.start_date ? new Date(selectedSemester.start_date)
+                        .getMonth() + 1 : 1;
                 },
 
                 getMaxMonth() {
-                    if (!this.exportFilters.semester) return 12; // If no semester selected, allow all months (1-12)
+                    if (!this.exportFilters.semester) return 12;
                     const selectedSemester = this.semesters.find(s => s.id == this.exportFilters.semester);
-                    // Extract month number from date string
-                    return selectedSemester ? new Date(selectedSemester.end_month).getMonth() + 1 : 12;
+                    // Pastikan end_date ada sebelum mencoba parse
+                    return selectedSemester && selectedSemester.end_date ? new Date(selectedSemester.end_date).getMonth() +
+                        1 : 12;
                 },
 
                 get filteredMonthOptions() {
-                    const minMonth = this.getMinMonth();
-                    const maxMonth = this.getMaxMonth();
-
-                    // If no semester is selected, show all months
+                    // Jika tidak ada semester yang dipilih di filter export, tampilkan semua bulan
                     if (!this.exportFilters.semester) {
                         return this.monthNames.map((name, index) => ({
                             name: name,
@@ -1166,13 +1178,51 @@
                         }));
                     }
 
-                    // Otherwise, filter based on min/max month
-                    return this.monthNames.map((name, index) => ({
+                    const selectedSemesterObj = this.semesters.find(s => s.id == this.exportFilters.semester);
+                    // Jika semester yang dipilih tidak ditemukan atau tidak punya tanggal, tampilkan semua bulan sebagai fallback
+                    if (!selectedSemesterObj || !selectedSemesterObj.start_date || !selectedSemesterObj.end_date) {
+                        return this.monthNames.map((name, index) => ({
                             name: name,
                             value: index + 1
-                        }))
-                        .filter(month => month.value >= minMonth && month.value <= maxMonth);
+                        }));
+                    }
+
+                    const minMonth = new Date(selectedSemesterObj.start_date).getMonth() + 1;
+                    const maxMonth = new Date(selectedSemesterObj.end_date).getMonth() + 1;
+
+                    let availableMonths = [];
+
+                    if (minMonth <= maxMonth) {
+                        // Kasus 1: Rentang bulan dalam tahun kalender yang sama (misal: Februari - Juli)
+                        for (let m = minMonth; m <= maxMonth; m++) {
+                            availableMonths.push({
+                                name: this.monthNames[m - 1],
+                                value: m
+                            });
+                        }
+                    } else {
+                        // Kasus 2: Rentang bulan melintasi akhir tahun (misal: Agustus - Januari)
+                        // Bulan dari minMonth hingga Desember
+                        for (let m = minMonth; m <= 12; m++) {
+                            availableMonths.push({
+                                name: this.monthNames[m - 1],
+                                value: m
+                            });
+                        }
+                        // Bulan dari Januari hingga maxMonth
+                        for (let m = 1; m <= maxMonth; m++) {
+                            // Hindari duplikasi jika sudah ada di loop pertama (seharusnya tidak terjadi dengan minMonth > maxMonth)
+                            if (!availableMonths.some(existing => existing.value === m)) {
+                                availableMonths.push({
+                                    name: this.monthNames[m - 1],
+                                    value: m
+                                });
+                            }
+                        }
+                    }
+                    return availableMonths;
                 },
+
 
                 triggerExportPdf() {
                     const params = new URLSearchParams({

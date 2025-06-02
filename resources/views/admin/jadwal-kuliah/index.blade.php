@@ -44,13 +44,17 @@
                             <td class="px-4 py-2 text-center">{{ $data->ruangan->name }}</td>
                             <td class="px-4 py-2 text-center">{{ $data->golongan->nama_golongan }}</td>
                             <td class="px-4 py-2 text-center">{{ $data->prodi->name }}</td>
-                            <td class="px-4 py-2 text-center">{{ explode(' ', $data->semester->semester_name)[1] }}</td>
-                            <td class="px-4 py-2 text-center flex gap-2 items-center justify-center">
-                                <a href="{{ route('admin.jadwal-kuliah.edit', $data->id) }}"
-                                    class="text-sm text-white py-2 rounded-md w-18 bg-gray-800 hover:bg-black transition font-medium">Edit</a>
-                                <button type="button" id="btnDeleteModal{{ $data->id }}"
-                                    class="text-sm text-gray-800 bg-transparent border py-2 w-18 rounded-md hover:bg-gray-800 hover:text-white transition cursor-pointer font-medium">Hapus
-                                </button>
+                            <td class="px-4 py-2 text-center">
+                                {{ $data->semester->display_name ? explode(' ', $data->semester->display_name)[1] : '-' }}
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <a href="{{ route('admin.jadwal-kuliah.edit', $data->id) }}"
+                                        class="text-sm text-white py-2 rounded-md w-18 bg-gray-800 hover:bg-black transition font-medium">Edit</a>
+                                    <button type="button" id="btnDeleteModal{{ $data->id }}"
+                                        class="text-sm text-gray-800 bg-transparent border py-2 w-18 rounded-md hover:bg-gray-800 hover:text-white transition cursor-pointer font-medium">Hapus
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <div class="hidden" id="modalDeleteJadwal{{ $data->id }}">
@@ -60,13 +64,14 @@
                                     <i class="fa-solid fa-triangle-exclamation text-6xl text-red-500 mb-4"></i>
                                     <h1 class="text-center font-medium">Anda yakin ingin menghapus Jadwal Kuliah
                                         <span class="font-bold">{{ $data->mataKuliah->name }} - Semester
-                                            {{ explode(' ', $data->semester->semester_name)[1] }} - Program Studi
+                                            {{ $data->semester->display_name ? explode(' ', $data->semester->display_name)[1] : '-' }}
+                                            - Program Studi
                                             {{ $data->prodi->name }} - Golongan
                                             {{ $data->golongan->nama_golongan }}</span>
                                         ?
                                     </h1>
                                 </div>
-                                <div class="flex gap-2 justify-center">
+                                <div class="flex gap-2 items-center justify-center">
                                     <form action="{{ route('admin.jadwal-kuliah.destroy', $data->id) }}" method="POST"
                                         class="inline">
                                         @csrf
