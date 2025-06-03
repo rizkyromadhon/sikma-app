@@ -7,6 +7,36 @@
 @source "../**/*.js";
 @source "../**/*.vue";
 
+@variant dark (&:is(.dark *));
+
+:root {
+    --color-background: 255 255 255;
+    --color-foreground: 15 23 42;
+    --color-card: 255 255 255;
+    --color-card-foreground: 15 23 42;
+    --color-border: 226 232 240;
+    --color-input: 226 232 240;
+}
+
+.dark {
+    --color-background: 0 0 0;
+    --color-foreground: 248 250 252;
+    --color-card: 15 23 42;
+    --color-card-foreground: 248 250 252;
+    --color-border: 51 65 85;
+    --color-input: 51 65 85;
+}
+
+/* Base styles untuk smooth transition */
+* {
+    border-color: rgb(var(--color-border));
+}
+
+body {
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+}
+
 @layer components {
     .underline-animation {
         @apply relative;
