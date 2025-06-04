@@ -1,27 +1,39 @@
 <x-layout>
-    {{-- <x-slot:title>{{ $title }}</x-slot:title> --}}
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Jadwal Kuliah</h1>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 dark-mode-transition mb-6">Jadwal Kuliah</h1>
         @auth
             @if (auth()->user()->role === 'admin')
-                <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md shadow-md">
+                <div
+                    class="bg-yellow-100 dark:bg-yellow-900/50 dark:backdrop-blur-sm border border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-100 dark-mode-transition px-4 py-3 rounded-md shadow-md">
                     <strong>Info:</strong> Admin Program Studi tidak memiliki Jadwal Kuliah.
                 </div>
             @else
-                <div class="overflow-x-auto bg-white rounded-xl shadow">
+                <div
+                    class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-100 rounded-xl shadow">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
+                        <thead class="bg-gray-100 dark:bg-black/60 dark-mode-transition">
                             <tr>
-                                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">Hari</th>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Mata Kuliah
+                                <th
+                                    class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-100 dark-mode-transition uppercase">
+                                    Hari</th>
+                                <th
+                                    class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-100 dark-mode-transition uppercase">
+                                    Mata Kuliah
                                 </th>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Dosen</th>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Jam</th>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Ruangan</th>
+                                <th
+                                    class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-100 dark-mode-transition uppercase">
+                                    Dosen</th>
+                                <th
+                                    class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-100 dark-mode-transition uppercase">
+                                    Jam</th>
+                                <th
+                                    class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-100 dark-mode-transition uppercase">
+                                    Ruangan</th>
                             </tr>
                         </thead>
 
-                        <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
+                        <tbody
+                            class="bg-white dark:bg-black/20 divide-y divide-gray-200 dark:divide-gray-100 text-sm text-gray-800 dark:text-gray-100 dark-mode-transition">
                             @forelse ($jadwalGrouped as $hari => $items)
                                 @foreach ($items as $index => $item)
                                     <tr>
@@ -40,7 +52,10 @@
                                 @endforeach
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-4 text-gray-500">Tidak ada jadwal kuliah untuk
+                                    <td colspan="5"
+                                        class="text-center py-4 text-gray-500 dark:text-gray-100 dark-mode-transition">Tidak
+                                        ada
+                                        jadwal kuliah untuk
                                         semester ini.</td>
                                 </tr>
                             @endforelse
@@ -51,8 +66,10 @@
         @endauth
 
         @guest
-            <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded-md shadow-md">
-                <strong>Info:</strong> Silahkan <a href="{{ route('login') }}" class="text-blue-600 underline">login</a>
+            <div
+                class="bg-yellow-100 dark:bg-yellow-900/50 dark:backdrop-blur-sm border border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-100 dark-mode-transition px-4 py-3 rounded-md shadow-md">
+                <strong>Info:</strong> Silahkan <a href="{{ route('login') }}"
+                    class="text-blue-600 dark:text-blue-400 dark-mode-transition underline">login</a>
                 untuk melihat jadwal kuliah anda.
             </div>
         @endguest

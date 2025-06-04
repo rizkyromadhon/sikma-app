@@ -37,6 +37,52 @@ body {
     color: rgb(var(--color-foreground));
 }
 
+/* Untuk browser berbasis Webkit (Chrome, Safari, Edge, Opera) */
+.custom-scrollbar::-webkit-scrollbar {
+    @apply w-2; /* Lebar scrollbar, contoh: 8px. Sesuaikan jika perlu (w-1.5, w-2.5, dll.) */
+}
+
+/* Track (latar belakang scrollbar) */
+.custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-100; /* Warna track di mode terang */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-800; /* Warna track di mode gelap (INI YANG ANDA INGIN UBAH) */
+    /* Anda bisa menggunakan warna lain seperti bg-gray-700 atau bg-slate-700 */
+}
+
+/* Thumb (bagian yang bisa digeser) */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 rounded-full; /* Warna thumb di mode terang */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-500 rounded-full; /* Warna thumb di mode gelap */
+}
+
+/* Thumb saat di-hover */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400;
+}
+
+/* Untuk Firefox */
+.custom-scrollbar {
+    scrollbar-width: thin; /* Bisa juga 'auto' atau 'none' */
+    /* Format: scrollbar-color: [warna_thumb] [warna_track]; */
+    scrollbar-color: theme("colors.gray.400") theme("colors.gray.100"); /* Mode terang */
+}
+
+.dark .custom-scrollbar {
+    /* Format: scrollbar-color: [warna_thumb] [warna_track_gelap]; */
+    scrollbar-color: theme("colors.gray.500") theme("colors.gray.800"); /* Mode gelap (INI YANG ANDA INGIN UBAH UNTUK TRACK) */
+    /* Sesuaikan theme('colors.gray.800') dengan warna track gelap yang Anda inginkan */
+}
+
 @layer components {
     .underline-animation {
         @apply relative;

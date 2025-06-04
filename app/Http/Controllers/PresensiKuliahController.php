@@ -11,7 +11,6 @@ use App\Models\MataKuliah;
 use App\Models\JadwalKuliah;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
-// use Illuminate\Container\Attributes\Log;
 use App\Events\PresensiCreated;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +24,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class PresensiKuliahController extends Controller
 {
+    // Perbaikan untuk method index dengan logika minggu dimulai dari Senin pertama
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -49,31 +49,65 @@ class PresensiKuliahController extends Controller
             // Ambil mata kuliah yang dipilih oleh user (jika ada)
             $mataKuliahSelected = $request->input('mata_kuliah');
 
-            // Hitung minggu keberapa hari ini dalam bulan yang dipilih
-            $tanggalHariIni = Carbon::now();
-            $mingguSaatIni = Carbon::now()->weekOfMonth;
-
-            // Ambil minggu dari request, atau default ke minggu saat ini
-            $mingguRequest = (int) $request->input('minggu', $mingguSaatIni);
+            // Ambil minggu dari request
+            $mingguRequest = (int) $request->input('minggu');
 
             // Ambil presensi berdasarkan filter bulan, minggu, dan mata kuliah
             $presensiQuery = Presensi::with(['user', 'jadwalKuliah', 'mataKuliah'])
                 ->where('user_id', $userId)
-                ->whereMonth('tanggal', $bulanSekarang);
+                ->whereMonth('tanggal', $bulanSekarang)
+                ->orderBy('tanggal', 'asc');
 
             // Tambahkan filter mata kuliah jika dipilih
             if ($mataKuliahSelected) {
                 $presensiQuery->where('id_matkul', $mataKuliahSelected);
             }
 
+            // Filter berdasarkan minggu jika dipilih
             if ($mingguRequest) {
-                $tanggalAwal = Carbon::create(null, $bulanSekarang, 1)->startOfMonth();
-                $tanggalAkhir = $tanggalAwal->copy()->addWeeks($mingguRequest - 1)->endOfWeek();
-                $presensiQuery->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
+                $tahunSekarang = Carbon::now()->year;
+
+                // Ambil tanggal 1 bulan yang dipilih
+                $tanggal1 = Carbon::create($tahunSekarang, $bulanSekarang, 1);
+
+                // Cari Senin pertama dalam bulan tersebut
+                $seninPertama = $tanggal1->copy();
+
+                // Jika tanggal 1 bukan Senin, cari Senin berikutnya
+                if ($seninPertama->dayOfWeek != Carbon::MONDAY) {
+                    $seninPertama = $seninPertama->next(Carbon::MONDAY);
+                }
+
+                // Pastikan Senin pertama masih dalam bulan yang sama
+                if ($seninPertama->month != $bulanSekarang) {
+                    // Jika tidak ada Senin dalam bulan ini, return empty
+                    $presensiQuery->whereRaw('1 = 0'); // Kondisi yang selalu false
+                } else {
+                    // Hitung minggu ke-N dari Senin pertama
+                    $tanggalMulaiMinggu = $seninPertama->copy()->addWeeks($mingguRequest - 1);
+                    $tanggalAkhirMinggu = $tanggalMulaiMinggu->copy()->addDays(6); // Senin sampai Minggu
+
+                    // Pastikan masih dalam bulan yang sama
+                    $akhirBulan = Carbon::create($tahunSekarang, $bulanSekarang, 1)->endOfMonth();
+
+                    if ($tanggalMulaiMinggu->month == $bulanSekarang) {
+                        // Pastikan tanggal akhir tidak melewati akhir bulan
+                        if ($tanggalAkhirMinggu->gt($akhirBulan)) {
+                            $tanggalAkhirMinggu = $akhirBulan;
+                        }
+
+                        $presensiQuery->whereBetween('tanggal', [
+                            $tanggalMulaiMinggu->format('Y-m-d'),
+                            $tanggalAkhirMinggu->format('Y-m-d')
+                        ]);
+                    } else {
+                        // Jika minggu yang diminta sudah keluar dari bulan, return empty
+                        $presensiQuery->whereRaw('1 = 0');
+                    }
+                }
             }
 
             $presensi = $presensiQuery->get();
-
             $mata_kuliah = MataKuliah::with('presensi')->get();
 
             // Mengelompokkan presensi berdasarkan tanggal
@@ -92,6 +126,8 @@ class PresensiKuliahController extends Controller
             'mingguRequest' => $mingguRequest
         ]);
     }
+
+    // Perbaikan untuk method ajaxFilter dengan logika minggu dimulai dari Senin pertama
     public function ajaxFilter(Request $request)
     {
         $user = Auth::user();
@@ -103,21 +139,60 @@ class PresensiKuliahController extends Controller
 
         $bulanRequest = (int) $request->input('bulan', $bulanPilihan[0]);
         $bulanSekarang = in_array($bulanRequest, $bulanPilihan) ? $bulanRequest : $bulanPilihan[0];
-        $mingguRequest = (int) $request->input('minggu', Carbon::now()->weekOfMonth);
+        $mingguRequest = (int) $request->input('minggu');
         $mataKuliahSelected = $request->input('mata_kuliah');
 
         $presensiQuery = Presensi::with('mataKuliah')
             ->where('user_id', $userId)
-            ->whereMonth('tanggal', $bulanSekarang);
+            ->whereMonth('tanggal', $bulanSekarang)
+            ->orderBy('tanggal', 'asc');
 
         if ($mataKuliahSelected) {
             $presensiQuery->where('id_matkul', $mataKuliahSelected);
         }
 
+        // Filter berdasarkan minggu jika dipilih
         if ($mingguRequest) {
-            $tanggalAwal = Carbon::create(null, $bulanSekarang, 1)->startOfMonth();
-            $tanggalAkhir = $tanggalAwal->copy()->addWeeks($mingguRequest - 1)->endOfWeek();
-            $presensiQuery->whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
+            $tahunSekarang = Carbon::now()->year;
+
+            // Ambil tanggal 1 bulan yang dipilih
+            $tanggal1 = Carbon::create($tahunSekarang, $bulanSekarang, 1);
+
+            // Cari Senin pertama dalam bulan tersebut
+            $seninPertama = $tanggal1->copy();
+
+            // Jika tanggal 1 bukan Senin, cari Senin berikutnya
+            if ($seninPertama->dayOfWeek != Carbon::MONDAY) {
+                $seninPertama = $seninPertama->next(Carbon::MONDAY);
+            }
+
+            // Pastikan Senin pertama masih dalam bulan yang sama
+            if ($seninPertama->month != $bulanSekarang) {
+                // Jika tidak ada Senin dalam bulan ini, return empty
+                $presensiQuery->whereRaw('1 = 0'); // Kondisi yang selalu false
+            } else {
+                // Hitung minggu ke-N dari Senin pertama
+                $tanggalMulaiMinggu = $seninPertama->copy()->addWeeks($mingguRequest - 1);
+                $tanggalAkhirMinggu = $tanggalMulaiMinggu->copy()->addDays(6); // Senin sampai Minggu
+
+                // Pastikan masih dalam bulan yang sama
+                $akhirBulan = Carbon::create($tahunSekarang, $bulanSekarang, 1)->endOfMonth();
+
+                if ($tanggalMulaiMinggu->month == $bulanSekarang) {
+                    // Pastikan tanggal akhir tidak melewati akhir bulan
+                    if ($tanggalAkhirMinggu->gt($akhirBulan)) {
+                        $tanggalAkhirMinggu = $akhirBulan;
+                    }
+
+                    $presensiQuery->whereBetween('tanggal', [
+                        $tanggalMulaiMinggu->format('Y-m-d'),
+                        $tanggalAkhirMinggu->format('Y-m-d')
+                    ]);
+                } else {
+                    // Jika minggu yang diminta sudah keluar dari bulan, return empty
+                    $presensiQuery->whereRaw('1 = 0');
+                }
+            }
         }
 
         $presensi = $presensiQuery->get();
@@ -135,83 +210,6 @@ class PresensiKuliahController extends Controller
 
         return response()->json($result);
     }
-
-    // public function store(Request $request)
-    // {
-    //     // $uid = $request->input('uid');
-    //     $validated = $request->validate([
-    //         // 'id' => 'required',
-    //         'uid' => 'required'
-    //     ]);
-
-    //     $userUid = $validated['uid'];
-    //     $user = User::where('role', 'mahasiswa')->where('uid', $userUid)->first();
-    //     // $user = User::findOrFail($userId);
-    //     $parts = explode(' ', trim($user->name));
-    //     $lastName = end($parts);
-    //     $now = Carbon::now();
-    //     $hari = $now->translatedFormat('l');
-    //     $jam = $now->format('H:i:s');
-    //     $tanggal = now()->format('Y-m-d');
-
-    //     if (!$user) {
-    //         return response()->json([
-    //             'message' => 'User tidak terdaftar'
-    //         ], 404);
-    //     }
-
-    //     $jadwal = JadwalKuliah::where('id_prodi', $user->id_prodi)
-    //         ->where('id_golongan', $user->id_golongan)
-    //         ->where('id_semester', $user->id_semester)
-    //         ->where('hari', $hari)
-    //         ->whereTime('jam_mulai', '<=', $jam)
-    //         ->whereTime('jam_selesai', '>=', $jam)
-    //         ->orderBy('jam_mulai', 'desc') // untuk berjaga kalau ada dua jadwal yang tumpang tindih
-    //         ->first();
-
-    //     if (!$jadwal) {
-    //         return response()->json([
-    //             'message' => 'Maaf ' . $lastName . ', tidak ada jadwal kuliah saat ini.'
-    //         ], 400);
-    //     }
-    //     $toleransi = Carbon::parse($jadwal->jam_mulai)->addMinutes(15)->format('H:i:s');
-
-    //     if ($now->greaterThan($toleransi)) {
-    //         return response()->json([
-    //             'message' => 'Maaf ' . $lastName . ', Anda terlambat.'
-    //         ], 400);
-    //     } else {
-    //         // Cek apakah sudah presensi sebelumnya
-    //         $sudahPresensi = Presensi::where('user_id', $user->id)
-    //             ->where('id_jadwal_kuliah', $jadwal->id)
-    //             ->where('tanggal', $tanggal)
-    //             ->exists();
-
-    //         if ($sudahPresensi) {
-    //             return response()->json([
-    //                 'message' => 'Maaf ' . $lastName . ', Anda sudah presensi untuk jadwal ini.'
-    //             ], 400);
-    //         }
-
-    //         // Simpan presensi
-    //         $presensi = Presensi::create([
-    //             'user_id' => $user->id,
-    //             'id_matkul' => $jadwal->id_matkul,
-    //             'id_jadwal_kuliah' => $jadwal->id,
-    //             'waktu_presensi' => now(),
-    //             'tanggal' => today(),
-    //             'status' => 'Hadir'
-    //         ]);
-
-
-    //         broadcast(new PresensiCreated($presensi))->toOthers();
-
-    //         return response()->json([
-    //             'message' => 'Hai ' . $lastName  . ', Berhasil melakukan presensi.'
-    //         ], 200);
-    //     }
-    // }
-
 
     public function store(Request $request)
     {

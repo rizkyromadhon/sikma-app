@@ -19,8 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Browsershot\Browsershot;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel; // Import Excel Facade
-use App\Exports\RekapitulasiKehadiranExport; // Import Export Class Anda
+use Maatwebsite\Excel\Facades\Excel; 
+use App\Exports\RekapitulasiKehadiranExport; 
 
 class RekapitulasiController extends Controller
 {
@@ -30,7 +30,7 @@ class RekapitulasiController extends Controller
 
         $semesters = $allSemestersForFilter->sortBy(function ($semester) {
             if (preg_match('/(\d+)$/', $semester->display_name, $matches)) {
-                return (int) $matches[1]; // Kembalikan angka sebagai integer
+                return (int) $matches[1]; 
             }
             if (empty($semester->display_name)) {
                 return PHP_INT_MAX;
@@ -40,7 +40,7 @@ class RekapitulasiController extends Controller
         $today = Carbon::today();
         $mahasiswaQuery = User::where('role', 'Mahasiswa');
         $totalMahasiswa = $mahasiswaQuery->count();
-        $mahasiswaIds = $mahasiswaQuery->pluck('id')->all(); // Ensure it's an array for whereIn
+        $mahasiswaIds = $mahasiswaQuery->pluck('id')->all(); 
 
         $allPresensiTodayForStudents = Presensi::whereIn('user_id', $mahasiswaIds)
             ->whereDate('tanggal', $today)

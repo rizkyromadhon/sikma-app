@@ -1201,8 +1201,6 @@
                             });
                         }
                     } else {
-                        // Kasus 2: Rentang bulan melintasi akhir tahun (misal: Agustus - Januari)
-                        // Bulan dari minMonth hingga Desember
                         for (let m = minMonth; m <= 12; m++) {
                             availableMonths.push({
                                 name: this.monthNames[m - 1],

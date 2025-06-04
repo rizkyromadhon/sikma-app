@@ -6,6 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <script>
+        (function() {
+            let applyDark;
+            const storedPreference = localStorage.getItem('darkMode');
+
+            if (storedPreference !== null) {
+                applyDark = storedPreference === 'true';
+            } else {
+                applyDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                localStorage.setItem('darkMode', JSON.stringify(applyDark));
+            }
+
+            if (applyDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+
     <title>SIKMA - APP</title>
 
     <!-- Fonts -->
@@ -113,7 +133,7 @@
 
             <!-- Modal Content -->
             <div class="flex items-center justify-center min-h-screen p-4">
-                <div class="relative bg-white dark:bg-gray-900/80 rounded-lg shadow-xl w-[320px] mx-auto backdrop-blur-sm"
+                <div class="relative bg-white dark:bg-gray-900/60 rounded-lg shadow-xl w-[320px] mx-auto backdrop-blur-sm"
                     @click.away="showLogoutConfirm = false" x-show="showLogoutConfirm"
                     x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95"
                     x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150"

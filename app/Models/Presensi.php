@@ -11,7 +11,9 @@ class Presensi extends Model
 
     protected $table = 'presensi_kuliah';
 
-    protected $fillable = ['user_id', 'tanggal', 'id_matkul', 'status', 'keterangan', 'waktu_presensi', 'id_jadwal_kuliah'];
+    // protected $fillable = ['user_id', 'tanggal', 'id_matkul', 'status', 'keterangan', 'waktu_presensi', 'id_jadwal_kuliah'];
+
+    protected $guarded = [];
 
     public $timestamps = false;
 

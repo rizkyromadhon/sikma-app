@@ -32,7 +32,7 @@
 
             <!-- Tombol Hamburger -->
             <div class="flex lg:hidden">
-                <button type="button" @click="open = !open"
+                <button type="button" @click="open = !open" x-cloak
                     class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-gray-100 dark-mode-transition">
                     <span class="sr-only">Open main menu</span>
 
@@ -54,15 +54,15 @@
             <!-- Menu Desktop -->
             <div class="hidden lg:flex lg:gap-x-6 xl:gap-x-12">
                 <a href="/"
-                    class="underline-animation text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition transition-all ease-in-out duration-100">Home</a>
+                    class="text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition hover:text-gray-700 dark:hover:text-gray-300 transition-all ease-in-out duration-100">Home</a>
                 <a href="{{ route('jadwal-kuliah.index') }}"
-                    class="underline-animation text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition transition-all ease-in-out duration-100">Jadwal
+                    class="text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition hover:text-gray-700 dark:hover:text-gray-300 transition-all ease-in-out duration-100">Jadwal
                     Kuliah</a>
                 <a href="/presensi-kuliah?bulan={{ now()->month }}&minggu={{ now()->weekOfMonth }}"
-                    class="underline-animation text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition transition-all ease-in-out duration-100">Presensi
+                    class="text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition hover:text-gray-700 dark:hover:text-gray-300 transition-all ease-in-out duration-100">Presensi
                     Kuliah</a>
                 <a href="{{ route('pusat-bantuan') }}"
-                    class="underline-animation text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition transition-all ease-in-out duration-100">Pusat
+                    class="text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition hover:text-gray-700 dark:hover:text-gray-300 transition-all ease-in-out duration-100">Pusat
                     Bantuan</a>
             </div>
 
@@ -134,7 +134,7 @@
                     </div>
                 @else
                     <a href="/login"
-                        class="underline-animation text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition transition-all ease-in-out duration-100">
+                        class="text-md font-semibold text-gray-900 dark:text-gray-100 dark-mode-transition hover:text-gray-700 dark:hover:text-gray-300 transition-all ease-in-out duration-100">
                         Login <span aria-hidden="true">&rarr;</span>
                     </a>
                 @endauth

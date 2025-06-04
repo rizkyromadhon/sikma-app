@@ -1,11 +1,12 @@
 <x-layout>
     <div class="px-4 md:px-6 py-4">
-        <h1 class="text-xl font-bold text-gray-800 mb-4">
-            <a href="{{ route('home') }}" class="text-black hover:text-gray-700">
+        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200 dark-mode-transition mb-4">
+            <a href="{{ route('home') }}"
+                class="text-black dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-400 transition">
                 <i class="fas fa-arrow-left mr-2"></i> Kembali
             </a>
         </h1>
-        <h1 class="text-xl md:text-2xl font-medium text-gray-800 mb-6">
+        <h1 class="text-xl md:text-2xl font-medium text-gray-800 dark:text-gray-200 dark-mode-transition mb-6">
             Detail Presensi - <strong>Program Studi {{ $program_studi }}</strong>
         </h1>
 
@@ -17,10 +18,13 @@
                         <div class="w-full col-span-1">
                             <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
                             <select name="semester" id="semester" onchange="fetchDataPresensi()"
-                                class="mt-1 block w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
-                                <option value="">Semua Semester</option>
+                                class="mt-1 block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark-mode-transition rounded-md text-sm">
+                                <option value=""
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
+                                    Semua Semester</option>
                                 @foreach ($semesterOptions as $semester)
                                     <option value="{{ $semester->id }}"
+                                        class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
                                         {{ request('semester') == $semester->id ? 'selected' : '' }}>
                                         {{ $semester->display_name }}
                                     </option>
@@ -33,9 +37,12 @@
                             <label for="golongan" class="block text-sm font-medium text-gray-700">Golongan</label>
                             <select name="golongan" id="golongan" onchange="fetchDataPresensi()"
                                 class="mt-1 block w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
-                                <option value="">Semua Golongan</option>
+                                <option value=""
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
+                                    Semua Golongan</option>
                                 @foreach ($golonganOptions as $golongan)
                                     <option value="{{ $golongan->id }}"
+                                        class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
                                         {{ request('golongan') == $golongan->id ? 'selected' : '' }}>
                                         {{ $golongan->nama_golongan }}
                                     </option>
@@ -48,9 +55,12 @@
                             <label for="ruangan" class="block text-sm font-medium text-gray-700">Ruangan</label>
                             <select name="ruangan" id="ruangan" onchange="fetchDataPresensi()"
                                 class="mt-1 block w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
-                                <option value="">Semua Ruangan</option>
+                                <option value=""
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
+                                    Semua Ruangan</option>
                                 @foreach ($ruanganOptions as $ruangan)
                                     <option value="{{ $ruangan->id }}"
+                                        class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
                                         {{ request('ruangan') == $ruangan->id ? 'selected' : '' }}>
                                         {{ $ruangan->name }}
                                     </option>
@@ -63,9 +73,12 @@
                             <label for="mata_kuliah" class="block text-sm font-medium text-gray-700">Mata Kuliah</label>
                             <select name="mata_kuliah" id="mata_kuliah" onchange="fetchDataPresensi()"
                                 class="mt-1 block w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
-                                <option value="">Semua Mata Kuliah</option>
+                                <option value=""
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
+                                    Semua Mata Kuliah</option>
                                 @foreach ($mataKuliahOptions as $mataKuliah)
                                     <option value="{{ $mataKuliah->id }}"
+                                        class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
                                         {{ request('mata_kuliah') == $mataKuliah->id ? 'selected' : '' }}>
                                         {{ $mataKuliah->name }}
                                     </option>
@@ -79,30 +92,50 @@
                 <form id="search-form" class="flex items-center justify-end">
                     <input type="text" name="search" placeholder="Cari Mahasiswa berdasarkan NIM...."
                         id="search-input" value="{{ old('search', request('search')) }}"
-                        class="px-4 py-2 w-full text-sm rounded-full border border-gray-300 focus:outline-none focus:ring focus:ring-gray-700 focus:border-transparent transition md:w-2xs">
+                        class="px-4 py-2 w-full text-sm rounded-full border border-gray-300 focus:outline-none focus:ring focus:ring-gray-700 focus:border-transparent transition md:w-2xs dark:placeholder-gray-300">
                 </form>
             </div>
         </div>
 
-        <div class="overflow-x-auto bg-white rounded-xl shadow mb-5">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-100">
+        <div
+            class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-100 rounded-xl shadow mb-5">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead class="bg-gray-100 dark:bg-black/60 dark-mode-transition">
                     <tr>
-                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700 uppercase">No.</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Nama</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">NIM</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Semester</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Program Studi
+                        <th
+                            class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            No.</th>
+                        <th
+                            class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            Nama</th>
+                        <th
+                            class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            NIM</th>
+                        <th
+                            class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            Semester</th>
+                        <th
+                            class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            Program Studi
                         </th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Golongan</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Mata Kuliah</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Ruangan</th>
-                        <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Waktu Presensi
+                        <th
+                            class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            Golongan</th>
+                        <th
+                            class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            Mata Kuliah</th>
+                        <th
+                            class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            Ruangan</th>
+                        <th
+                            class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            Waktu Presensi
                         </th>
                     </tr>
                 </thead>
 
-                <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
+                <tbody
+                    class="bg-white dark:bg-black/20 divide-y divide-gray-200 dark:divide-gray-100 text-sm text-gray-800 dark:text-gray-100 dark-mode-transition">
                     @forelse ($presensi as $items)
                         @foreach ($items as $index => $item)
                             <tr>

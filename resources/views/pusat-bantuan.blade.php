@@ -1,7 +1,8 @@
 <x-layout>
-    <div class="bg-gray-50 text-gray-800">
+    <div
+        class="bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-600 rounded-md text-gray-800 dark:text-gray-100 dark-mode-transition">
         <!-- Header -->
-        <header class="text-gray-950  py-10 text-center">
+        <header class="text-gray-950 dark:text-gray-100 dark-mode-transition py-10 text-center">
             <h1 class="text-3xl font-bold">Pusat Bantuan</h1>
             <p class="mt-2 text-lg">Temukan Jawaban dan Panduan Seputar Sistem Kehadiran Mahasiswa</p>
         </header>
@@ -18,20 +19,23 @@
                 <label for="search" class="block mb-2 text-xl font-semibold">Cari Pertanyaan</label>
                 <input x-model="searchQuery" id="search" type="text"
                     placeholder="Apa yang saya lakukan apabila Kartu RFID saya hilang?..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-100 focus:outline-none">
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-blue-100 dark:focus:ring-gray-700 focus:outline-none dark:placeholder-gray-300 dark-mode-transition">
             </div>
             <!-- Categories -->
             <h2 class="text-xl font-semibold mb-4">Kategori Bantuan</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div @click="showModalJadwal = true"
-                    class="p-4 py-4 bg-white rounded shadow hover:shadow-md transition cursor-pointer">📋 Jadwal &
+                    class="p-4 py-4 bg-white dark:bg-gray-900/60 rounded shadow hover:shadow-md transition cursor-pointer">
+                    📋 Jadwal &
                     Presensi
                 </div>
                 <div @click="showModalAkun = true"
-                    class="p-4 py-4 bg-white rounded shadow hover:shadow-md transition cursor-pointer">👤 Akun & Profil
+                    class="p-4 py-4 bg-white dark:bg-gray-900/60 rounded shadow hover:shadow-md transition cursor-pointer">
+                    👤 Akun & Profil
                 </div>
                 <div @click="showModalPanduan = true"
-                    class="p-4 py-4 bg-white rounded shadow hover:shadow-md transition cursor-pointer">📝 Panduan
+                    class="p-4 py-4 bg-white dark:bg-gray-900/60 rounded shadow hover:shadow-md transition cursor-pointer">
+                    📝 Panduan
                     Penggunaan
                 </div>
             </div>
@@ -74,7 +78,7 @@
                                     <div class="rounded">
                                         <button
                                             @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
-                                            class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md rounded-md">
+                                            class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 dark:bg-gray-900/60 dark:hover:bg-gray-900 hover:bg-gray-200 font-semibold text-md rounded-t-md dark-mode-transition">
                                             <span x-text="item.id + '. ' + item.question"></span>
                                             <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
                                                 class="w-5 h-5 transition-transform duration-200 text-gray-500"
@@ -84,7 +88,7 @@
                                             </svg>
                                         </button>
                                         <div x-show="openItems.includes(item.id)" x-transition
-                                            class="px-4 py-3 text-sm text-gray-700">
+                                            class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200 bg-gray-100/50 dark:bg-gray-900/40 rounded-b-md dark-mode-transition">
                                             <span x-text="item.answer"></span>
                                         </div>
                                     </div>
@@ -93,12 +97,11 @@
 
                             <!-- Jika tidak ditemukan -->
                             <template x-if="filteredItems.length === 0">
-                                <div class="text-center text-gray-500 py-4 italic">
+                                <div class="text-center text-gray-500 dark:text-gray-200 py-4 italic">
                                     Tidak ada pertanyaan yang cocok dengan pencarian Anda.
                                 </div>
                             </template>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -107,15 +110,16 @@
             <div x-show="showModalJadwal" x-cloak x-transition.opacity.duration.200
                 class="fixed inset-0 z-50 flex items-center justify-center">
                 <!-- Overlay -->
-                <div class="absolute inset-0 bg-black/50" @click="showModalJadwal = false"></div>
+                <div class="absolute inset-0 bg-black/50 dark:bg-black/70 dark-mode-transition"
+                    @click="showModalJadwal = false"></div>
 
                 <!-- Modal Box -->
                 <div x-show="showModalJadwal" x-transition.scale.duration.200
-                    class="relative bg-white w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
+                    class="relative bg-white dark:bg-gray-900/40 backdrop-blur-sm w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
 
                     <!-- Tombol Tutup -->
                     <button @click="showModalJadwal = false"
-                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl z-10">
+                        class="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 dark-mode-transition text-2xl z-10">
                         &times;
                     </button>
 
@@ -125,7 +129,8 @@
                     </div>
 
                     <!-- Konten scrollable -->
-                    <div x-data="{ openItems: [] }" class="px-6 pb-10 max-h-[350px] overflow-y-auto space-y-4 mt-8">
+                    <div x-data="{ openItems: [] }"
+                        class="custom-scrollbar px-6 pb-10 max-h-[350px] overflow-y-auto space-y-4 mt-8">
                         <!-- Accordion -->
                         <template
                             x-for="item in [
@@ -140,18 +145,18 @@
                             <div class="rounded border border-gray-200">
                                 <button
                                     @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
-                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md md:text-xl transition">
+                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 dark:bg-gray-900/60 hover:bg-gray-200 dark:hover:bg-gray-700 font-semibold text-md md:text-xl transition">
                                     <span x-text="item.id + '. ' + item.question"></span>
                                     <!-- Chevron -->
                                     <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
-                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500"
+                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500 dark:text-gray-200"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
                                 <div x-show="openItems.includes(item.id)" x-transition
-                                    class="px-4 py-3 text-sm text-gray-700">
+                                    class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
                                     <span x-text="item.answer"></span>
                                 </div>
                             </div>
@@ -165,15 +170,16 @@
             <div x-show="showModalAkun" x-cloak x-transition.opacity.duration.300
                 class="fixed inset-0 z-50 flex items-center justify-center">
                 <!-- Overlay -->
-                <div class="absolute inset-0 bg-black/50" @click="showModalAkun = false"></div>
+                <div class="absolute inset-0 bg-black/50 dark:bg-black/70 dark-mode-transition"
+                    @click="showModalAkun = false"></div>
 
                 <!-- Modal Box -->
                 <div x-show="showModalAkun" x-transition.scale.duration.300
-                    class="relative bg-white w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
+                    class="relative bg-white dark:bg-gray-900/40 backdrop-blur-sm w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
 
                     <!-- Tombol Tutup -->
                     <button @click="showModalAkun = false"
-                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl z-10">
+                        class="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 dark-mode-transition text-2xl z-10">
                         &times;
                     </button>
 
@@ -183,7 +189,8 @@
                     </div>
 
                     <!-- Konten scrollable -->
-                    <div x-data="{ openItems: [] }" class="px-6 pb-10 max-h-[350px] overflow-y-auto space-y-4 mt-8">
+                    <div x-data="{ openItems: [] }"
+                        class="custom-scrollbar px-6 pb-10 max-h-[350px] overflow-y-auto space-y-4 mt-8">
                         <!-- Accordion -->
                         <template
                             x-for="item in [
@@ -192,21 +199,20 @@
                                 { id: 3, question: 'Bagaimana cara mengedit profil?', answer: 'Untuk mengedit profil, Anda dapat mengunjungi halaman profil pada sistem kehadiran mahasiswa dan mengisi formulir pengeditan profil.' }
                             ]"
                             :key="item.id">
-                            <div class="rounded">
-                                <button
+                            <div class="rounded border border-gray-200 dark:border-gray-700"> <button
                                     @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
-                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md md:text-xl">
+                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 dark:bg-gray-900/60 hover:bg-gray-200 dark:hover:bg-gray-700 font-semibold text-md md:text-xl transition">
                                     <span x-text="item.id + '. ' + item.question"></span>
                                     <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
-                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500"
+                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500 dark:text-gray-200"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
                                 <div x-show="openItems.includes(item.id)" x-transition
-                                    class="px-4 py-3 text-sm text-gray-700">
-                                    <span x-text="item.answer"></span>
+                                    class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200"> <span
+                                        x-text="item.answer"></span>
                                 </div>
                             </div>
                         </template>
@@ -217,15 +223,16 @@
             <div x-show="showModalPanduan" x-cloak x-transition.opacity.duration.200
                 class="fixed inset-0 z-50 flex items-center justify-center">
                 <!-- Overlay -->
-                <div class="absolute inset-0 bg-black/50" @click="showModalPanduan = false"></div>
+                <div class="absolute inset-0 bg-black/50 dark:bg-black/70 dark-mode-transition"
+                    @click="showModalPanduan = false"></div>
 
                 <!-- Modal Box -->
                 <div x-show="showModalPanduan" x-transition.scale.duration.200
-                    class="relative bg-white w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
+                    class="relative bg-white dark:bg-gray-900/40 backdrop-blur-sm w-90 md:w-2xl rounded-md shadow min-h-[500px] z-50">
 
                     <!-- Tombol Tutup -->
                     <button @click="showModalPanduan = false"
-                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl z-10">
+                        class="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 dark-mode-transition text-2xl z-10">
                         &times;
                     </button>
 
@@ -235,7 +242,8 @@
                     </div>
 
                     <!-- Konten scrollable -->
-                    <div x-data="{ openItems: [] }" class="px-6 pb-10 max-h-[350px] overflow-y-auto space-y-4 mt-8">
+                    <div x-data="{ openItems: [] }"
+                        class="custom-scrollbar px-6 pb-10 max-h-[350px] overflow-y-auto space-y-4 mt-8">
                         <!-- Accordion -->
                         <template
                             x-for="item in [
@@ -250,18 +258,18 @@
                             <div class="rounded border border-gray-200">
                                 <button
                                     @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
-                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 font-semibold text-md md:text-xl transition">
+                                    class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 dark:bg-gray-900/60 hover:bg-gray-200 dark:hover:bg-gray-700 font-semibold text-md md:text-xl transition">
                                     <span x-text="item.id + '. ' + item.question"></span>
                                     <!-- Chevron -->
                                     <svg :class="openItems.includes(item.id) ? 'transform rotate-180' : ''"
-                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500"
+                                        class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0 transition-transform duration-200 text-gray-500 dark:text-gray-200"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
                                 <div x-show="openItems.includes(item.id)" x-transition
-                                    class="px-4 py-3 text-sm text-gray-700">
+                                    class="px-4 py-3 text-sm text-gray-700 dark:text-gray-200">
                                     <span x-text="item.answer"></span>
                                 </div>
                             </div>
@@ -273,7 +281,7 @@
 
 
         <!-- Footer -->
-        <footer class="text-center text-sm text-gray-500 py-6">
+        <footer class="text-center text-sm text-gray-500 dark:text-gray-200 py-6">
             &copy; 2025 Sistem Kehadiran Mahasiswa. Semua hak dilindungi.
         </footer>
     </div>
