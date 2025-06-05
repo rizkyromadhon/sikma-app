@@ -149,7 +149,7 @@
                         </div>
 
                         <!-- Message -->
-                        <p class="text-gray-500 dark:text-gray-400 mb-5">Anda yakin ingin logout?</p>
+                        <p class="text-gray-500 dark:text-gray-300 mb-5">Anda yakin ingin logout?</p>
 
                         <!-- Buttons -->
                         <div class="flex justify-end space-x-2">
@@ -230,7 +230,7 @@
                 @auth
                     <div class="mb-4 space-y-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">NIM</label>
-                        <input type="text" name="nim" required readonly placeholder="E32222530"
+                        <input type="text" name="nim" required readonly placeholder="Inputkan NIM anda..."
                             value="{{ Auth::user()->nim }}"
                             class="w-full px-2 py-2 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-300">
                     </div>
@@ -262,7 +262,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">NIM</label>
                         <div class="relative">
                             <input type="text" name="nim" x-model="form.nim" @input="validateNIM()" required
-                                placeholder="E32222530"
+                                placeholder="Inputkan NIM anda..."
                                 class="w-full px-2 py-2 pr-8 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring focus:ring-gray-500 dark:focus:ring-gray-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
 
                             <!-- Loading indicator -->

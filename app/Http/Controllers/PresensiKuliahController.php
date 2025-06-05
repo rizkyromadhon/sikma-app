@@ -226,7 +226,7 @@ class PresensiKuliahController extends Controller
         // Jika user tidak ditemukan
         if (!$user) {
             return response()->json([
-                'message' => 'User tidak terdaftar atau bukan mahasiswa.'
+                'message' => 'User tidak terdaftar.'
             ], 404);
         }
 
@@ -236,7 +236,7 @@ class PresensiKuliahController extends Controller
 
         // Waktu saat ini
         $now = Carbon::now();
-        $hariIni = $now->translatedFormat('l'); // Format hari dalam Bahasa Indonesia (e.g., Senin, Selasa)
+        $hariIni = $now->translatedFormat('l');
         $jamSekarang = $now->format('H:i:s');
         $tanggalSekarang = $now->format('Y-m-d');
 

@@ -2,31 +2,33 @@
 
 @section('admin-content')
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
-        <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
+    <div
+        class="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700 px-8 py-4.5 dark-mode-transition">
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-200 dark-mode-transition">Dashboard</h1>
     </div>
 
-    <div class="container mx-auto p-6">
+    <div class="container mx-auto p-6 bg-white dark:bg-black dark-mode-transition">
         <!-- Statistik Utama -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div
-                class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition flex items-center gap-6 border-t-blue-300 border-t-4">
-                <div class="px-4.5 py-4 rounded-full bg-blue-100">
-                    <i class="fa-solid fa-user-graduate text-3xl text-blue-500"></i>
+                class="bg-white dark:bg-gray-900/80 rounded-lg shadow p-4 hover:shadow-lg transition flex items-center gap-6 border-t-blue-300 dark:border-t-blue-600/40 border-t-4">
+                <div class="px-4.5 py-4 rounded-full bg-blue-100 dark:bg-blue-600/40 dark-mode-transition">
+                    <i class="fa-solid fa-user-graduate text-3xl text-blue-500 dark:text-blue-400 dark-mode-transition"></i>
                 </div>
                 <div>
-                    <h2 class="text-sm text-gray-500 mb-2">Total Mahasiswa</h2>
-                    <p class="text-2xl font-bold text-blue-600">{{ $jumlahMahasiswa }}</p>
+                    <h2 class="text-md text-gray-500 dark:text-gray-200 dark-mode-transition mb-2">Total Mahasiswa</h2>
+                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-500">{{ $jumlahMahasiswa }}</p>
                 </div>
             </div>
             <div
-                class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition flex items-center gap-6 border-t-green-300 border-t-4">
-                <div class="px-4.5 py-4 rounded-full bg-green-100">
-                    <i class="fa-solid fa-user-tie text-3xl text-green-500"></i>
+                class="bg-white dark:bg-gray-900/80 rounded-lg shadow p-4 hover:shadow-lg transition flex items-center gap-6 border-t-green-300 dark:border-t-green-600/40 border-t-4 dark-mode-transition">
+                <div class="px-4.5 py-4 rounded-full bg-green-100 dark:bg-green-600/40 dark-mode-transition">
+                    <i class="fa-solid fa-user-tie text-3xl text-green-500 dark:text-green-400 dark-mode-transition"></i>
                 </div>
                 <div>
-                    <h2 class="text-sm text-gray-500 mb-2">Total Dosen</h2>
-                    <p class="text-2xl font-bold text-green-600">{{ $jumlahDosen }}</p>
+                    <h2 class="text-md text-gray-500 dark:text-gray-200 dark-mode-transition mb-2">Total Dosen</h2>
+                    <p class="text-2xl font-bold text-green-600 dark:text-green-500 dark-mode-transition">
+                        {{ $jumlahDosen }}</p>
                 </div>
             </div>
         </div>
@@ -34,15 +36,19 @@
         <!-- Chart dan Data -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <!-- Grafik Mahasiswa per Semester -->
-            <div class="bg-white rounded-lg shadow p-4 hover:shadow-lg transition border-t-blue-300 border-t-4">
-                <h3 class="font-semibold text-lg mb-4 text-gray-700">Jumlah Mahasiswa per Semester</h3>
+            <div
+                class="bg-white dark:bg-gray-900/80 rounded-lg shadow p-4 hover:shadow-lg transition border-t-blue-300 dark:border-t-blue-600/40 border-t-4">
+                <h3 class="font-semibold text-lg mb-4 text-gray-700 dark:text-gray-300 dark-mode-transition">Jumlah
+                    Mahasiswa per Semester</h3>
                 <div id="chartSemester" class="h-48 rounded-lg flex items-center justify-center pr-4">
                 </div>
             </div>
 
             <!-- Grafik Mahasiswa per Program Studi -->
-            <div class="bg-white rounded-lg shadow hover:shadow-lg transition border-t-blue-300 border-t-4">
-                <h3 class="font-semibold text-lg mb-4 text-gray-700 p-4">Jumlah Mahasiswa per Program Studi</h3>
+            <div
+                class="bg-white dark:bg-gray-900/80 rounded-lg shadow hover:shadow-lg transition border-t-blue-300 dark:border-t-blue-600/40 border-t-4">
+                <h3 class="font-semibold text-lg mb-4 text-gray-700 dark:text-gray-300 dark-mode-transition p-4">Jumlah
+                    Mahasiswa per Program Studi</h3>
                 <div class="flex items-center justify-center w-full">
                     <div id="chartProdi" class="h-48 pl-6"></div>
                     <div id="pie-chart" class="h-48"></div>
@@ -51,20 +57,28 @@
         </div>
 
         <!-- Data Dosen dan Program Studi -->
-        <div class="bg-white rounded-lg shadow p-6 mb-8 hover:shadow-lg transition border-t-green-300 border-t-4">
-            <h3 class="font-semibold text-lg mb-4 text-gray-700">Jumlah Dosen per Program Studi</h3>
+        <div
+            class="bg-white dark:bg-gray-900/80 rounded-lg shadow p-6 mb-8 hover:shadow-lg transition border-t-green-300 dark:border-t-green-600/40 border-t-4 dark-mode-transition">
+            <h3 class="font-semibold text-lg mb-4 text-gray-700 dark:text-gray-300 dark-mode-transition">Jumlah Dosen per
+                Program Studi</h3>
             <div class="flex flex-col md:flex-row gap-8">
                 <div class="flex-1">
-                    <table class="w-full divide-y divide-gray-200 border border-gray-200">
-                        <thead class="bg-gray-100">
+                    <table
+                        class="w-full divide-y divide-gray-200 dark:divide-gray-700 border border-gray-200 dark:border-gray-700 dark-mode-transition">
+                        <thead class="bg-gray-100 dark:bg-gray-900/80 dark-mode-transition">
                             <tr>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Program
+                                <th
+                                    class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300 dark-mode-transition uppercase">
+                                    Program
                                     Studi</th>
-                                <th class="px-6 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Jumlah Dosen
+                                <th
+                                    class="px-6 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-300 dark-mode-transition uppercase">
+                                    Jumlah Dosen
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
+                        <tbody
+                            class="bg-white dark:bg-gray-800/80 divide-y divide-gray-200 dark:divide-gray-700 text-sm text-gray-800 dark:text-gray-300 dark-mode-transition">
                             @forelse ($tabelDosenPerProdi as $item)
                                 <tr>
                                     <td class="px-6 py-3 text-center">{{ $item->programStudi->name }}</td>
@@ -72,7 +86,9 @@
                                 </tr>
                             @empty
                                 <div>
-                                    <td colspan="2" class="px-6 py-4 text-center text-gray-500">Tidak ada data dosen</td>
+                                    <td colspan="2"
+                                        class="px-6 py-4 text-center text-gray-500 dark:text-gray-300 dark-mode-transition">
+                                        Tidak ada data dosen</td>
                                 </div>
                             @endforelse
                         </tbody>
