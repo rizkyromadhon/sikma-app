@@ -16,9 +16,10 @@
                     <div class="w-full grid grid-cols-1 md:grid-cols-4 gap-4">
                         <!-- Semester -->
                         <div class="w-full col-span-1">
-                            <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
+                            <label for="semester"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Semester</label>
                             <select name="semester" id="semester" onchange="fetchDataPresensi()"
-                                class="mt-1 block w-full px-2 py-2 border border-gray-300 dark:border-gray-600 dark-mode-transition rounded-md text-sm">
+                                class="mt-1 block w-full px-2 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md text-sm">
                                 <option value=""
                                     class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
                                     Semua Semester</option>
@@ -34,9 +35,10 @@
 
                         <!-- Golongan -->
                         <div class="w-full col-span-1">
-                            <label for="golongan" class="block text-sm font-medium text-gray-700">Golongan</label>
+                            <label for="golongan"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Golongan</label>
                             <select name="golongan" id="golongan" onchange="fetchDataPresensi()"
-                                class="mt-1 block w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
+                                class="mt-1 block w-full px-2 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md text-sm">
                                 <option value=""
                                     class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
                                     Semua Golongan</option>
@@ -52,9 +54,10 @@
 
                         <!-- Ruangan -->
                         <div class="w-full col-span-1">
-                            <label for="ruangan" class="block text-sm font-medium text-gray-700">Ruangan</label>
+                            <label for="ruangan"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Ruangan</label>
                             <select name="ruangan" id="ruangan" onchange="fetchDataPresensi()"
-                                class="mt-1 block w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
+                                class="mt-1 block w-full px-2 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md text-sm">
                                 <option value=""
                                     class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
                                     Semua Ruangan</option>
@@ -70,9 +73,11 @@
 
                         <!-- Mata Kuliah -->
                         <div class="w-full col-span-1">
-                            <label for="mata_kuliah" class="block text-sm font-medium text-gray-700">Mata Kuliah</label>
+                            <label for="mata_kuliah"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Mata
+                                Kuliah</label>
                             <select name="mata_kuliah" id="mata_kuliah" onchange="fetchDataPresensi()"
-                                class="mt-1 block w-full px-2 py-2 border border-gray-300 rounded-md text-sm">
+                                class="mt-1 block w-full px-2 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md text-sm">
                                 <option value=""
                                     class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
                                     Semua Mata Kuliah</option>
@@ -92,13 +97,13 @@
                 <form id="search-form" class="flex items-center justify-end">
                     <input type="text" name="search" placeholder="Cari Mahasiswa berdasarkan NIM...."
                         id="search-input" value="{{ old('search', request('search')) }}"
-                        class="px-4 py-2 w-full text-sm rounded-full border border-gray-300 focus:outline-none focus:ring focus:ring-gray-700 focus:border-transparent transition md:w-2xs dark:placeholder-gray-300">
+                        class="px-4 py-2 w-full text-sm rounded-full border border-gray-300 dark:border-gray-700 dark-mode-transition focus:outline-none focus:ring focus:ring-gray-700 focus:border-transparent transition md:w-2xs dark:placeholder-gray-300 placeholder-gray-700">
                 </form>
             </div>
         </div>
 
         <div
-            class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-100 rounded-xl shadow mb-5">
+            class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-700 rounded-xl shadow mb-5">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                 <thead class="bg-gray-100 dark:bg-black/60 dark-mode-transition">
                     <tr>
@@ -135,7 +140,7 @@
                 </thead>
 
                 <tbody
-                    class="bg-white dark:bg-black/20 divide-y divide-gray-200 dark:divide-gray-100 text-sm text-gray-800 dark:text-gray-100 dark-mode-transition">
+                    class="bg-white dark:bg-black/20 divide-y divide-gray-200 dark:divide-gray-700 text-sm text-gray-800 dark:text-gray-100 dark-mode-transition">
                     @forelse ($presensi as $items)
                         @foreach ($items as $index => $item)
                             <tr>
@@ -176,7 +181,8 @@
                         @endforeach
                     @empty
                         <tr>
-                            <td colspan="9" class="text-center py-4 text-gray-500">Tidak ada data presensi.</td>
+                            <td colspan="9" class="text-center py-4 text-gray-500 dark:text-gray-200">Tidak ada data
+                                presensi.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -235,7 +241,7 @@
             if (data.length === 0) {
                 tbody.innerHTML = `
             <tr>
-                <td colspan="9" class="text-center py-4 text-gray-500">Tidak ada data presensi.</td>
+                <td colspan="9" class="text-center py-4 text-gray-500 dark:text-gray-200">Tidak ada data presensi.</td>
             </tr>`;
                 return;
             }

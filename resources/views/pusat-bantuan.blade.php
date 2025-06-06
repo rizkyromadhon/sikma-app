@@ -1,6 +1,6 @@
 <x-layout>
     <div
-        class="bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-600 rounded-md text-gray-800 dark:text-gray-100 dark-mode-transition">
+        class="bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-md text-gray-800 dark:text-gray-100 dark-mode-transition">
         <!-- Header -->
         <header class="text-gray-950 dark:text-gray-100 dark-mode-transition py-10 text-center">
             <h1 class="text-3xl font-bold">Pusat Bantuan</h1>
@@ -19,7 +19,7 @@
                 <label for="search" class="block mb-2 text-xl font-semibold">Cari Pertanyaan</label>
                 <input x-model="searchQuery" id="search" type="text"
                     placeholder="Apa yang saya lakukan apabila Kartu RFID saya hilang?..."
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring focus:ring-blue-100 dark:focus:ring-gray-700 focus:outline-none dark:placeholder-gray-300 dark-mode-transition">
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:ring focus:ring-blue-100 dark:focus:ring-gray-700 focus:outline-none dark:placeholder-gray-300 dark-mode-transition">
             </div>
             <!-- Categories -->
             <h2 class="text-xl font-semibold mb-4">Kategori Bantuan</h2>
@@ -142,7 +142,7 @@
                                 { id: 6, question: 'Bagaimana jika tidak ada jadwal tapi saya ingin presensi?', answer: 'Presensi hanya tersedia jika ada jadwal yang sesuai dengan waktu dan hari tersebut.' }
                             ]"
                             :key="item.id">
-                            <div class="rounded border border-gray-200">
+                            <div class="rounded border border-gray-200 dark:border-gray-700">
                                 <button
                                     @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
                                     class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 dark:bg-gray-900/60 hover:bg-gray-200 dark:hover:bg-gray-700 font-semibold text-md md:text-xl transition">
@@ -255,7 +255,7 @@
                                 { id: 6, question: 'Bagaimana jika kartu RFID saya hilang/rusak?', answer: 'Apabila kartu RFID anda rusak/hilang, Anda bisa menghubungi Admin Program Studi pada menu Hubungi Admin untuk melakukan request penggantian kartu.' }
                             ]"
                             :key="item.id">
-                            <div class="rounded border border-gray-200">
+                            <div class="rounded border border-gray-200 dark:border-gray-700">
                                 <button
                                     @click="openItems.includes(item.id) ? openItems = openItems.filter(i => i !== item.id) : openItems.push(item.id)"
                                     class="w-full flex items-center justify-between text-left px-4 py-3 bg-gray-100 dark:bg-gray-900/60 hover:bg-gray-200 dark:hover:bg-gray-700 font-semibold text-md md:text-xl transition">

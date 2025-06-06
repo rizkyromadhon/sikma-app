@@ -23,7 +23,7 @@
         @endif
 
         <!-- Navbar -->
-        <div class="shadow-md w-full bg-white dark:bg-black dark-mode-transition dark:border-b dark:border-gray-100/80 z-50 h-16 flex items-center justify-between p-4 sm:p-6 lg:px-8"
+        <div class="shadow-md w-full bg-white dark:bg-black dark-mode-transition dark:border-b dark:border-gray-700 z-50 h-16 flex items-center justify-between p-4 sm:p-6 lg:px-8"
             aria-label="Global">
             <div class="flex flex-1">
                 <a href="/"
@@ -157,7 +157,7 @@
             x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full" x-cloak>
 
-            <div class="flex items-center justify-between py-6 px-4 border-b border-gray-200 dark:border-gray-100">
+            <div class="flex items-center justify-between py-6 px-4 border-b border-gray-200 dark:border-gray-700">
                 <a href="/" class="text-xl font-bold text-gray-800 dark:text-gray-100">'SIKMA'</a>
                 <button @click="open = false" class="rounded-md p-2 text-gray-700 dark:text-gray-100">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -183,7 +183,7 @@
                         Bantuan</a>
                 </div>
 
-                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-100">
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                     @auth
                         <div class="flex space-x-3 px-3 py-3 mb-2 rounded-md bg-gray-100 dark:bg-black/70">
                             <img src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('img/user.png') }}"

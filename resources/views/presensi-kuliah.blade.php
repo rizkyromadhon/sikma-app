@@ -32,7 +32,7 @@
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Mata
                             Kuliah</label>
                         <select name="mata_kuliah" onchange="fetchData()"
-                            class="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark-mode-transition">
+                            class="w-full px-2 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm dark-mode-transition">
                             <option value=""
                                 class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
                                 Semua Mata
@@ -53,7 +53,7 @@
                         <label
                             class="text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Bulan</label>
                         <select name="bulan" onchange="fetchData()"
-                            class="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark-mode-transition">
+                            class="w-full px-2 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm dark-mode-transition">
                             <option value=""
                                 class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">Semua
                                 Bulan
@@ -72,7 +72,7 @@
                         <label
                             class="text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Minggu</label>
                         <select name="minggu" onchange="fetchData()"
-                            class="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm dark-mode-transition">
+                            class="w-full px-2 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm dark-mode-transition">
                             <option value=""
                                 class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">Semua
                                 Minggu
@@ -89,8 +89,8 @@
 
                 <!-- Presensi Table -->
                 <div
-                    class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-600 rounded-xl shadow">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 dark-mode-transition">
+                    class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-700 rounded-xl shadow">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 dark-mode-transition">
                         <thead class="bg-gray-100 dark:bg-black/60 dark-mode-transition ">
                             <tr>
                                 <th
@@ -115,7 +115,7 @@
                             </tr>
                         </thead>
                         <tbody
-                            class="bg-white dark:bg-black/20 divide-y divide-gray-200 dark:divide-gray-600 text-sm text-gray-800 dark:text-gray-100 dark-mode-transition">
+                            class="bg-white dark:bg-black/20 divide-y divide-gray-200 dark:divide-gray-700 text-sm text-gray-800 dark:text-gray-100 dark-mode-transition">
                             @forelse ($presensiGrouped as $tanggal => $items)
                                 @foreach ($items as $index => $item)
                                     <tr>

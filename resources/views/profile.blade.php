@@ -7,7 +7,7 @@
             <div class="flex flex-col-reverse md:flex-row md:items-start gap-4 md:gap-6 w-full px-2 md:px-4">
                 <div class="md:hidden mt-4 flex items-end justify-end">
                     <a href="/profile/edit"
-                        class="inline-block px-4 py-2 bg-gray-800 text-white dark:text-gray-200 dark-mode-transition rounded-md hover:bg-gray-900 transition">
+                        class="inline-block px-4 py-2 bg-gray-800 text-white dark:text-gray-200 dark-mode-transition rounded-md hover:bg-gray-900 transition text-sm md:text-md">
                         Edit Profil
                     </a>
                 </div>

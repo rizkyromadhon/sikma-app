@@ -414,7 +414,8 @@
 
     <!-- Main Content -->
     <div id="main" x-data="{ isSidebarLockedOpen: localStorage.getItem('sidebarLockedOpen') === 'true' || false }" x-cloak
-        @sidebar-toggle.window="isSidebarLockedOpen = $event.detail.locked" class="bg-gray-50 min-h-screen z-20"
+        @sidebar-toggle.window="isSidebarLockedOpen = $event.detail.locked"
+        class="bg-gray-50 dark:bg-black min-h-screen z-20 dark-mode-transition"
         :style="{
             'padding-left': isSidebarLockedOpen ? '16rem' : '4rem',
             'transition': 'padding-left 0.3s ease-in-out'

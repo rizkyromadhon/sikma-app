@@ -9,8 +9,8 @@
                 </div>
             @else
                 <div
-                    class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-100 rounded-xl shadow">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-700 rounded-xl shadow">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-100 dark:bg-black/60 dark-mode-transition">
                             <tr>
                                 <th
@@ -33,7 +33,7 @@
                         </thead>
 
                         <tbody
-                            class="bg-white dark:bg-black/20 divide-y divide-gray-200 dark:divide-gray-100 text-sm text-gray-800 dark:text-gray-100 dark-mode-transition">
+                            class="bg-white dark:bg-black/20 divide-y divide-gray-200 dark:divide-gray-700 text-sm text-gray-800 dark:text-gray-100 dark-mode-transition">
                             @forelse ($jadwalGrouped as $hari => $items)
                                 @foreach ($items as $index => $item)
                                     <tr>

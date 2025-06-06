@@ -1,5 +1,6 @@
 <x-layout>
-    <div class="max-w-2xl mx-auto mt-6 bg-white dark:bg-gray-900/30 p-4 shadow-md rounded-md dark-mode-transition">
+    <div
+        class="max-w-2xl mx-auto mt-6 bg-white dark:bg-gray-900/30 p-4 shadow-md rounded-md dark-mode-transition mb-8 md:mb-0">
         <h2 class="text-xl font-semibold mb-8 px-4 py-2 text-center md:text-left">Kotak Pesan</h2>
 
         @forelse ($laporan as $item)
@@ -11,7 +12,7 @@
                             'bg-red-200 text-red-600 dark:bg-red-900/40 dark:text-red-200 dark:backdrop-blur-sm';
                     } elseif ($item->status === 'Sedang Diproses') {
                         $statusColor =
-                            'bg-red-200 text-red-600 dark:bg-red-900/40 dark:text-red-200 dark:backdrop-blur-sm';
+                            'bg-yellow-200 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-200 dark:backdrop-blur-sm';
                     } else {
                         $statusColor =
                             'bg-blue-200 dark:bg-blue-900/40 dark:text-blue-200 dark:backdrop-blur-sm text-blue-600';

@@ -11,7 +11,7 @@
         <!-- Statistik Utama -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div
-                class="bg-white dark:bg-gray-900/80 rounded-lg shadow p-4 hover:shadow-lg transition flex items-center gap-6 border-t-blue-300 dark:border-t-blue-600/40 border-t-4">
+                class="bg-white dark:bg-gray-900/80 dark-mode-transition rounded-lg shadow p-4 hover:shadow-lg transition flex items-center gap-6 border-t-blue-300 dark:border-t-blue-600/40 border-t-4">
                 <div class="px-4.5 py-4 rounded-full bg-blue-100 dark:bg-blue-600/40 dark-mode-transition">
                     <i class="fa-solid fa-user-graduate text-3xl text-blue-500 dark:text-blue-400 dark-mode-transition"></i>
                 </div>
@@ -107,282 +107,362 @@
         </div>
     </div>
     <script>
+        // 1. Mengambil data dari Laravel Blade (Struktur ini sudah benar)
         const semesterCategories = @json($jumlahMahasiswaPerSemester->keys()->toArray());
         const mahasiswaDataSemester = @json($jumlahMahasiswaPerSemester->values()->toArray());
         const prodiCategories = @json($jumlahMahasiswaPerProdi->keys()->toArray());
         const mahasiswaDataProdi = @json($jumlahMahasiswaPerProdi->values()->toArray());
         const dosenCategories = @json($jumlahDosenPerProdi->keys()->toArray());
         const dosenDataProdi = @json($jumlahDosenPerProdi->values()->toArray());
-
         const genderPersentase = [<?php echo number_format($persentaseLaki, 1); ?>, <?php echo number_format($persentasePerempuan, 1); ?>];
 
-        const optionSemester = {
-            chart: {
-                type: 'area',
-                height: 200,
-                fontFamily: "Inter, sans-serif",
-                toolbar: {
-                    show: false
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth',
-
-            },
-            colors: ['#3B82F6'],
-            series: [{
-                name: 'Jumlah Mahasiswa',
-                data: mahasiswaDataSemester
-            }, ],
-            xaxis: {
-                categories: semesterCategories,
-                labels: {
-                    style: {
-                        colors: '#374151' // warna teks axis
-                    }
-                },
-                tickAmount: 8 // jumlah label sesuai dengan data
-            },
-            yaxis: {
-                labels: {
-                    style: {
-                        colors: '#374151'
-                    }
-                },
-                min: 0
-            },
-            legend: {
-                position: 'bottom',
-                labels: {
-                    colors: '#374151'
-                }
-            },
-            grid: {
-                borderColor: 'rgba(55, 65, 81, 0.2)',
-                padding: {
-                    left: 2,
-                    right: 2,
-                    top: -20
-                },
-            },
-            tooltip: {
-                x: {
-                    formatter: function(val) {
-                        return 'Semester ' + val; // Tambahkan kata "Semester"
-                    }
-                }
-            },
-        };
-
-        const optionProdi = {
-            chart: {
-                type: 'bar',
-                width: "100%",
-                height: 200,
-                fontFamily: "Inter, sans-serif",
-                toolbar: {
-                    show: false
-                }
-            },
-            fill: {
-                opacity: 1
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                    columnWidth: "100%",
-                    borderRadiusApplication: "end",
-                    borderRadius: 4,
-                    dataLabels: {
-                        position: "top",
-                    },
-                },
-            },
-            dataLabels: {
-                enabled: false
-            },
-            colors: ['#3B82F6'],
-            series: [{
-                name: 'Jumlah Mahasiswa',
-                data: mahasiswaDataProdi,
-            }, ],
-            xaxis: {
-                categories: prodiCategories,
-                tickAmount: prodiCategories.length - 1, // jumlah tick sesuai kategori
-                labels: {
-                    show: true,
-                    formatter: function(val) {
-                        return Math.round(val); // pastikan tampil angka bulat
-                    },
-                    style: {
-                        colors: '#374151'
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: {
-                        colors: '#374151'
-                    }
-                },
-                min: 0,
-            },
-            legend: {
-                position: 'bottom',
-                labels: {
-                    colors: '#374151'
-                }
-            },
-            grid: {
-                show: true,
-                padding: {
-                    left: 6,
-                    right: 2,
-                    top: -25
-                },
-            },
-
-        };
-
-        const optionProdiGender = {
-            series: genderPersentase,
-            colors: ["#1C64F2", "#16BDCA"],
-            chart: {
-                height: 180,
-                width: "100%",
-                type: "pie",
-            },
-            stroke: {
-                colors: ["white"],
-                lineCap: "",
-            },
-            plotOptions: {
-                pie: {
-                    labels: {
-                        show: true,
-                    },
-                    size: "100%",
-                    dataLabels: {
-                        offset: -25
-                    }
-                },
-            },
-            labels: ["Laki-laki", "Perempuan"],
-            dataLabels: {
-                enabled: true,
-                style: {
-                    fontFamily: "Inter, sans-serif",
-                },
-            },
-            legend: {
-                position: "bottom",
-                fontFamily: "Inter, sans-serif",
-            },
-            yaxis: {
-                labels: {
-                    formatter: function(value) {
-                        return value + "%"
-                    },
-                },
-            },
-            xaxis: {
-                labels: {
-                    formatter: function(value) {
-                        return value + "%"
-                    },
-                },
-                axisTicks: {
-                    show: false,
-                },
-                axisBorder: {
-                    show: false,
-                },
-            },
+        // 2. Fungsi Helper untuk tema (Struktur ini sudah benar)
+        function getTextColor() {
+            return document.documentElement.classList.contains('dark') ? '#E5E7EB' : '#374151';
         }
 
-        const optionDosen = {
-            chart: {
-                type: 'bar',
-                width: "100%",
-                height: 230,
-                fontFamily: "Inter, sans-serif",
-                toolbar: {
-                    show: false
-                }
-            },
-            fill: {
-                opacity: 1
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                    columnWidth: "100%",
-                    borderRadiusApplication: "end",
-                    borderRadius: 6,
-                    dataLabels: {
-                        position: "top",
-                    },
-                },
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth',
+        function getGridColor() {
+            return document.documentElement.classList.contains('dark') ? 'rgba(229, 231, 235, 0.2)' :
+                'rgba(55, 65, 81, 0.2)';
+        }
 
-            },
-            colors: ['#00C941'],
-            series: [{
-                name: 'Jumlah Dosen',
-                data: dosenDataProdi,
-            }, ],
-            xaxis: {
-                categories: dosenCategories,
-                tickAmount: dosenCategories.length - 1, // jumlah tick sesuai kategori
-                labels: {
+        function getTooltipTheme() {
+            return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        }
+
+        // 3. Fungsi utama untuk membuat semua konfigurasi chart
+        function createChartOptions() {
+            const textColor = getTextColor();
+            const gridColor = getGridColor();
+            const tooltipTheme = getTooltipTheme();
+
+            // Konfigurasi Chart 1: Mahasiswa per Semester
+            const optionSemester = {
+                chart: {
+                    type: 'area',
+                    height: 200,
+                    fontFamily: "Inter, sans-serif",
+                    toolbar: {
+                        show: false
+                    },
+                    animations: {
+                        enabled: true,
+                        easing: 'easeinout',
+                        speed: 300, // Kecepatan animasi dibuat konsisten & ringan
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                colors: ['#3B82F6'],
+                series: [{
+                    name: 'Jumlah Mahasiswa',
+                    data: mahasiswaDataSemester
+                }],
+                xaxis: {
+                    categories: semesterCategories,
+                    labels: {
+                        style: {
+                            colors: textColor
+                        }
+                    },
+                    tickAmount: 8
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: textColor
+                        }
+                    },
+                    min: 0
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        colors: textColor
+                    }
+                },
+                grid: {
+                    borderColor: gridColor,
+                    padding: {
+                        left: 2,
+                        right: 2,
+                        top: -20
+                    }
+                },
+                tooltip: {
+                    theme: tooltipTheme,
+                    x: {
+                        formatter: (val) => 'Semester ' + val
+                    }
+                },
+            };
+
+            // Konfigurasi Chart 2: Mahasiswa per Prodi
+            const optionProdi = {
+                chart: {
+                    type: 'bar',
+                    width: "100%",
+                    height: 200,
+                    fontFamily: "Inter, sans-serif",
+                    toolbar: {
+                        show: false
+                    },
+                    animations: {
+                        enabled: true,
+                        speed: 300
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        columnWidth: "100%",
+                        borderRadiusApplication: "end",
+                        borderRadius: 4
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ['#3B82F6'],
+                series: [{
+                    name: 'Jumlah Mahasiswa',
+                    data: mahasiswaDataProdi
+                }],
+                xaxis: {
+                    categories: prodiCategories,
+                    tickAmount: prodiCategories.length > 1 ? prodiCategories.length - 1 : 1,
+                    labels: {
+                        formatter: (val) => Math.round(val),
+                        style: {
+                            colors: textColor
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: textColor
+                        }
+                    },
+                    min: 0
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        colors: textColor
+                    }
+                },
+                grid: {
                     show: true,
-                    formatter: function(val) {
-                        return Math.round(val); // pastikan tampil angka bulat
+                    borderColor: gridColor,
+                    padding: {
+                        left: 6,
+                        right: 2,
+                        top: -25
+                    }
+                },
+                tooltip: {
+                    theme: tooltipTheme
+                },
+            };
+
+            // Konfigurasi Chart 3: Gender Mahasiswa (Pie Chart)
+            const optionProdiGender = {
+                series: genderPersentase,
+                colors: ["#1C64F2", "#16BDCA"],
+                chart: {
+                    height: 180,
+                    width: "100%",
+                    type: "pie",
+                    animations: {
+                        enabled: true,
+                        speed: 300
+                    }
+                },
+                stroke: {
+                    colors: [document.documentElement.classList.contains('dark') ? '#111827' : '#FFFFFF'],
+                    width: 2
+                }, // Stroke disesuaikan dengan background
+                plotOptions: {
+                    pie: {
+                        animateScale: true,
+                        dataLabels: {
+                            offset: -25
+                        }
+                    }
+                },
+                labels: ["Laki-laki", "Perempuan"],
+                dataLabels: {
+                    enabled: true,
+                    style: {
+                        fontFamily: "Inter, sans-serif",
+                        colors: ["#ffffff"],
+                        fontSize: '14px'
                     },
-                    style: {
-                        colors: '#374151'
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: {
-                        colors: '#374151'
+                    dropShadow: {
+                        enabled: true,
+                        top: 1,
+                        left: 1,
+                        blur: 1,
+                        color: '#000',
+                        opacity: 0.45
                     }
                 },
-            },
-            legend: {
-                position: 'bottom',
-                labels: {
-                    colors: '#374151'
-                }
-            },
-            grid: {
-                show: true,
-                padding: {
-                    left: 4,
-                    right: 2,
-                    top: -30
+                legend: {
+                    position: "bottom",
+                    fontFamily: "Inter, sans-serif",
+                    labels: {
+                        colors: textColor
+                    }
                 },
-            },
+                tooltip: {
+                    theme: tooltipTheme,
+                    y: {
+                        formatter: (value) => value + "%"
+                    }
+                },
+            };
 
-        };
+            // Konfigurasi Chart 4: Dosen per Prodi
+            const optionDosen = {
+                chart: {
+                    type: 'bar',
+                    width: "100%",
+                    height: 230,
+                    fontFamily: "Inter, sans-serif",
+                    toolbar: {
+                        show: false
+                    },
+                    animations: {
+                        enabled: true,
+                        speed: 300
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        columnWidth: "100%",
+                        borderRadiusApplication: "end",
+                        borderRadius: 6
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                colors: ['#00C941'],
+                series: [{
+                    name: 'Jumlah Dosen',
+                    data: dosenDataProdi
+                }],
+                xaxis: {
+                    categories: dosenCategories,
+                    tickAmount: dosenCategories.length > 1 ? dosenCategories.length - 1 : 1,
+                    labels: {
+                        formatter: (val) => Math.round(val),
+                        style: {
+                            colors: textColor
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            colors: textColor
+                        }
+                    }
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        colors: textColor
+                    }
+                },
+                grid: {
+                    show: true,
+                    borderColor: gridColor,
+                    padding: {
+                        left: 4,
+                        right: 2,
+                        top: -30
+                    }
+                },
+                tooltip: {
+                    theme: tooltipTheme
+                },
+            };
 
-        const chartSemester = new ApexCharts(document.querySelector("#chartSemester"), optionSemester);
-        const chartProdi = new ApexCharts(document.querySelector("#chartProdi"), optionProdi);
-        const chartProdiGender = new ApexCharts(document.querySelector("#pie-chart"), optionProdiGender);
-        const chartDosen = new ApexCharts(document.querySelector("#chartDosen"), optionDosen);
-        chartSemester.render();
-        chartProdi.render();
-        chartProdiGender.render();
-        chartDosen.render();
+            return {
+                optionSemester,
+                optionProdi,
+                optionProdiGender,
+                optionDosen
+            };
+        }
+
+        // 4. Logika untuk inisialisasi dan update chart (disempurnakan)
+        let chartSemester, chartProdi, chartProdiGender, chartDosen;
+
+        function initCharts() {
+            const options = createChartOptions();
+            chartSemester = new ApexCharts(document.querySelector("#chartSemester"), options.optionSemester);
+            chartProdi = new ApexCharts(document.querySelector("#chartProdi"), options.optionProdi);
+            chartProdiGender = new ApexCharts(document.querySelector("#pie-chart"), options.optionProdiGender);
+            chartDosen = new ApexCharts(document.querySelector("#chartDosen"), options.optionDosen);
+
+            chartSemester.render();
+            chartProdi.render();
+            chartProdiGender.render();
+            chartDosen.render();
+        }
+
+        // Fungsi update tema dengan metode bertahap (staggering) untuk transisi mulus
+        function updateChartsTheme() {
+            const options = createChartOptions();
+
+            // Memberi jeda antar update agar tidak membebani browser
+            setTimeout(() => {
+                if (chartSemester) chartSemester.updateOptions(options.optionSemester);
+            }, 0);
+            setTimeout(() => {
+                if (chartProdi) chartProdi.updateOptions(options.optionProdi);
+            }, 75);
+            setTimeout(() => {
+                if (chartProdiGender) chartProdiGender.updateOptions(options.optionProdiGender);
+            }, 150);
+            setTimeout(() => {
+                if (chartDosen) chartDosen.updateOptions(options.optionDosen);
+            }, 225);
+        }
+
+        // 5. Observer untuk mendeteksi perubahan tema (Struktur ini sudah benar)
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    updateChartsTheme();
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+
+        // Inisialisasi utama saat dokumen siap
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCharts);
+        } else {
+            initCharts();
+        }
     </script>
 @endsection

@@ -94,31 +94,35 @@
         </div>
     </main>
 
+
     <!-- Notifikasi -->
     @if (session('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
-            class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 text-green-800 dark:text-green-200 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
+            class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
             <strong>Sukses.</strong> {{ session('success') }}
         </div>
     @endif
 
+
+
     @if (session('error'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
-            class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
+            class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-100 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
             <strong>Gagal.</strong> {{ session('error') }}
         </div>
     @endif
 
+
     @if (session('info'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
-            class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 text-yellow-800 dark:text-yellow-200 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
+            class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-yellow-50 dark:bg-yellow-900/50 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
             <strong>Info.</strong> {{ session('info') }}
         </div>
     @endif
 
     @if ($errors->has('login'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
-            class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-800 dark:text-red-200 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
+            class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-100 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
             <strong>Gagal.</strong> {{ $errors->first('login') }}
         </div>
     @endif
