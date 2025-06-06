@@ -1,68 +1,65 @@
 @extends('admin.dashboard')
 
 @section('admin-content')
-    <div class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 mb-4 flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-800">Daftar Alat Presensi</h1>
+    <div
+        class="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700 dark-mode-transition px-8 py-3.5 mb-4 flex items-center justify-between">
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-200 dark-mode-transition">Daftar Alat Presensi</h1>
         <div class="flex items-center justify-start"><a href="{{ route('admin.alat-presensi.create') }}"
-                class="flex items-center gap-3 text-sm justify-center px-4 py-2 bg-gray-800 text-white font-semibold shadow-xl mb-2 rounded-full cursor-pointer transition hover:bg-black">
+                class="flex items-center gap-3 text-sm justify-center px-4 py-2 bg-gray-800 dark:bg-black dark:border dark:border-gray-700 dark-mode-transition text-white font-semibold shadow-xl rounded-full cursor-pointer transition hover:bg-black dark:hover:bg-gray-900">
                 <span>Tambah Alat Presensi</span>
             </a>
         </div>
     </div>
 
     <div class="px-6">
-        <div class="overflow-x-auto bg-white rounded-xl shadow mb-4">
-            @livewire('alat-presensi-table')
-            {{-- <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-100">
-                    <tr class="border-b-2 border-gray-200">
-                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 uppercase">ID Alat</th>
-                        <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 uppercase">Nama</th>
-                        <th class="px-4 py-3 text-sm font-semibold text-gray-700 uppercase text-center">Lokasi</th>
-                        <th class="px-4 py-3 text-sm font-semibold text-gray-700 uppercase text-center">SSID</th>
-                        <th class="px-4 py-3 text-sm font-semibold text-gray-700 uppercase text-center">Jadwal Nyala</th>
-                        <th class="px-4 py-3 text-sm font-semibold text-gray-700 uppercase text-center">Jadwal Mati</th>
-                        <th class="px-4 py-3 text-sm font-semibold text-gray-700 uppercase text-center">Status</th>
-                        <th class="px-4 py-3 text-sm font-semibold text-gray-700 uppercase text-center">Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody class="bg-white divide-y divide-gray-200 text-sm text-gray-800">
-                    @forelse ($alatPresensi as $item)
-                        <tr>
-                            <td class="px-4 py-2 text-center">{{ $item->id }}</td>
-                            <td class="px-4 py-2 text-center">{{ $item->name }}</td>
-                            <td class="px-4 py-2 text-center">{{ $item->ruangan->name }}</td>
-                            <td class="px-4 py-2 text-center">{{ $item->ssid }}</td>
-                            <td class="px-4 py-2 text-center">
-                                {{ \Carbon\Carbon::createFromFormat('H:i:s', $item->jadwal_nyala)->format('H:i') }}
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                {{ \Carbon\Carbon::createFromFormat('H:i:s', $item->jadwal_mati)->format('H:i') }}
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                <span id="status{{ $item->id }}"
-                                    class="{{ $item->status == 1 ? 'text-green-600 bg-green-100 px-4 py-2 rounded-md' : 'text-red-600 bg-red-100 px-4 py-2 rounded-md' }}">
-                                    {{ $item->status == 1 ? 'Aktif' : 'Nonaktif' }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-2 text-center flex gap-2">
-                                <a href="{{ route('admin.alat-presensi.edit', $item->id) }}"
-                                    class="text-sm text-white py-2 rounded-md w-18 bg-gray-800 hover:bg-black transition font-medium">Edit</a>
-                                <button type="button" id="btnDeleteModal{{ $item->id }}"
-                                    class="text-sm text-gray-800 bg-transparent border py-2 w-18 rounded-md hover:bg-gray-800 hover:text-white transition cursor-pointer font-medium">Hapus
+        <div
+            class="overflow-x-auto bg-white dark:bg-black border dark-mode-transition border-gray-200 dark:border-gray-700 rounded-xl shadow mb-4">
+            @foreach ($alatPresensi as $item)
+                @livewire('alat-presensi-table')
+                <div class="hidden" id="modalDeleteAlat{{ $item->id }}">
+                    <div
+                        class="absolute p-6 py-10 bg-white dark:bg-gray-900/60 dark-mode-transition backdrop-blur-sm top-[200px] right-1/2 translate-x-1/2 shadow z-50 w-full max-w-xl rounded">
+                        <div class="mb-6 text-center">
+                            <i
+                                class="fa-solid fa-triangle-exclamation text-6xl text-red-500 dark:text-red-600 dark-mode-transition mb-4"></i>
+                            <h1 class="text-center font-medium">Anda yakin ingin menghapus alat presensi
+                                <span class="font-bold">{{ $item->name }}</span>
+                                ?
+                            </h1>
+                        </div>
+                        <div class="flex gap-2 justify-center">
+                            <form action="{{ route('admin.alat-presensi.destroy', $item->id) }}" method="POST"
+                                class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="text-sm text-gray-800 bg-transparent dark:bg-transparent dark:text-red-700 dark:border-red-800 border py-2 w-18 rounded-md hover:bg-gray-800 dark:hover:bg-red-900 dark:hover:text-white hover:text-white transition cursor-pointer font-medium dark-mode-transition">Hapus
                                 </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="px-6 py-4 text-center text-gray-500">Data alat presensi tidak
-                                ditemukan
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table> --}}
+                                <button type="button" id="btnCloseDeleteModal{{ $item->id }}"
+                                    class="text-sm text-white py-2 rounded-md w-18 bg-gray-800 dark:bg-white dark:text-black dark:border dark:border-gray-700 hover:bg-black dark:hover:bg-gray-300 transition font-medium cursor-pointer dark-mode-transition">Batal
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="absolute inset-0 bg-gray-900/50 dark:bg-black/70 dark-mode-transition z-40">
+
+                    </div>
+                </div>
+                <script>
+                    const btnDeleteModal{{ $item->id }} = document.getElementById("btnDeleteModal{{ $item->id }}");
+                    const modalDeleteAlat{{ $item->id }} = document.getElementById("modalDeleteAlat{{ $item->id }}");
+                    const btnCloseDeleteModal{{ $item->id }} = document.getElementById("btnCloseDeleteModal{{ $item->id }}");
+
+                    btnDeleteModal{{ $item->id }}.addEventListener("click", () => {
+                        modalDeleteAlat{{ $item->id }}.classList.toggle("hidden");
+                    });
+
+                    btnCloseDeleteModal{{ $item->id }}.addEventListener("click", () => {
+                        modalDeleteAlat{{ $item->id }}.classList.toggle("hidden");
+                    });
+                </script>
+            @endforeach
+
         </div>
     </div>
 @endsection

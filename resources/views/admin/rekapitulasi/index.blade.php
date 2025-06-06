@@ -1,25 +1,25 @@
 @extends('admin.dashboard')
 @section('admin-content')
     <div x-data="attendanceData()" x-init="init()">
-        {{-- Header dan Kartu Statistik Tetap Sama --}}
-        <div class="bg-white shadow-sm border-b border-gray-200 px-8 py-6 mb-6">
+        <div
+            class="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700 dark-mode-transition px-8 py-6 mb-6">
             <div class="flex items-center justify-between">
                 <div class="animate-slide-in">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                        <i class="fas fa-chart-line text-gray-900 mr-3"></i>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-200 mb-2">
+                        <i class="fas fa-chart-line text-gray-900 dark:text-gray-200 mr-3"></i>
                         Rekapitulasi Kehadiran
                     </h1>
-                    <p class="text-gray-600">Kelola dan pantau kehadiran mahasiswa secara real-time</p>
+                    <p class="text-gray-600 dark:text-gray-300">Kelola dan pantau kehadiran mahasiswa secara real-time</p>
                 </div>
 
                 <div class="flex items-center space-x-3">
                     <button @click="showExportPdfModal = true"
-                        class="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-all duration-200 flex items-center space-x-2 hover-scale">
+                        class="bg-gray-900 dark:bg-red-900/60 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 dark:hover:bg-red-900/70 transition-all duration-200 flex items-center space-x-2 hover-scale">
                         <i class="fas fa-file-pdf"></i>
                         <span>Export PDF</span>
                     </button>
                     <button @click="showExportExcelModal = true"
-                        class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200 flex items-center space-x-2 hover-scale">
+                        class="bg-white dark:bg-green-900/60 border border-gray-300 dark:border-transparent text-gray-700 dark:text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200 flex items-center space-x-2 hover-scale">
                         <i class="fas fa-file-excel text-green-600"></i>
                         <span>Export Excel</span>
                     </button>
@@ -31,82 +31,88 @@
         <div class="px-4 pb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div
-                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in flex items-center justify-between gap-8">
+                    class="bg-white dark:bg-gray-900/60 rounded-xl shadow-sm border border-gray-200 dark:border-transparent p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in flex items-center justify-between gap-8">
                     <div class="flex items-center justify-between w-full">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Total Mahasiswa</p>
-                            <p class="text-3xl font-bold text-gray-900 mt-2" x-text="stats.totalMahasiswa"></p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-200">Total Mahasiswa</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-gray-200 mt-2"
+                                x-text="stats.totalMahasiswa"></p>
 
                         </div>
-                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 px-[18px] py-[15px] rounded-full shadow-lg">
+                        <div
+                            class="bg-gradient-to-br from-blue-500 dark:from-blue-900/60 to-blue-600 dark:to-blue-900 px-[18px] py-[15px] rounded-full shadow-lg">
                             <i class="fas fa-user-graduate text-2xl text-white"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in"
+                <div class="bg-white dark:bg-gray-900/60 rounded-xl shadow-sm border border-gray-200 dark:border-transparent p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in"
                     style="animation-delay: 0.1s">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Hadir Hari Ini</p>
-                            <p class="text-3xl font-bold text-green-600 mt-2" x-text="stats.totalHadirToday"></p>
-                            <p class="text-sm text-gray-500 mt-2">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-200">Hadir Hari Ini</p>
+                            <p class="text-3xl font-bold text-green-600 dark:text-green-700 mt-2"
+                                x-text="stats.totalHadirToday"></p>
+                            <p class="text-sm text-gray-500 dark:text-gray-200 mt-2">
                                 <span x-text="stats.persenHadirToday"></span>% dari total
                             <div>
-                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                    <div class="bg-green-500 h-2 rounded-full transition-all duration-500"
+                                <div class="w-full bg-gray-200 dark:bg-gray-300 rounded-full h-2 mt-1">
+                                    <div class="bg-green-500 dark:bg-green-600 h-2 rounded-full transition-all duration-500"
                                         style="width: {{ $persenHadirToday }}%;"></div>
                                 </div>
                             </div>
                             </p>
                         </div>
                         <div
-                            class="bg-gradient-to-br from-green-500 to-green-600 px-[18px] py-[15px] rounded-full shadow-lg">
+                            class="bg-gradient-to-br from-green-500 dark:from-green-800/60 to-green-600 dark:to-green-900 px-[18px] py-[15px] rounded-full shadow-lg">
                             <i class="fas fa-check-circle text-2xl text-white"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in"
+                <div class="bg-white dark:bg-gray-900/60 rounded-xl shadow-sm border border-gray-200 dark:border-transparent p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in"
                     style="animation-delay: 0.2s">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Tidak Hadir Hari ini</p>
-                            <p class="text-3xl font-bold text-red-600 mt-2" x-text="stats.totalTidakHadirToday"></p>
-                            <p class="text-sm text-gray-500 mt-2">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-200">Tidak Hadir Hari ini</p>
+                            <p class="text-3xl font-bold text-red-600 dark:text-red-700 mt-2"
+                                x-text="stats.totalTidakHadirToday"></p>
+                            <p class="text-sm text-gray-500 dark:text-gray-200 mt-2">
                                 <span x-text="stats.persenTidakHadirToday"></span>% dari total
                             <div>
-                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                    <div class="bg-red-500 h-2 rounded-full transition-all duration-500"
+                                <div class="w-full bg-gray-200 dark:bg-gray-300 rounded-full h-2 mt-1">
+                                    <div class="bg-red-500 dark:bg-red-600 h-2 rounded-full transition-all duration-500"
                                         style="width: {{ $persenTidakHadirToday }}%;"></div>
                                 </div>
                             </div>
                             </p>
                         </div>
-                        <div class="bg-gradient-to-br from-red-500 to-red-600 px-[18px] py-[15px] rounded-full shadow-lg">
+                        <div
+                            class="bg-gradient-to-br from-red-500 dark:from-red-900/60 to-red-600 dark:to-red-900 px-[18px] py-[15px] rounded-full shadow-lg">
                             <i class="fas fa-times-circle text-2xl text-white"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in"
+                <div class="bg-white dark:bg-gray-900/60 rounded-xl shadow-sm border border-gray-200 dark:border-transparent p-6 hover:shadow-lg transition-all duration-300 hover-scale animate-fade-in"
                     style="animation-delay: 0.3s">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Izin/Sakit Hari ini</p>
-                            <p class="text-3xl font-bold text-yellow-600 mt-2" x-text="stats.totalIzinToday"></p>
-                            <p class="text-sm text-gray-500 mt-2">
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-200">Izin/Sakit Hari ini</p>
+                            <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-700 mt-2"
+                                x-text="stats.totalIzinToday"></p>
+                            <p class="text-sm text-gray-500 dark:text-gray-200 mt-2">
                                 <span x-text="stats.persenIzinToday"></span>% dari total
                             <div>
-                                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                                    <div class="bg-yellow-500 h-2 rounded-full transition-all duration-500"
+                                <div class="w-full bg-gray-200 dark:bg-gray-300 rounded-full h-2 mt-1">
+                                    <div class="bg-yellow-500 dark:text-yellow-600 h-2 rounded-full transition-all duration-500"
                                         style="width: {{ $persenIzinToday }}%;"></div>
                                 </div>
                             </div>
                             </p>
                         </div>
                         <div
-                            class="bg-gradient-to-br from-yellow-500 to-yellow-600 px-[18px] py-[15px] rounded-full shadow-lg">
+                            class="bg-gradient-to-br from-yellow-500 dark:from-yellow-900/60 to-yellow-600 dark:to-yellow-900 px-[18px] py-[15px] rounded-full shadow-lg">
                             <i class="fas fa-exclamation-triangle text-2xl text-white"></i>
                         </div>
                     </div>
