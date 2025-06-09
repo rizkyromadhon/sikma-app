@@ -41,6 +41,7 @@
     <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.11.1/dist/echo.iife.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+    {{-- <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/ui@3.x.x/dist/cdn.min.js"></script> --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
@@ -87,8 +88,12 @@
     <!-- Konten halaman -->
     <main class="bg-white dark:bg-black dark-mode-transition">
         <div @class([
-            !$isAdmin ? 'mx-auto w-full md:max-w-11/12 py-3 md:py-6' : '',
-            $isOldPassword && !$isAdmin ? 'mt-30 md:mt-24' : ($isAdmin ? '' : 'mt-14'),
+            !$isAdmin && !$isDosen ? 'mx-auto w-full md:max-w-11/12 py-3 md:py-6' : '',
+            $isOldPassword && (!$isAdmin || !$isDosen)
+                ? 'mt-30 md:mt-24'
+                : ($isAdmin || $isDosen
+                    ? ''
+                    : 'mt-14'),
         ])>
             {{ $slot }}
         </div>
@@ -137,7 +142,7 @@
 
             <!-- Modal Content -->
             <div class="flex items-center justify-center min-h-screen p-4">
-                <div class="relative bg-white dark:bg-gray-900/60 rounded-lg shadow-xl w-[320px] mx-auto backdrop-blur-sm"
+                <div class="relative bg-white dark:bg-slate-800/90 rounded-lg shadow-xl w-[320px] mx-auto backdrop-blur-sm"
                     @click.away="showLogoutConfirm = false" x-show="showLogoutConfirm"
                     x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95"
                     x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150"
@@ -177,8 +182,8 @@
 
     <div @class([
         'fixed bottom-6 z-[9998]',
-        'right-6' => request()->is('admin/*'),
-        'left-6' => !request()->is('admin/*'),
+        'right-6' => request()->is('admin/*') || request()->is('dosen/*'),
+        'left-6' => !request()->is('admin/*') && !request()->is('dosen/*'),
     ])>
         <button @click="toggleDarkMode()"
             class="group bg-gray-800 dark:bg-gray-900/50 text-gray-200 dark:text-gray-200 border border-gray-900 dark:border-gray-200 w-12 h-12 rounded-full shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center transition-all duration-300 ease-in-out cursor-pointer backdrop-blur-sm">
@@ -191,7 +196,10 @@
         </button>
     </div>
 
-    @if (!request()->is('admin/*') && (!Auth::check() || (Auth::check() && Auth::user()->role != 'admin')))
+    @if (
+        !request()->is('admin/*') &&
+            !request()->is('dosen/*') &&
+            (!Auth::check() || (Auth::check() && Auth::user()->role != 'admin' && Auth::user()->role != 'dosen')))
         <div class="fixed bottom-6 right-6 z-[9998]">
             <button @click="showContactModal = true"
                 class="group bg-gray-800 dark:bg-gray-900/50 text-gray-200 dark:text-gray-200 border border-gray-900 dark:border-gray-200 px-[15px] w-full h-12 rounded-full shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center gap-0 hover:gap-2 transition-all duration-500 ease-in-out cursor-pointer backdrop-blur-sm">
@@ -493,6 +501,7 @@
             });
         });
     </script>
+    @stack('scripts')
 
 </body>
 

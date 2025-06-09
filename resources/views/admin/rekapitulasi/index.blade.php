@@ -19,7 +19,7 @@
                         <span>Export PDF</span>
                     </button>
                     <button @click="showExportExcelModal = true"
-                        class="bg-white dark:bg-green-900/60 border border-gray-300 dark:border-transparent text-gray-700 dark:text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200 flex items-center space-x-2 hover-scale">
+                        class="bg-white dark:bg-green-900/60 border border-gray-300 dark:border-transparent text-gray-700 dark:text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-green-900/70 transition-all duration-200 flex items-center space-x-2 hover-scale">
                         <i class="fas fa-file-excel text-green-600"></i>
                         <span>Export Excel</span>
                     </button>
@@ -119,17 +119,20 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 w-full">
-                <h2 class="text-lg font-semibold text-gray-900 pb-4">Daftar Mahasiswa</h2>
+            <div
+                class="bg-white dark:bg-gray-900/60 rounded-xl shadow-sm border border-gray-200 dark:border-transparent p-6 mb-6 w-full">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-200 pb-4">Daftar Mahasiswa</h2>
                 <div class="flex flex-col md:flex-row gap-4 mb-4">
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Cari Mahasiswa</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Cari
+                            Mahasiswa</label>
                         <div class="relative">
                             <input type="text" placeholder="Nama atau NIM..." x-model="filters.search"
                                 @input.debounce.500ms="applyFilters()"
-                                class="text-sm w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                                class="text-sm w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 placeholder-gray-600/50 dark:placeholder-gray-400/50 focus:border-transparent transition-all duration-200">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
@@ -138,23 +141,31 @@
                     </div>
 
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Program Studi</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Program Studi</label>
                         <select x-model="filters.program" @change="applyFilters()"
-                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                            <option value="">Semua Program Studi</option>
+                            class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition-all duration-200">
+                            <option value=""
+                                class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">Semua
+                                Program Studi</option>
                             <template x-for="prodi in programStudis" :key="prodi.id">
-                                <option :value="prodi.id" x-text="prodi.name"></option>
+                                <option :value="prodi.id"
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
+                                    x-text="prodi.name"></option>
                             </template>
                         </select>
                     </div>
 
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Semester</label>
                         <select x-model="filters.semester" @change="applyFilters()"
-                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                            <option value="">Semua Semester</option>
+                            class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition-all duration-200 dark-mode-transition">
+                            <option value=""
+                                class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">Semua
+                                Semester</option>
                             <template x-for="semester in semesters" :key="semester.id">
-                                <option :value="semester.id" x-text="semester.display_name"></option>
+                                <option :value="semester.id"
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
+                                    x-text="semester.display_name"></option>
                             </template>
                         </select>
                     </div>
@@ -164,16 +175,18 @@
                     <div class="flex items-center justify-start">
                         <div class="flex items-center space-x-2">
                             <button @click="handleBulkAction('mark-present')" x-show="selectedStudents.length > 0"
-                                class="text-sm text-green-600 hover:text-green-800 transition-colors duration-200"
+                                class="text-sm text-green-600 dark:text-green-200 hover:text-green-800 dark:hover:text-green-300 transition-colors duration-200 dark-mode-transition"
                                 title="Tandai Hadir">
-                                <div class="px-4 py-2 bg-green-100 rounded-md">
+                                <div
+                                    class="px-4 py-2 bg-green-100 dark:bg-green-900/60 hover:bg-green-200 dark:hover:bg-green-900/80 transition rounded-md dark-mode-transition">
                                     <span>Tandai Hadir</span>
                                 </div>
                             </button>
                             <button @click="handleBulkAction('mark-absent')" x-show="selectedStudents.length > 0"
-                                class="text-sm text-red-600 hover:text-red-800 transition-colors duration-200"
+                                class="text-sm text-red-600 dark:text-red-200 hover:text-red-800 dark:hover:text-red-30 transition-colors duration-200 dark-mode-transition"
                                 title="Tandai Tidak Hadir">
-                                <div class="px-4 py-2 bg-red-100 rounded-md">
+                                <div
+                                    class="px-4 py-2 bg-red-100 dark:bg-red-900/60 hover:bg-red-200 dark:hover:bg-red-900/80 transition    rounded-md dark-mode-transition">
                                     <span>Tandai Tidak Hadir</span>
                                 </div>
                             </button>
@@ -182,84 +195,98 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
+                    <table class="w-full border border-transparent dark:border-gray-700 dark-mode-transition">
+                        <thead class="bg-gray-100 dark:bg-gray-900/30 dark-mode-transition">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     <input type="checkbox" @change="toggleSelectAll()"
                                         :checked="selectedStudents.length === students.length && students.length > 0"
                                         class="rounded border-gray-300 text-gray-900 focus:ring-gray-900">
                                 </th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 dark-mode-transition uppercase tracking-wider">
                                     Mahasiswa</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 dark-mode-transition uppercase tracking-wider">
+                                    Semester</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 dark-mode-transition uppercase tracking-wider">
                                     Program Studi</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-200 dark-mode-transition uppercase tracking-wider">
                                     Status Hari Ini</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-200 dark-mode-transition uppercase tracking-wider">
                                     Waktu</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 dark-mode-transition uppercase tracking-wider">
                                     Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody
+                            class="bg-white dark:bg-gray-900/70 divide-y divide-gray-200 dark:divide-gray-700 dark-mode-transition">
                             <template x-if="isLoading">
                                 <tr>
-                                    <td colspan="6" class="px-6 py-8 text-center"> {{-- Sesuaikan colspan dengan jumlah kolom Anda --}}
+                                    <td colspan="6" class="px-6 py-8 text-center">
                                         <div class="flex items-center justify-center space-x-2">
-                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600">
+                                            <div
+                                                class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-800">
                                             </div>
-                                            <span class="text-gray-500">Memuat data...</span>
+                                            <span class="text-gray-500 dark:text-gray-200">Memuat data...</span>
                                         </div>
                                     </td>
                                 </tr>
                             </template>
 
-                            {{-- Tampilkan Pesan "Tidak Ada Data" jika tidak loading DAN students kosong --}}
                             <template x-if="!isLoading && students.length === 0">
                                 <tr>
-                                    <td colspan="6"
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                        {{-- Sesuaikan colspan --}}
+                                    <td colspan="7"
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-200 text-center">
                                         Tidak ada data mahasiswa yang ditemukan.
                                     </td>
                                 </tr>
                             </template>
                             <template x-if="!isLoading && students.length > 0">
                                 <template x-for="student in students" :key="student.id">
-                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/85 transition-colors duration-200">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <input type="checkbox" :value="student.id"
                                                 @change="toggleStudent(student.id)"
                                                 :checked="selectedStudents.includes(student.id)"
-                                                class="rounded border-gray-300 text-gray-900 focus:ring-gray-900">
+                                                class="rounded border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:ring-gray-900 dark:focus:ring-gray-200">
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
-                                                <div class="h-10 w-10 rounded-full bg-gray-900 flex items-center justify-center text-white font-medium"
-                                                    x-text="student.initials"> {{-- Pastikan 'initials' dikirim dari backend atau ada accessor --}}
+                                                <div class="h-10 w-10 rounded-full bg-gray-900 dark:bg-gray-800 flex items-center justify-center text-white font-medium"
+                                                    x-text="student.initials">
                                                 </div>
                                                 <div class="ml-4">
-                                                    <div class="text-sm font-medium text-gray-900" x-text="student.name">
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-200"
+                                                        x-text="student.name">
                                                     </div>
-                                                    <div class="text-sm text-gray-500" x-text="student.nim"></div>
+                                                    <div class="text-sm text-gray-500 dark:text-gray-400"
+                                                        x-text="student.nim"></div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200"
+                                            x-text="student.semester"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200"
                                             x-text="student.program_studi_name"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4 text-center whitespace-nowrap">
                                             <span
                                                 :class="{
-                                                    'bg-green-100 text-green-800': student
+                                                    'bg-green-100 dark:bg-green-900/60 text-green-800 dark:text-green-200 px-2 py-1 w-28 items-center justify-center': student
                                                         .status_kehadiran_hari_ini === 'Hadir',
-                                                    'bg-red-100 text-red-800': student
+                                                    'bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-200 px-2 py-1 w-28 items-center justify-center': student
                                                         .status_kehadiran_hari_ini === 'Tidak Hadir',
-                                                    'bg-yellow-100 text-yellow-800': student
+                                                    'bg-yellow-100 dark:bg-yellow-900/60 text-yellow-800 dark:text-yellow-200 px-2 py-1 w-28 items-center justify-center': student
                                                         .status_kehadiran_hari_ini === 'Izin/Sakit' || student
                                                         .status_kehadiran_hari_ini === 'Izin' || student
                                                         .status_kehadiran_hari_ini === 'Sakit',
-                                                    'bg-gray-100 text-gray-800': !student
+                                                    'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 w-28 items-center justify-center':
+                                                        !
+                                                        student
                                                         .status_kehadiran_hari_ini
                                                 }"
                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
@@ -267,11 +294,11 @@
                                                     x-text="student.status_kehadiran_hari_ini || 'Belum Presensi'"></span>
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                        <td class="px-6 py-4 text-center whitespace-nowrap text-sm text-gray-500 dark:text-gray-200"
                                             x-text="student.waktu_kehadiran_hari_ini || '-'"></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <button @click="showDetail(student)"
-                                                class="text-gray-600 hover:text-gray-900 transition-colors duration-200">Detail</button>
+                                                class="text-gray-600 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-300 transition-colors duration-200">Detail</button>
                                         </td>
                                     </tr>
                                 </template>
@@ -281,42 +308,53 @@
                 </div>
 
                 <!-- Pagination -->
-                <div class="bg-white px-6 py-3 border-t border-gray-200"
+                <div class="bg-white dark:bg-gray-900/80 px-6 py-3 dark-mode-transition"
                     x-show="pagination.totalItems > 0 && students.length > 0">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2"> <span class="text-sm text-gray-700">Tampilkan</span>
+                        <div class="flex items-center space-x-2"> <span
+                                class="text-sm text-gray-700 dark:text-gray-200">Tampilkan</span>
                             <select x-model="pagination.perPage" @change="applyFilters()"
-                                class="border border-gray-300 rounded px-2 py-1 text-sm">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
+                                class="border border-gray-300 dark:border-gray-700 dark:bg-gray-800 rounded px-2 py-1 text-sm dark-mode-transition">
+                                <option value="10"
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">10
+                                </option>
+                                <option value="25"
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">25
+                                </option>
+                                <option value="50"
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">50
+                                </option>
+                                <option value="100"
+                                    class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">100
+                                </option>
                             </select>
-                            <span class="text-sm text-gray-700">per halaman</span>
+                            <span class="text-sm text-gray-700 dark:text-gray-200 dark-mode-transition">per halaman</span>
                         </div>
                         <div class="flex items-center space-x-1" x-show="pagination.totalPages > 1">
                             <button @click="changePage(pagination.currentPage - 1)" :disabled="pagination.currentPage <= 1"
-                                :class="pagination.currentPage <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'"
-                                class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 transition-colors duration-200">
+                                :class="pagination.currentPage <= 1 ? 'opacity-50 cursor-not-allowed' :
+                                    'hover:bg-gray-50 dark:hover:bg-gray-800'"
+                                class="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded text-sm text-gray-700 dark:text-gray-200 transition-colors duration-200">
                                 &lt;
                             </button>
                             <template x-for="page in paginationPages" :key="page">
                                 <button @click="changePage(page)"
-                                    :class="page === pagination.currentPage ? 'bg-gray-900 text-white' :
-                                        'border border-gray-300 text-gray-700 hover:bg-gray-50'"
+                                    :class="page === pagination.currentPage ?
+                                        'bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-200' :
+                                        'border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 dark-mode-transition'"
                                     class="px-3 py-1 rounded text-sm transition-colors duration-200"
                                     x-text="page"></button>
                             </template>
                             <button @click="changePage(pagination.currentPage + 1)"
                                 :disabled="pagination.currentPage >= pagination.totalPages"
                                 :class="pagination.currentPage >= pagination.totalPages ? 'opacity-50 cursor-not-allowed' :
-                                    'hover:bg-gray-50'"
-                                class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-700 transition-colors duration-200">
+                                    'hover:bg-gray-50 dark:hover:bg-gray-800'"
+                                class="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded text-sm text-gray-700 dark:text-gray-200 transition-colors duration-200">
                                 &gt;
                             </button>
                         </div>
                     </div>
-                    <div class="text-sm text-gray-500 mt-2 text-right"
+                    <div class="text-sm text-gray-500 dark:text-gray-300 mt-4 text-right"
                         x-show="pagination.totalItems > 0 && students.length > 0">
                         Menampilkan <span x-text="pagination.from"></span> sampai <span x-text="pagination.to"></span>
                         dari <span x-text="pagination.totalItems"></span> hasil
@@ -326,29 +364,35 @@
 
             <div class="flex flex-col lg:flex-row gap-6">
                 <div class="lg:w-2/3">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 w-full">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                            <i class="fas fa-chart-bar mr-2 text-blue-600"></i>
+                    <div
+                        class="bg-white dark:bg-gray-900/80 dark:border-transparent rounded-xl shadow-sm border border-gray-200 p-6 w-full">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-4 flex items-center">
+                            <i class="fas fa-chart-bar mr-4 text-blue-600 dark:text-blue-500"></i>
                             Tren Kehadiran
                         </h3>
                         <div class="space-y-4">
                             <div
-                                class="h-64 w-full bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg flex items-center justify-center border border-blue-200">
+                                class="h-[430px] w-full bg-gradient-to-br from-blue-50 dark:from-blue-800/60 to-indigo-100 dark:to-indigo-900/60 rounded-lg flex items-center justify-center border border-blue-200 dark:border-transparent">
                                 <div class="text-center">
-                                    <i class="fas fa-chart-line text-4xl text-blue-500 mb-3"></i>
-                                    <p class="text-lg text-blue-600 font-medium">Grafik Kehadiran Mingguan</p>
-                                    <p class="text-sm text-blue-400">(Data real-time - Placeholder untuk grafik aktual)</p>
+                                    <i class="fas fa-chart-line text-4xl text-blue-500 dark:text-blue-500 mb-3"></i>
+                                    <p class="text-lg text-blue-600 dark:text-blue-400 font-medium">Grafik Kehadiran
+                                        Mingguan</p>
+                                    <p class="text-sm text-blue-400 dark:text-blue-200">(Data real-time - Placeholder untuk
+                                        grafik aktual)</p>
                                 </div>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div class="text-center p-3 bg-green-50 rounded-lg border border-green-200">
-                                    <p class="text-2xl font-bold text-green-700"
+                                <div
+                                    class="text-center p-3 bg-green-50 dark:bg-green-900/60 rounded-lg border border-green-200 dark:border-green-700">
+                                    <p class="text-2xl font-bold text-green-700 dark:text-green-400"
                                         x-text="stats.persenRataRataHadirMingguan + '%'"></p>
-                                    <p class="text-xs text-green-600">Rata-rata hadir minggu ini</p>
+                                    <p class="text-xs text-green-600 dark:text-green-300">Rata-rata hadir minggu ini</p>
                                 </div>
-                                <div class="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                    <p class="text-2xl font-bold text-blue-700" x-text="stats.weeklyGrowthDisplay"></p>
-                                    <p class="text-xs text-blue-600">Dari minggu lalu (Placeholder)</p>
+                                <div
+                                    class="text-center p-3 bg-blue-50 dark:bg-blue-900/60 rounded-lg border border-blue-200 dark:border-blue-700">
+                                    <p class="text-2xl font-bold text-blue-700 dark:text-blue-400"
+                                        x-text="stats.weeklyGrowthDisplay"></p>
+                                    <p class="text-xs text-blue-600 dark:text-blue-300">Dari minggu lalu (Placeholder)</p>
                                 </div>
                             </div>
                         </div>
@@ -356,37 +400,45 @@
                 </div>
 
                 <div class="lg:w-1/3 flex flex-col gap-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1">
-                        <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-teal-50">
-                            <h3 class="text-md font-semibold text-gray-900 flex items-center gap-3">
-                                <i class="fas fa-trophy text-yellow-500 text-lg"></i>
-                                Kehadiran Terbaik Mahasiswa (Top 10)
+                    <div
+                        class="bg-white dark:bg-gray-900/60 dark:border-transparent dark-mode-transition rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1">
+                        <div
+                            class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark-mode-transition bg-gradient-to-r from-green-50 dark:from-green-900/60 to-teal-50 dark:to-green-800">
+                            <h3
+                                class="text-md font-semibold text-gray-900 dark:text-gray-200 dark-mode-transition flex items-center gap-3">
+                                <i
+                                    class="fas fa-trophy text-yellow-500 dark:text-yellow-400 dark-mode-transition text-lg"></i>
+                                Kehadiran Terbaik Mahasiswa
                             </h3>
                         </div>
-                        <div class="p-4 space-y-2 max-h-96 overflow-y-auto pretty-scrollbar">
+                        <div class="p-4 space-y-2 h-full max-h-60 overflow-y-auto custom-scrollbar">
                             <template x-if="!topStudents || topStudents.length === 0">
-                                <p class="text-sm text-gray-500 text-center py-4">Data kehadiran terbaik belum tersedia.
+                                <p class="text-sm text-gray-500 dark:text-gray-300 text-center py-4">Data kehadiran terbaik
+                                    belum tersedia.
                                 </p>
                             </template>
                             <template x-for="(student, index) in topStudents" :key="student.id">
                                 <div
-                                    class="flex items-center justify-between p-3 hover:bg-gray-100/80 rounded-lg transition-colors duration-150 ease-in-out">
+                                    class="flex items-center justify-between p-3 hover:bg-gray-100/80 dark:hover:bg-gray-900/80 dark-mode-transition rounded-lg transition-colors duration-150 ease-in-out">
                                     <div class="flex items-center">
-                                        <span class="text-xs font-semibold text-gray-500 w-7 text-center mr-2 tabular-nums"
+                                        <span
+                                            class="text-xs font-semibold text-gray-500 dark:text-gray-200 dark-mode-transition w-7 text-center mr-2 tabular-nums"
                                             x-text="index + 1 + '.'"></span>
-                                        <div class="h-9 w-9 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-semibold mr-3 flex-shrink-0"
+                                        <div class="h-9 w-9 rounded-full bg-teal-600 dark:bg-teal-900 dark-mode-transition flex items-center justify-center text-white text-sm font-semibold mr-3 flex-shrink-0"
                                             x-text="student.initials ? student.initials : (student.name ? student.name.substring(0,1).toUpperCase() : '?')">
                                         </div>
                                         <div class="flex-grow">
-                                            <p class="text-sm text-gray-800 font-semibold leading-tight"
+                                            <p class="text-sm text-gray-800 dark:text-gray-200 dark-mode-transition font-semibold leading-tight"
                                                 x-text="student.name"></p>
-                                            <p class="text-xs text-gray-500 leading-tight" x-text="student.nim"></p>
-                                            <p class="text-xs text-teal-700 leading-tight"
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 dark-mode-transition leading-tight"
+                                                x-text="student.nim"></p>
+                                            <p class="text-xs text-teal-700 dark:text-teal-500 dark-mode-transition leading-tight"
                                                 x-text="'Hadir: ' + student.hadir_count + ' dari ' + student.total_relevant_days + ' hari relevan'">
                                             </p>
                                         </div>
                                     </div>
-                                    <span class="text-sm font-bold text-green-600 tabular-nums"
+                                    <span
+                                        class="text-sm font-bold text-green-600 dark:text-green-400 dark-mode-transition tabular-nums"
                                         x-text="parseFloat(student.attendance_percentage).toFixed(1) + '%'">
                                     </span>
                                 </div>
@@ -394,17 +446,23 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1">
-                        <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-white">
-                            <h3 class="text-md font-semibold text-gray-900 flex items-center">
-                                <i class="fas fa-history mr-2 text-purple-600"></i>
-                                Aktivitas Terbaru (Placeholder)
+                    <div
+                        class="bg-white dark:bg-gray-900/60 rounded-xl shadow-sm border dark:border-transparent border-gray-200 overflow-hidden flex-1 dark-mode-transition">
+                        <div
+                            class="px-6 py-4 border-b border-gray-200 dark:border-transparent bg-gradient-to-r from-purple-50 dark:from-purple-900/60 to-white dark:to-purple-800 dark-mode-transition">
+                            <h3 class="text-md font-semibold text-gray-900 dark:text-gray-200 flex items-center gap-3">
+                                <i
+                                    class="fas fa-history text-purple-600 dark:text-gray-200 text-md dark-mode-transition"></i>
+                                Aktivitas Terbaru
                             </h3>
                         </div>
 
-                        <div class="p-4 max-h-64 overflow-y-auto">
+                        <div class="p-4 space-y-2 h-full max-h-60 overflow-y-auto custom-scrollbar">
                             <template x-if="recentActivities.length === 0">
-                                <p class="text-sm text-gray-500 text-center py-4">Tidak ada aktivitas terbaru.</p>
+                                <p
+                                    class="text-sm text-gray-500 dark:text-gray-300 dark-mode-transition text-center items-center justify-center py-4">
+                                    Tidak ada aktivitas
+                                    terbaru.</p>
                             </template>
 
                             <template x-for="activity in recentActivities" :key="activity.id">

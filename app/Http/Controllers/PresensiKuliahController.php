@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use App\Events\PresensiCreated;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use App\Events\KehadiranDiperbarui;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -330,6 +331,13 @@ class PresensiKuliahController extends Controller
         // Broadcast event jika menggunakan Laravel Echo atau sejenisnya
         if (class_exists(PresensiCreated::class)) {
             broadcast(new PresensiCreated($presensi))->toOthers();
+        }
+
+        if ($presensi->jadwalKuliah) {
+            Log::info('Mencoba mengirim event KehadiranDiperbarui untuk jadwal ID: ' . $presensi->jadwalKuliah->id);
+
+            // [DIPERBAIKI] Gunakan broadcast() agar dikirim langsung tanpa antrean
+            broadcast(new KehadiranDiperbarui($presensi->jadwalKuliah))->toOthers();
         }
 
         return response()->json([

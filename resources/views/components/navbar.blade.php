@@ -73,12 +73,35 @@
                         <div class="relative">
                             <button @click="open = !open"
                                 class="flex items-center space-x-2 xl:space-x-3 focus:outline-none transition-all ease-in-out duration-100 transform hover:scale-105 cursor-pointer">
+                                @if (Auth::user()->foto && Auth::user()->role == 'dosen')
+                                    <img src="{{ asset('storage/' . Auth::user()->foto) }}" alt="Foto Profil"
+                                        class="w-8 h-8 mt-3.5 rounded-full object-cover mb-4 ring-4 ring-white dark:ring-slate-700">
+                                @elseif (Auth::user()->foto && Auth::user()->role == 'mahasiswa')
+                                    <img src="{{ asset('storage/' . Auth::user()->foto) }}" alt="Foto Profil"
+                                        class="w-8 h-8 mt-3.5 rounded-full object-cover mb-4 ring ring-white dark:ring-slate-700">
+                                @elseif (!Auth::user()->foto && Auth::user()->role == 'dosen')
+                                    <div
+                                        class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
+                                        <i class="fas fa-user-tie text-3xl text-gray-500 dark:text-gray-500"></i>
+                                    </div>
+                                @elseif (!Auth::user()->foto && Auth::user()->role == 'mahasiswa')
+                                    <div
+                                        class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
+                                        <i class="fas fa-user text-3xl text-gray-500 dark:text-gray-500"></i>
+                                    </div>
+                                @else
+                                    <div
+                                        class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
+                                        <i class="fas fa-user text-3xl text-gray-500 dark:text-gray-500"></i>
+                                    </div>
+                                @endif
 
-                                <img src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('img/user.png') }}"
-                                    alt="Foto Profil" class="w-7 h-7 xl:w-8 xl:h-8 rounded-full object-cover">
+                                {{-- <img src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('img/user.png') }}"
+                                    alt="Foto Profil" class="w-7 h-7 xl:w-8 xl:h-8 rounded-full object-cover"> --}}
 
-                                <span
-                                    class="text-sm font-semibold text-gray-800 dark:text-gray-100 dark-mode-transition">{{ Auth::user()->nim }}</span>
+                                <span class="text-sm font-semibold text-gray-800 dark:text-gray-100 dark-mode-transition">
+                                    {{ Auth::user()->role == 'dosen' ? Auth::user()->nip : Auth::user()->nim }}
+                                </span>
 
                                 <svg class="w-4 h-4 text-gray-600 dark:text-gray-100 dark-mode-transition" fill="none"
                                     stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -111,12 +134,21 @@
                                         @endif
                                     </a>
 
-                                    @if (Auth::check() && Auth::user()->role !== 'admin')
+                                    @if (Auth::check() && Auth::user()->role == 'mahasiswa')
                                         <a href="{{ route('mahasiswa.pesan') }}"
                                             class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">Pesan</a>
+                                        <a href="{{ route('mahasiswa.izin.index') }}"
+                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">Pengajuan
+                                            Izin</a>
                                     @endif
                                     @if (Auth::check() && Auth::user()->role === 'admin')
                                         <a href="{{ route('admin.dashboard') }}"
+                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">
+                                            Dashboard
+                                        </a>
+                                    @endif
+                                    @if (Auth::check() && Auth::user()->role === 'dosen')
+                                        <a href="{{ route('dosen.dashboard') }}"
                                             class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">
                                             Dashboard
                                         </a>
@@ -205,11 +237,19 @@
                                     class="inline-block w-2 h-2 bg-red-500 dark:bg-red-600/80 rounded-full absolute right-6 mt-1.5"></span>
                             @endif
                         </a>
-                        <a href="{{ route('mahasiswa.pesan') }}" x-on:click="loading = true; open = false"
-                            class="block px-3 py-2 text-base font-semibold text-gray-900 dark:text-gray-100 rounded-md">Pesan</a>
+                        @if (Auth::user()->role == 'mahasiswa')
+                            <a href="{{ route('mahasiswa.pesan') }}" x-on:click="loading = true; open = false"
+                                class="block px-3 py-2 text-base font-semibold text-gray-900 dark:text-gray-100 rounded-md">Pesan</a>
+                        @endif
                         @if (Auth::check() && Auth::user()->role === 'admin')
                             <a href="{{ route('admin.dashboard') }}" x-on:click="loading = true; open = false"
                                 class="block px-3 py-2 text-base font-semibold text-gray-900 dark:text-gray-100 rounded-md">Dashboard</a>
+                        @endif
+                        @if (Auth::check() && Auth::user()->role === 'dosen')
+                            <a href="{{ route('dosen.dashboard') }}"
+                                class="block px-3 py-2 text-base font-semibold text-gray-900 dark:text-gray-100 rounded-md">
+                                Dashboard
+                            </a>
                         @endif
                         <form method="POST" action="{{ route('logout') }}" class="mt-1">
                             @csrf

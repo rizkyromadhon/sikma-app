@@ -38,7 +38,7 @@ class DashboardController extends Controller
             ->where('role', 'mahasiswa')
             ->whereNotNull('id_semester')
             ->get()
-            ->groupBy(fn($user) => optional($user->semester)->display_name)
+            ->groupBy(fn($user) => optional($user->semester)->display_name) 
             ->map(fn($group) => $group->count());
 
         $jumlahMahasiswaPerSemester = $semesters->mapWithKeys(function ($semester) use ($mahasiswaPerSemester) {

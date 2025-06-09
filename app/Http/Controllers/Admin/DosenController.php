@@ -64,7 +64,6 @@ class DosenController extends Controller
             'no_hp.required' => 'Nomor HP wajib diisi.',
             'alamat.required' => 'Alamat wajib diisi.',
         ]);
-        // dd($request->all());
 
         $defaultPassword = 'passworddosen';
 

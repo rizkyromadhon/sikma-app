@@ -7,6 +7,22 @@
                     class="bg-yellow-100 dark:bg-yellow-900/50 dark:backdrop-blur-sm border border-yellow-300 dark:border-yellow-700 text-yellow-800 dark:text-yellow-100 dark-mode-transition px-4 py-3 rounded-md shadow-md">
                     <strong>Info:</strong> Admin Program Studi tidak memiliki Jadwal Kuliah.
                 </div>
+            @elseif (auth()->user()->role === 'dosen')
+                <div class="bg-blue-100 dark:bg-blue-900/50 dark:backdrop-blur-sm border border-blue-300 dark:border-blue-700 text-blue-800 dark:text-blue-200 dark-mode-transition px-4 py-3 rounded-md shadow-md"
+                    role="alert">
+                    <div class="flex items-center">
+                        <div class="py-1"><i class="fas fa-info-circle fa-lg mr-3"></i></div>
+                        <div>
+                            <p class="text-sm">
+                                Jadwal mengajar detail dan fitur presensi Anda tersedia di
+                                <a href="{{ route('dosen.dashboard') }}"
+                                    class="font-bold underline hover:text-blue-600 dark:hover:text-blue-300">
+                                    Dashboard Dosen
+                                </a>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             @else
                 <div
                     class="overflow-x-auto bg-white dark:bg-gray-900/80 border dark-mode-transition border-gray-200 dark:border-gray-700 rounded-xl shadow">

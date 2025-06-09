@@ -27,6 +27,10 @@ class LoginController extends Controller
                 return redirect('/admin/dashboard')->with('success', 'Login berhasil!');
             }
 
+            if ($user->role == 'dosen') {
+                return redirect('/dosen/dashboard')->with('success', 'Login berhasil!');
+            }
+
             if (!$user->is_profile_complete) {
                 return redirect('/profile/edit')->with('info', ' Silakan lengkapi profil Anda.');
             }

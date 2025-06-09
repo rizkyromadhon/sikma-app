@@ -16,13 +16,22 @@ class Golongan extends Model
 
     public $timestamps = false;
 
+    // public function users()
+    // {
+    //     return $this->hasMany(User::class, 'golongan_id');
+    // }
     public function users()
     {
-        return $this->hasMany(User::class, 'golongan_id'); // Assuming 'golongan_id' is the foreign key in users table
+        return $this->hasMany(User::class, 'id_golongan');
     }
 
     public function programStudi()
     {
         return $this->belongsTo(ProgramStudi::class, 'id_prodi');
+    }
+
+    public function jadwalKuliah()
+    {
+        return $this->hasMany(JadwalKuliah::class, 'id_golongan');
     }
 }

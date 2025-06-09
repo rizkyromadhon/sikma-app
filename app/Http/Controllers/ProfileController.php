@@ -120,4 +120,88 @@ class ProfileController extends Controller
 
         return redirect('/')->with('success', 'Password berhasil diperbarui!');
     }
+
+    public function showDosen()
+    {
+        // Ambil data user dosen yang sedang login, beserta relasi 'programStudi'
+        $dosen = User::with('programStudi')->find(Auth::id());
+
+        return view('dosen.profile.index', [
+            'dosen' => $dosen
+        ]);
+    }
+
+    public function editDosen()
+    {
+        return view('dosen.profile.edit', [
+            'dosen' => Auth::user()
+        ]);
+    }
+
+    /**
+     * [BARU] Memproses update data profil.
+     */
+    public function updateDosen(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'no_hp' => 'nullable|string|max:15',
+            'alamat' => 'nullable|string|max:500',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Maks 2MB
+        ]);
+
+        // Update data teks
+        $dataToUpdate = [
+            'name' => $request->name,
+            'no_hp' => $request->no_hp,
+            'alamat' => $request->alamat,
+        ];
+
+        // Proses upload foto jika ada
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($user->foto) {
+                Storage::disk('public')->delete($user->foto);
+            }
+            // Simpan foto baru dan update path di database
+            $dataToUpdate['foto'] = $request->file('foto')->store('profile-photos', 'public');
+        }
+
+        User::where('id', $user->id)->update($dataToUpdate);
+
+        return redirect()->route('dosen.profile')->with('success', 'Profil berhasil diperbarui!');
+    }
+
+    public function editPasswordDosen()
+    {
+        return view('dosen.profile.ubah-password');
+    }
+
+    /**
+     * Memproses dan menyimpan password baru.
+     */
+    public function updatePasswordDosen(Request $request)
+    {
+        // 1. Validasi input
+        $validated = $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'min:8', 'confirmed'],
+        ], [
+            'current_password.required' => 'Password lama wajib diisi.',
+            'current_password.current_password' => 'Password lama tidak sesuai.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        // 2. Update password user yang sedang login
+        User::where('id', Auth::id())->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        // 3. Redirect kembali dengan pesan sukses
+        return redirect()->route('dosen.profile')->with('success', 'Password Anda berhasil diperbarui.');
+    }
 }

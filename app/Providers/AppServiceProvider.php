@@ -39,11 +39,18 @@ class AppServiceProvider extends ServiceProvider
 
             $isOldPassword = false;
             $isProfileCompleted = true;
+            // $isDosen = $user && $user->role === 'dosen';
+            // $isAdmin = $user && $user->role === 'admin';
+            $isAdmin = request()->routeIs('admin.*');
+            $isDosen = request()->routeIs('dosen.*');
+
             if ($user) {
                 $isOldPassword = Hash::check('passwordmahasiswa', $user->password);
                 $isProfileCompleted = $user->is_profile_complete == 1;
             }
 
+            $view->with('isDosen', $isDosen);
+            $view->with('isAdmin', $isAdmin);
             $view->with('isOldPassword', $isOldPassword);
             $view->with('isProfileCompleted', $isProfileCompleted);
             $view->with('programStudi', ProgramStudi::all());

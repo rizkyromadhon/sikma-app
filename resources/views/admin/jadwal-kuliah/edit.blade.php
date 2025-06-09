@@ -1,216 +1,254 @@
-{{-- @dd($jadwal->mataKuliah); --}}
-
 @extends('admin.dashboard')
 
 @section('admin-content')
-    <div class="container mx-auto">
-        <div
-            class="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700 dark-mode-transition px-8 py-4 mb-4 flex items-center gap-4">
-            <a href="{{ route('admin.jadwal-kuliah.index') }}">
-                <i
-                    class="fas fa-arrow-left text-black dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-400 dark-mode-transition transition"></i>
+    <div
+        class="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700 dark-mode-transition px-8 py-4.5 mb-4 flex items-center gap-4">
+        <a href="{{ route('admin.jadwal-kuliah.index') }}">
+            <i
+                class="fas fa-arrow-left text-black dark:text-gray-200 hover:text-gray-700 dark:hover:text-gray-400 dark-mode-transition transition"></i>
+        </a>
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-200 dark-mode-transition">Edit Jadwal
+            Kuliah
+            @if ($isKelasBesar)
+                <span class="text-xl text-blue-600 dark:text-blue-400">(Kelas Besar - {{ $relatedSchedules->count() }}
+                    Golongan)</span>
+            @endif
+        </h1>
+    </div>
+    {{-- <div
+        class="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-700 dark-mode-transition px-8 py-3.5 mb-4 flex items-center justify-between">
+        <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-200 dark-mode-transition">
+            Edit Jadwal Kuliah
+            @if ($isKelasBesar)
+                <span class="text-xl text-blue-600 dark:text-blue-400">(Kelas Besar - {{ $relatedSchedules->count() }}
+                    Golongan)</span>
+            @endif
+        </h1>
+        <div class="flex items-center justify-start">
+            <a href="{{ route('admin.jadwal-kuliah.index') }}"
+                class="flex items-center gap-3 text-sm justify-center px-4 py-2 bg-gray-800 dark:bg-black dark:border dark:border-gray-700 dark-mode-transition text-white font-semibold shadow-xl rounded-full cursor-pointer transition hover:bg-black dark:hover:bg-gray-900">
+                <span>Kembali</span>
             </a>
-            <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-200 dark-mode-transition0">Edit Jadwal Kuliah</h1>
         </div>
+    </div> --}}
 
-        <div class="px-2 rounded-md">
-            <form action="{{ route('admin.jadwal-kuliah.update', $jadwal->id) }}?page={{ request()->get('page') }}"
-                enctype="multipart/form-data" method="post" class="flex gap-6">
+    <div class="px-6">
+        <div
+            class="bg-white dark:bg-black border dark-mode-transition border-gray-200 dark:border-gray-700 rounded-xl shadow p-6">
+            @if ($isKelasBesar)
+                <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Informasi Kelas Besar</h3>
+                    <p class="text-sm text-blue-700 dark:text-blue-400">
+                        Jadwal ini adalah kelas besar yang mencakup {{ $relatedSchedules->count() }} golongan:
+                        <strong>{{ $relatedSchedules->pluck('golongan.nama_golongan')->sort()->join(', ') }}</strong>
+                    </p>
+                    <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                        Jika Anda mengubah pengaturan golongan, semua jadwal terkait akan disesuaikan.
+                    </p>
+                </div>
+            @endif
+
+            <form action="{{ route('admin.jadwal-kuliah.update', $jadwal->id) }}" method="POST">
                 @csrf
                 @method('PUT')
 
-                <div
-                    class="bg-white dark:bg-black dark:border dark:border-gray-700 px-8 py-4 shadow w-full max-w-4xl h-fit">
-                    @if ($errors->any())
-                        <div
-                            class="p-4 bg-red-100 dark:bg-red-900/50 border-2 text-red-500 dark:text-red-600 rounded flex items-center gap-2 w-full mb-4">
-                            <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
-                            <div>
-                                @foreach ($errors->all() as $error)
-                                    <p class="text-red-500 dark:text-red-100 text-sm ml-4 py-1">{{ $error }}</p>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                    <div class="flex gap-6">
-                        <div class="flex flex-col flex-1 gap-4">
-                            <div class="flex flex-col gap-2">
-                                <label for="hari"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Hari</label>
-                                <input type="text" id="hari" name="hari" value="{{ old('hari', $jadwal->hari) }}"
-                                    class="text-sm px-4 py-2 rounded border border-gray-300 dark:border-gray-700 shadow placeholder-gray-600/50 dark:placeholder-gray-400/50 h-10"
-                                    placeholder="Senin">
-                            </div>
+                <!-- Form fields sama seperti sebelumnya -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Hari</label>
+                        <select name="hari" id="hari"
+                            class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            required>
+                            <option value="">Pilih Hari</option>
+                            <option value="Senin" {{ $jadwal->hari == 'Senin' ? 'selected' : '' }}>Senin</option>
+                            <option value="Selasa" {{ $jadwal->hari == 'Selasa' ? 'selected' : '' }}>Selasa</option>
+                            <option value="Rabu" {{ $jadwal->hari == 'Rabu' ? 'selected' : '' }}>Rabu</option>
+                            <option value="Kamis" {{ $jadwal->hari == 'Kamis' ? 'selected' : '' }}>Kamis</option>
+                            <option value="Jumat" {{ $jadwal->hari == 'Jumat' ? 'selected' : '' }}>Jumat</option>
+                        </select>
+                        @error('hari')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                            <div class="flex flex-col gap-2">
-                                <label for="mata_kuliah"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Mata
-                                    Kuliah</label>
-                                <select name="mata_kuliah" id="mata_kuliah"
-                                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition h-10">
-                                    @foreach ($mataKuliah as $matkul)
-                                        <option value="{{ $matkul->id }}"
-                                            class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
-                                            {{ old('mata_kuliah', $matkul->id == $jadwal->id_matkul ? 'selected' : '') }}>
-                                            {{ $matkul->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <label for="ruangan"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Ruangan</label>
-                                <select name="ruangan" id="ruangan"
-                                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition h-10">
-                                    @foreach ($ruangans as $ruangan)
-                                        <option value="{{ $ruangan->id }}"
-                                            class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
-                                            {{ old('ruangan', $ruangan->id == $jadwal->id_ruangan ? 'selected' : '') }}>
-                                            {{ $ruangan->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <label for="dosen"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Dosen</label>
-                                <select name="dosen" id="dosen"
-                                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition h-10">
-                                    @foreach ($dosens as $dosen)
-                                        <option value="{{ $dosen->id }}"
-                                            class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
-                                            {{ old('dosen', $dosen->id == $jadwal->id_dosen ? 'selected' : '') }}>
-                                            {{ $dosen->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Semester</label>
+                        <select name="semester" id="semester"
+                            class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            required>
+                            <option value="">Pilih Semester</option>
+                            @foreach ($semesters as $semester)
+                                <option value="{{ $semester->id }}"
+                                    {{ $jadwal->id_semester == $semester->id ? 'selected' : '' }}>
+                                    {{ $semester->display_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('semester')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                        </div>
-                        <div class="flex flex-col flex-1 gap-4">
-                            <div class="flex flex-col gap-2">
-                                <label for="semester"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Semester
-                                    Tempuh</label>
-                                <select name="semester" id="semester"
-                                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition h-10">
-                                    @foreach ($semesters as $semester)
-                                        <option value="{{ $semester->id }}"
-                                            class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
-                                            {{ old('semester', $semester->id == $jadwal->id_semester ? 'selected' : '') }}>
-                                            {{ $semester->display_name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <label for="program_studi"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Program
-                                    Studi</label>
-                                <select id="programStudi" name="program_studi"
-                                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition h-10">
-                                    @foreach ($programStudi as $ps)
-                                        <option value="{{ $ps->id }}"
-                                            class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
-                                            {{ $ps->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="flex flex-col gap-2">
-                                <label for="golongan"
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Golongan</label>
-                                <select id="golongan" name="golongan"
-                                    class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition h-10">
-                                    <option value="{{ old('golongan', $jadwal->id_golongan) }}"
-                                        class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">
-                                        {{ $jadwal->golongan->nama_golongan }}</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center gap-4">
-                                <div class="flex flex-col gap-2">
-                                    <label for="jam_mulai"
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Jam
-                                        Mulai</label>
-                                    <input type="time" id="jam_mulai" name="jam_mulai"
-                                        value="{{ old('jam_mulai', $jadwal->jam_mulai) }}"
-                                        class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition dark:[&::-webkit-calendar-picker-indicator]:invert h-10">
-                                </div>
-                                <div class="flex items-center justify-center mt-7">-</div>
-                                <div class="flex flex-col gap-2">
-                                    <label for="jam_selesai"
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-200 dark-mode-transition">Jam
-                                        Berakhir</label>
-                                    <input type="time" id="jam_selesai" name="jam_selesai"
-                                        value="{{ old('jam_selesai', $jadwal->jam_selesai) }}"
-                                        class="block w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition dark:[&::-webkit-calendar-picker-indicator]:invert h-10">
-                                </div>
-                            </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Dosen</label>
+                        <select name="dosen" id="dosen"
+                            class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            required>
+                            <option value="">Pilih Dosen</option>
+                            @foreach ($dosens as $dosen)
+                                <option value="{{ $dosen->id }}"
+                                    {{ $jadwal->id_user == $dosen->id ? 'selected' : '' }}>
+                                    {{ $dosen->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('dosen')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Program Studi</label>
+                        <select name="program_studi" id="program_studi"
+                            class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            required>
+                            <option value="">Pilih Program Studi</option>
+                            @foreach ($programStudi as $prodi)
+                                <option value="{{ $prodi->id }}"
+                                    {{ $jadwal->id_prodi == $prodi->id ? 'selected' : '' }}>
+                                    {{ $prodi->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('program_studi')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mata Kuliah</label>
+                        <select name="mata_kuliah" id="mata_kuliah"
+                            class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            required>
+                            <option value="">Pilih Mata Kuliah</option>
+                            @foreach ($mataKuliah as $mk)
+                                <option value="{{ $mk->id }}" {{ $jadwal->id_matkul == $mk->id ? 'selected' : '' }}>
+                                    {{ $mk->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('mata_kuliah')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Golongan</label>
+                        <select name="golongan" id="golongan"
+                            class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            required>
+                            <option value="">Pilih Golongan</option>
+                            @if ($isKelasBesar)
+                                <option value="all" selected>Semua Golongan</option>
+                            @else
+                                <option value="all">Semua Golongan</option>
+                            @endif
+                        </select>
+                        @error('golongan')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ruangan</label>
+                        <select name="ruangan" id="ruangan"
+                            class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                            required>
+                            <option value="">Pilih Ruangan</option>
+                            @foreach ($ruangans as $ruangan)
+                                <option value="{{ $ruangan->id }}"
+                                    {{ $jadwal->id_ruangan == $ruangan->id ? 'selected' : '' }}>
+                                    {{ $ruangan->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('ruangan')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="jam_mulai"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jam
+                                Mulai</label>
+                            <input type="time" name="jam_mulai" id="jam_mulai" value="{{ $jadwal->jam_mulai }}"
+                                class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:[&::-webkit-calendar-picker-indicator]:invert"
+                                required>
+                            @error('jam_mulai')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div> 
+                        <div>
+                            <label for="jam_selesai"
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Jam
+                                Selesai</label>
+                            <input type="time" name="jam_selesai" id="jam_selesai" value="{{ $jadwal->jam_selesai }}"
+                                class="w-full text-sm px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white dark:[&::-webkit-calendar-picker-indicator]:invert"
+                                required>
+                            @error('jam_selesai')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
+
+
+                </div>
+
+                <div class="mt-8 flex items-center justify-end gap-4">
+                    <a href="{{ route('admin.jadwal-kuliah.index') }}"
+                        class="text-sm px-6 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                        Batal
+                    </a>
                     <button type="submit"
-                        class="flex w-full items-center gap-3 text-sm justify-center px-4 py-2 bg-gray-800 dark:bg-gray-900/80 dark:border dark:border-gray-700 dark:hover:bg-gray-900 text-white font-semibold shadow-xl mb-2 mt-4 rounded-full cursor-pointer transition hover:bg-black dark-mode-transition">Simpan</button>
+                        class="text-sm px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                        Simpan
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const golonganData = @json($golonganData); // Mengambil data golongan dari controller
-            const prodiSelect = document.getElementById('programStudi');
-            const golonganSelect = document.getElementById('golongan');
-            const selectedGolonganId =
-                "{{ old('golongan', $jadwal->id_golongan) }}"; // Mendapatkan golongan_id yang terpilih sebelumnya
+        const programStudiSelect = document.getElementById('program_studi');
+        const golonganSelect = document.getElementById('golongan');
+        const golonganData = @json($golonganData);
+        const currentGolongan = {{ $jadwal->id_golongan }};
+        const isKelasBesar = {{ $isKelasBesar ? 'true' : 'false' }};
 
-            function filterGolongan() {
-                const selectedProdi = prodiSelect.value; // Mendapatkan id_prodi yang dipilih
-                let firstVisibleOption = null;
+        function updateGolonganOptions() {
+            const selectedProdi = programStudiSelect.value;
 
-                // Kosongkan dropdown golongan
-                golonganSelect.innerHTML =
-                    '<option value="" class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">Pilih Golongan</option>';
+            // Clear existing options except "Semua Golongan"
+            golonganSelect.innerHTML = '<option value="">Pilih Golongan</option>';
 
-                // Jika ada program studi yang dipilih
-                if (selectedProdi) {
-                    // Ambil golongan yang sesuai dengan id_prodi yang dipilih
-                    const golongans = golonganData[selectedProdi] || [];
-
-                    // Tambahkan opsi golongan ke dropdown
-                    golongans.forEach(golongan => {
-                        const option = document.createElement('option');
-                        option.value = golongan.id;
-                        option.textContent = golongan.nama_golongan;
-                        option.className =
-                            'dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition';
-                        golonganSelect.appendChild(option);
-
-                        // Menandai opsi pertama yang cocok untuk dipilih
-                        if (!firstVisibleOption) {
-                            firstVisibleOption = option;
-                        }
-                    });
-
-                    // Jika ada old value golongan, pilih opsi yang sesuai
-                    if (selectedGolonganId) {
-                        const selectedOption = golonganSelect.querySelector(
-                            `option[value="${selectedGolonganId}"]`);
-                        if (selectedOption) {
-                            selectedOption.selected = true; // Menandai opsi yang dipilih sebelumnya
-                        }
-                    }
-                }
-
-                // Set nilai default ke opsi pertama yang cocok jika tidak ada old value
-                if (!selectedGolonganId && firstVisibleOption) {
-                    golonganSelect.value = firstVisibleOption.value;
-                }
+            if (isKelasBesar) {
+                golonganSelect.innerHTML += '<option value="all" selected>Semua Golongan</option>';
+            } else {
+                golonganSelect.innerHTML += '<option value="all">Semua Golongan</option>';
             }
 
-            // Panggil filterGolongan saat halaman pertama kali dimuat
-            filterGolongan();
+            if (selectedProdi && golonganData[selectedProdi]) {
+                golonganData[selectedProdi].forEach(function(golongan) {
+                    const selected = (!isKelasBesar && golongan.id == currentGolongan) ? 'selected' : '';
+                    golonganSelect.innerHTML +=
+                        `<option value="${golongan.id}" ${selected}>${golongan.nama_golongan}</option>`;
+                });
+            }
+        }
 
-            // Tambahkan event listener untuk perubahan program studi
-            prodiSelect.addEventListener('change', filterGolongan);
-        });
+        programStudiSelect.addEventListener('change', updateGolonganOptions);
+
+        // Initialize on page load
+        updateGolonganOptions();
     </script>
 @endsection

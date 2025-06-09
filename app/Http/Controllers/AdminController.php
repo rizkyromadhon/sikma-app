@@ -14,8 +14,6 @@ use Illuminate\Support\Facades\Auth;
 class AdminController extends Controller
 {
 
-   
-
     public function jadwalKuliah()
     {
         return view('admin.pages.jadwal-kuliah');

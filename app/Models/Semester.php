@@ -14,4 +14,9 @@ class Semester extends Model
     {
         return $this->hasMany(MataKuliah::class);
     }
+
+    public function jadwalKuliah()
+    {
+        return $this->hasMany(JadwalKuliah::class, 'id_semester');
+    }
 }

@@ -26,10 +26,16 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\MataKuliahController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Dosen\JadwalDosenController;
 use App\Http\Controllers\Admin\AlatPresensiController;
 use App\Http\Controllers\Admin\JadwalKuliahController;
 use App\Http\Controllers\Admin\RekapitulasiController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Dosen\DashboardDosenController;
+use App\Http\Controllers\Dosen\KelolaPresensiController;
+use App\Http\Controllers\Dosen\PengajuanIzinController;
+use App\Http\Controllers\Dosen\PengumumanController;
+use App\Http\Controllers\Dosen\RekapKehadiranController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -84,6 +90,34 @@ Route::match(['GET', 'POST'], '/check-nim', [LaporanController::class, 'checkNIM
 
 Route::get('/pesan', [PesanController::class, 'index'])->name('mahasiswa.pesan');
 
+Route::get('/pengajuan-izin', [PengajuanIzinController::class, 'indexMahasiswa'])->name('mahasiswa.izin.index');
+Route::get('/pengajuan-izin/create', [PengajuanIzinController::class, 'create'])->name('mahasiswa.izin.create');
+Route::post('/pengajuan-izin', [PengajuanIzinController::class, 'store'])->name('mahasiswa.izin.store');
+
+Route::middleware(['auth', 'dosen'])->group(function () {
+    Route::get('/dosen/dashboard', [DashboardDosenController::class, 'index'])->name('dosen.dashboard');
+
+    Route::get('/dosen/jadwal', [JadwalDosenController::class, 'index'])->name('dosen.jadwal.index');
+
+    Route::get('/dosen/profil', [ProfileController::class, 'showDosen'])->name('dosen.profile');
+    Route::get('/dosen/profil/edit', [ProfileController::class, 'editDosen'])->name('dosen.profile.edit');
+    Route::put('/dosen/profil/update', [ProfileController::class, 'updateDosen'])->name('dosen.profile.update');
+
+    Route::get('/dosen/profil/ubah-password', [ProfileController::class, 'editPasswordDosen'])->name('dosen.password.edit');
+    Route::put('/dosen/profil/ubah-password', [ProfileController::class, 'updatePasswordDosen'])->name('dosen.password.update');
+
+    Route::get('/dosen/kelola-presensi', [KelolaPresensiController::class, 'index'])->name('dosen.presensi.index');
+    Route::get('/dosen/presensi/detail/{jadwal}/{tanggal}', [KelolaPresensiController::class, 'show'])->name('dosen.presensi.detail');
+    Route::post('/dosen/presensi/update-status/{jadwal}/{tanggal}', [KelolaPresensiController::class, 'updateStatus'])->name('dosen.presensi.updateStatus');
+
+    Route::get('/dosen/pengajuan-izin', [PengajuanIzinController::class, 'index'])->name('dosen.izin.index');
+    Route::post('/dosen/pengajuan-izin/{pengajuan}/update', [PengajuanIzinController::class, 'updateStatus'])->name('dosen.izin.updateStatus');
+
+    Route::get('/dosen/pengumuman', [PengumumanController::class, 'index'])->name('dosen.pengumuman.index');
+    Route::post('/dosen/pengumuman', [PengumumanController::class, 'store'])->name('dosen.pengumuman.store');
+    Route::post('/dosen/pengumuman/get-mahasiswa', [PengumumanController::class, 'getMahasiswa'])->name('dosen.pengumuman.getMahasiswa');
+    Route::post('/dosen/pengumuman/get-golongan-options', [PengumumanController::class, 'getGolonganOptions'])->name('dosen.pengumuman.getGolonganOptions');
+});
 
 // Routes Admin
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -148,6 +182,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/jadwal-kuliah/{id}/edit', [JadwalKuliahController::class, 'edit'])->name('admin.jadwal-kuliah.edit');
     Route::put('/admin/jadwal-kuliah/{id}/update', [JadwalKuliahController::class, 'update'])->name('admin.jadwal-kuliah.update');
     Route::delete('/admin/jadwal-kuliah/{id}/destroy', [JadwalKuliahController::class, 'destroy'])->name('admin.jadwal-kuliah.destroy');
+    Route::delete('/jadwal-kuliah/destroy-group', [JadwalKuliahController::class, 'destroyGroup'])->name('admin.jadwal-kuliah.destroy-group');
+    Route::get('/admin/jadwal-kuliah/edit-group', [JadwalKuliahController::class, 'editGroup'])->name('admin.jadwal-kuliah.edit-group');
+    Route::put('/admin/jadwal-kuliah/update-group', [JadwalKuliahController::class, 'updateGroup'])->name('admin.jadwal-kuliah.update-group');
 
     // Alat Presensi Routes
     Route::get('/admin/alat-presensi', [AlatPresensiController::class, 'index'])->name('admin.alat-presensi.index');
