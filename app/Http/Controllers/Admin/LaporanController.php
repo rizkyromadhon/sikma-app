@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\NotifikasiMahasiswaBaru;
 use App\Models\User;
 use App\Models\Laporan;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Notifikasi;
 use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
@@ -35,7 +37,6 @@ class LaporanController extends Controller
     public function store(Request $request)
     {
         if (Auth::check()) {
-            // User login: ambil dari data user
             $user = Auth::user();
             $data = [
                 'user_id' => $user->id,
@@ -63,12 +64,10 @@ class LaporanController extends Controller
             ];
         }
 
-        // Validasi pesan tetap dilakukan untuk semua
         $request->validate([
             'pesan' => 'required|string|max:1000',
         ]);
 
-        // Simpan laporan
         Laporan::create(array_merge($data, [
             'pesan' => $request->pesan,
             'status' => 'Belum Ditangani',
@@ -126,17 +125,46 @@ class LaporanController extends Controller
 
     public function aksi(Request $request, $id, $aksi)
     {
+        $request->validate([
+            'balasan' => 'required|string|min:5|max:1000',
+        ], [
+            'balasan.required' => 'Pesan balasan wajib diisi untuk melanjutkan.',
+            'balasan.min' => 'Pesan balasan minimal 5 karakter.',
+        ]);
         $laporan = Laporan::findOrFail($id);
 
+        $laporan = Laporan::with('user')->findOrFail($id);
         $laporan->balasan = $request->balasan;
 
         if ($aksi == 'proses') {
             $laporan->status = 'Sedang Diproses';
+            $tipeNotifikasi = 'Laporan Anda Sedang Diproses';
         } elseif ($aksi == 'selesai') {
             $laporan->status = 'Selesai';
+            $tipeNotifikasi = 'Laporan Anda Telah Selesai';
         }
 
         $laporan->save();
+        try {
+            $mahasiswa = $laporan->user;
+
+            if ($mahasiswa) {
+                $kontenNotifikasi = "Tanggapan untuk laporan Anda: \"{$laporan->pesan}\". Pesan dari admin: \"{$request->balasan}\"";
+
+                $notifikasi = Notifikasi::create([
+                    'id_user'   => $mahasiswa->id,
+                    'sender_id' => Auth::id(),
+                    'tipe'      => $tipeNotifikasi,
+                    'konten'    => $kontenNotifikasi,
+                    'url_tujuan' => route('mahasiswa.pesan'),
+                ]);
+
+                NotifikasiMahasiswaBaru::dispatch($mahasiswa, $notifikasi);
+            }
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim notifikasi update status laporan: ' . $e->getMessage());
+        }
+
         return back()->with('success', 'Status laporan diperbarui.');
     }
 

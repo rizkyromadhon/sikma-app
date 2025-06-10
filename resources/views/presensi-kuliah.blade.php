@@ -182,7 +182,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="flex items-center justify-center md:justify-start mt-4 space-x-5 mb-5">
+                {{-- <div class="flex items-center justify-center md:justify-start mt-4 space-x-5 mb-5">
                     <div class="flex gap-3">
                         <a href="{{ url('/presensi-kuliah/download/pdf') }}" x-on:click="$store.loading.value = true">
                             <button
@@ -201,7 +201,7 @@
                             </button>
                         </a>
                     </div>
-                </div>
+                </div> --}}
             @endif
         @endauth
         @guest

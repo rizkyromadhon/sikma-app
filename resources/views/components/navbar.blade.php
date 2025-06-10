@@ -1,9 +1,35 @@
-@php
-    $user = Auth::user();
-@endphp
+<div x-data="{
+    open: false,
+    unreadCount: {{ $unreadNotificationsCount }},
+    notifications: {{ $notifications->toJson() }},
+    initListener() {
+        if (window.Echo) {
+            window.Echo.private('notifikasi.{{ Auth::id() }}')
+                .listen('NotifikasiMahasiswaBaru', (e) => {
+                    console.log('Notifikasi baru diterima:', e);
+                    this.unreadCount++;
+                    this.notifications.unshift(e); // Tambah notifikasi baru ke paling atas daftar
+                });
+        } else {
+            console.error('Laravel Echo tidak terdefinisi. Pastikan Anda sudah menjalankan `npm run dev`.');
+        }
+    },
 
-<div x-data="{ open: false }" :class="open ? 'overflow-hidden' : ''" @toggle-sidebar.window="open = $event.detail.open"
-    @keydown.escape.window="open = false">
+    // Fungsi untuk menandai semua sebagai terbaca
+    markAsReadAll() {
+        if (this.unreadCount > 0) {
+            fetch('{{ route('notifikasi.markAllAsRead') }}', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json', 'Accept': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') { this.unreadCount = 0; }
+                });
+        }
+    }
+}" x-init="initListener()" :class="open ? 'overflow-hidden' : ''"
+    @toggle-sidebar.window="open = $event.detail.open" @keydown.escape.window="open = false">
     <nav class="fixed top-0 left-0 w-full z-50">
         @if ($isOldPassword)
             <div id="headerOldPassword"
@@ -28,6 +54,52 @@
             <div class="flex flex-1">
                 <a href="/"
                     class="-m-1.5 p-1.5 text-lg sm:text-xl font-bold text-gray-700 dark:text-gray-100 dark-mode-transition tracking-tight hover:text-gray-900 dark:hover:text-gray-300">'SIKMA'</a>
+            </div>
+
+            <div x-data="{ open: false }" class="relative">
+                <button @click="open = !open; markAsReadAll()"
+                    class="relative mr-4 text-gray-700 dark:text-gray-200 focus:outline-none transition-all ease-in-out duration-100 transform hover:scale-110 md:hidden">
+                    <i class="fa-regular fa-bell fa-lg"></i>
+                    <span x-show="unreadCount > 0" x-cloak class="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span
+                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                </button>
+
+                <div x-show="open" @click.outside="open = false" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                    class="absolute right-0 mt-3 w-72 sm:w-80 origin-top-right rounded-md bg-white dark:bg-gray-900/60 dark-mode-transition backdrop-blur-sm shadow-lg ring-1 ring-gray-300 dark:ring-gray-600 ring-opacity-5 focus:outline-none z-50"
+                    style="display: none;" x-cloak>
+                    <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Notifikasi
+                        </h3>
+                    </div>
+
+                    <div class="py-1 max-h-80 overflow-y-auto">
+                        <template x-for="notification in notifications" :key="notification.id">
+                            <a x-bind:href="'/notifikasi/' + notification.id + '/read'"
+                                x-bind="notification.tipe === 'Tugas Baru' ? { target: '_blank', rel: 'noopener noreferrer' } : {}"
+                                class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 transition">
+                                <p class="font-bold" x-text="notification.tipe"></p>
+                                <p class="text-xs" x-text="notification.konten"></p>
+                                <p class="text-xs mt-1 text-blue-500 dark:text-blue-400"
+                                    x-text="notification.created_at_human"></p>
+                            </a>
+                        </template>
+
+                        <div x-show="notifications.length === 0" class="p-4 text-center">Tidak ada notifikasi.</div>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700">
+                        <a href="{{ route('notifikasi.index') }}"
+                            class="block text-center py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-900/90 transition-colors duration-150">
+                            Lihat Semua Notifikasi
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <!-- Tombol Hamburger -->
@@ -70,96 +142,150 @@
             <div class="hidden lg:flex lg:flex-1 lg:justify-end">
                 @auth
                     <div class="hidden lg:flex lg:flex-1 lg:justify-end" x-data="{ open: false }">
-                        <div class="relative">
-                            <button @click="open = !open"
-                                class="flex items-center space-x-2 xl:space-x-3 focus:outline-none transition-all ease-in-out duration-100 transform hover:scale-105 cursor-pointer">
-                                @if (Auth::user()->foto && Auth::user()->role == 'dosen')
-                                    <img src="{{ asset('storage/' . Auth::user()->foto) }}" alt="Foto Profil"
-                                        class="w-8 h-8 mt-3.5 rounded-full object-cover mb-4 ring-4 ring-white dark:ring-slate-700">
-                                @elseif (Auth::user()->foto && Auth::user()->role == 'mahasiswa')
-                                    <img src="{{ asset('storage/' . Auth::user()->foto) }}" alt="Foto Profil"
-                                        class="w-8 h-8 mt-3.5 rounded-full object-cover mb-4 ring ring-white dark:ring-slate-700">
-                                @elseif (!Auth::user()->foto && Auth::user()->role == 'dosen')
-                                    <div
-                                        class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
-                                        <i class="fas fa-user-tie text-3xl text-gray-500 dark:text-gray-500"></i>
-                                    </div>
-                                @elseif (!Auth::user()->foto && Auth::user()->role == 'mahasiswa')
-                                    <div
-                                        class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
-                                        <i class="fas fa-user text-3xl text-gray-500 dark:text-gray-500"></i>
-                                    </div>
-                                @else
-                                    <div
-                                        class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
-                                        <i class="fas fa-user text-3xl text-gray-500 dark:text-gray-500"></i>
-                                    </div>
-                                @endif
-
-                                {{-- <img src="{{ Auth::user()->foto ? asset('storage/' . Auth::user()->foto) : asset('img/user.png') }}"
-                                    alt="Foto Profil" class="w-7 h-7 xl:w-8 xl:h-8 rounded-full object-cover"> --}}
-
-                                <span class="text-sm font-semibold text-gray-800 dark:text-gray-100 dark-mode-transition">
-                                    {{ Auth::user()->role == 'dosen' ? Auth::user()->nip : Auth::user()->nim }}
-                                </span>
-
-                                <svg class="w-4 h-4 text-gray-600 dark:text-gray-100 dark-mode-transition" fill="none"
-                                    stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path x-show="!open" stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19 9l-7 7-7-7" />
-                                    <path x-show="open" stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"
-                                        style="display: none;" />
-                                </svg>
-
-                                @if ($isProfileCompleted == '0')
-                                    <div class="px-1 py-1 rounded-full bg-red-500 dark:bg-red-600/80 dark-mode-transition">
-
-                                    </div>
-                                @endif
-                            </button>
-
-                            <div x-show="open" @click.outside="open = false"
-                                x-transition:enter="transition ease-out duration-200"
-                                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-                                x-transition:leave="transition ease-in duration-150"
-                                x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
-                                class="absolute right-0 mt-3 w-42 origin-top-right rounded-md bg-white dark:bg-gray-900/30 dark-mode-transition backdrop-blur-sm shadow-lg ring-1 ring-gray-300 dark:ring-gray-600 ring-opacity-5 focus:outline-none z-50"
-                                style="display: none;">
-                                <div class="py-1">
-                                    <a href="/profile"
-                                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark-mode-transition dark:hover:bg-gray-900/90 transition">Profil
-                                        @if (Auth::check() && !$isProfileCompleted)
+                        <div class="flex items-center space-x-4 xl:space-x-6">
+                            @if (Auth::user()->role == 'mahasiswa')
+                                <div x-data="{ open: false }" class="relative">
+                                    <button @click="open = !open; markAsReadAll()"
+                                        class="relative text-gray-700 dark:text-gray-200 focus:outline-none transition-all ease-in-out duration-100 transform hover:scale-110">
+                                        <i class="fa-regular fa-bell fa-lg"></i>
+                                        <span x-show="unreadCount > 0" x-cloak
+                                            class="absolute -top-1 -right-1 flex h-3 w-3">
                                             <span
-                                                class="inline-block w-2 h-2 bg-red-500 dark:bg-red-600/80 rounded-full absolute right-4 mt-1.5"></span>
-                                        @endif
-                                    </a>
+                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                        </span>
+                                    </button>
 
-                                    @if (Auth::check() && Auth::user()->role == 'mahasiswa')
-                                        <a href="{{ route('mahasiswa.pesan') }}"
-                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">Pesan</a>
-                                        <a href="{{ route('mahasiswa.izin.index') }}"
-                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">Pengajuan
-                                            Izin</a>
+                                    <div x-show="open" @click.outside="open = false"
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 scale-95"
+                                        x-transition:enter-end="opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 scale-100"
+                                        x-transition:leave-end="opacity-0 scale-95"
+                                        class="absolute right-0 mt-3 w-72 sm:w-80 origin-top-right rounded-md bg-white dark:bg-gray-900/60 dark-mode-transition backdrop-blur-sm shadow-lg ring-1 ring-gray-300 dark:ring-gray-600 ring-opacity-5 focus:outline-none z-50"
+                                        style="display: none;" x-cloak>
+                                        <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                                            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Notifikasi
+                                            </h3>
+                                        </div>
+
+                                        <div class="py-1 max-h-80 overflow-y-auto custom-scrollbar">
+                                            <template x-for="notification in notifications" :key="notification.id">
+                                                <a x-bind:href="'/notifikasi/' + notification.id + '/read'"
+                                                    x-bind="notification.tipe === 'Tugas Baru' ? { target: '_blank', rel: 'noopener noreferrer' } : {}"
+                                                    class="block px-4 py-3 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 transition">
+                                                    <p class="font-bold" x-text="notification.tipe"></p>
+                                                    <p class="text-xs" x-text="notification.konten"></p>
+                                                    <p class="text-xs mt-1 text-blue-500 dark:text-blue-400" x-text="notification.created_at_human"></p>
+                                                </a>
+                                            </template>
+
+                                            <div x-show="notifications.length === 0" class="p-4 text-center">Tidak ada
+                                                notifikasi.</div>
+                                        </div>
+
+                                        <div class="border-t border-gray-200 dark:border-gray-700">
+                                            <a href="{{ route('notifikasi.index') }}"
+                                                class="block text-center py-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-900/90 transition-colors duration-150">
+                                                Lihat Semua Notifikasi
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                            <div x-data="{ open: false }" class="relative">
+                                <button @click="open = !open"
+                                    class="flex items-center space-x-2 xl:space-x-3 focus:outline-none transition-all ease-in-out duration-100 transform hover:scale-105 cursor-pointer">
+                                    @if (Auth::user()->foto && Auth::user()->role == 'dosen')
+                                        <img src="{{ asset('storage/' . Auth::user()->foto) }}" alt="Foto Profil"
+                                            class="w-8 h-8 mt-3.5 rounded-full object-cover mb-4 ring-4 ring-white dark:ring-slate-700">
+                                    @elseif (Auth::user()->foto && Auth::user()->role == 'mahasiswa')
+                                        <img src="{{ asset('storage/' . Auth::user()->foto) }}" alt="Foto Profil"
+                                            class="w-8 h-8 mt-3.5 rounded-full object-cover mb-4 ring ring-white dark:ring-slate-700">
+                                    @elseif (!Auth::user()->foto && Auth::user()->role == 'dosen')
+                                        <div
+                                            class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
+                                            <i class="fas fa-user-tie text-3xl text-gray-500 dark:text-gray-500"></i>
+                                        </div>
+                                    @elseif (!Auth::user()->foto && Auth::user()->role == 'mahasiswa')
+                                        <div
+                                            class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
+                                            <i class="fas fa-user text-3xl text-gray-500 dark:text-gray-500"></i>
+                                        </div>
+                                    @else
+                                        <div
+                                            class="w-8 h-8 mt-3.5 rounded-full flex items-end bg-gray-200 dark:bg-gray-300 justify-center mb-4 ring ring-white dark:ring-slate-700 overflow-hidden">
+                                            <i class="fas fa-user text-3xl text-gray-500 dark:text-gray-500"></i>
+                                        </div>
                                     @endif
-                                    @if (Auth::check() && Auth::user()->role === 'admin')
-                                        <a href="{{ route('admin.dashboard') }}"
-                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">
-                                            Dashboard
+
+                                    <span
+                                        class="text-sm font-semibold text-gray-800 dark:text-gray-100 dark-mode-transition">
+                                        {{ Auth::user()->role == 'dosen' ? Auth::user()->nip : Auth::user()->nim }}
+                                    </span>
+
+                                    <svg class="w-4 h-4 text-gray-600 dark:text-gray-100 dark-mode-transition"
+                                        fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path x-show="!open" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M19 9l-7 7-7-7" />
+                                        <path x-show="open" stroke-linecap="round" stroke-linejoin="round"
+                                            d="M5 15l7-7 7 7" style="display: none;" />
+                                    </svg>
+
+                                    @if ($isProfileCompleted == '0')
+                                        <div
+                                            class="px-1 py-1 rounded-full bg-red-500 dark:bg-red-600/80 dark-mode-transition">
+
+                                        </div>
+                                    @endif
+                                </button>
+
+                                <div x-show="open" @click.outside="open = false"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 scale-95"
+                                    x-transition:enter-end="opacity-100 scale-100"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 scale-100"
+                                    x-transition:leave-end="opacity-0 scale-95"
+                                    class="absolute right-0 mt-3 w-42 origin-top-right rounded-md bg-white dark:bg-gray-900/30 dark-mode-transition backdrop-blur-sm shadow-lg ring-1 ring-gray-300 dark:ring-gray-600 ring-opacity-5 focus:outline-none z-50"
+                                    style="display: none;">
+                                    <div class="py-1">
+                                        <a href="/profile"
+                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark-mode-transition dark:hover:bg-gray-900/90 transition">Profil
+                                            @if (Auth::check() && !$isProfileCompleted)
+                                                <span
+                                                    class="inline-block w-2 h-2 bg-red-500 dark:bg-red-600/80 rounded-full absolute right-4 mt-1.5"></span>
+                                            @endif
                                         </a>
-                                    @endif
-                                    @if (Auth::check() && Auth::user()->role === 'dosen')
-                                        <a href="{{ route('dosen.dashboard') }}"
-                                            class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">
-                                            Dashboard
-                                        </a>
-                                    @endif
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="button" @click="$dispatch('open-logout-modal')"
-                                            class="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition cursor-pointer">
-                                            Logout
-                                        </button>
-                                    </form>
+
+                                        @if (Auth::check() && Auth::user()->role == 'mahasiswa')
+                                            <a href="{{ route('mahasiswa.pesan') }}"
+                                                class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">Pesan</a>
+                                            <a href="{{ route('mahasiswa.izin.index') }}"
+                                                class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">Pengajuan
+                                                Izin</a>
+                                        @endif
+                                        @if (Auth::check() && Auth::user()->role === 'admin')
+                                            <a href="{{ route('admin.dashboard') }}"
+                                                class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">
+                                                Dashboard
+                                            </a>
+                                        @endif
+                                        @if (Auth::check() && Auth::user()->role === 'dosen')
+                                            <a href="{{ route('dosen.dashboard') }}"
+                                                class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition">
+                                                Dashboard
+                                            </a>
+                                        @endif
+                                        <form method="POST" action="{{ route('logout') }}">
+                                            @csrf
+                                            <button type="button" @click="$dispatch('open-logout-modal')"
+                                                class="w-full text-left block px-4 py-2 text-sm text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-900/90 dark-mode-transition transition cursor-pointer">
+                                                Logout
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>

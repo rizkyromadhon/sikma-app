@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dosen;
 
+use App\Events\NotifikasiMahasiswaBaru;
 use App\Models\User;
 use App\Models\Golongan;
 use App\Models\Semester;
@@ -233,7 +234,63 @@ class PengumumanController extends Controller
         }
     }
 
-    // ... (metode generateDetailMessage() dan store() tidak perlu diubah)
+    public function getJadwalOptions(Request $request)
+    {
+        try {
+            $dosenId = Auth::id();
+            $semesterId = $request->input('semester');
+            $prodiId = $request->input('prodi');
+
+            // 1. Ambil jadwal dosen yang relevan, pastikan memuat semua relasi
+            $jadwalDosen = JadwalKuliah::where('id_user', $dosenId)
+                ->with('mataKuliah', 'prodi', 'semester', 'golongan')
+                ->when($semesterId && $semesterId !== 'all', fn($q) => $q->where('id_semester', $semesterId))
+                ->when($prodiId && $prodiId !== 'all', fn($q) => $q->where('id_prodi', $prodiId))
+                ->get();
+
+            if ($jadwalDosen->isEmpty()) {
+                return response()->json(['success' => true, 'jadwal' => []]);
+            }
+
+            // 2. Gunakan map() untuk mengubah setiap jadwal menjadi format yang diinginkan
+            $jadwalOptions = $jadwalDosen->map(function ($jadwal) {
+
+                $matkulName = $jadwal->mataKuliah->name ?? 'N/A';
+                $semesterName = $jadwal->semester->display_name ?? 'N/A';
+                $prodiName = $jadwal->prodi->name ?? 'N/A';
+
+                $displayName = '';
+
+                // Cek langsung ke kolom boolean 'is_kelas_besar'
+                if ($jadwal->is_kelas_besar) {
+                    // Jika ini adalah kelas besar
+                    $displayName = "{$matkulName} - {$semesterName} - {$prodiName} - Semua Golongan";
+                } else {
+                    // Jika ini adalah kelas reguler per golongan
+                    $golonganName = $jadwal->golongan->nama_golongan ?? 'N/A';
+                    $displayName = "{$matkulName} - {$semesterName} - {$prodiName} - Gol. {$golonganName}";
+                }
+
+                return (object)[
+                    'display_name' => $displayName,
+                    'value'        => $displayName,
+                    'short_name'   => $matkulName,
+                ];
+            })
+                // 3. Gunakan unique() untuk menghapus duplikat (misal, ada beberapa jadwal kelas besar yang sama)
+                ->unique('display_name')
+                ->values(); // Reset keys array untuk output JSON yang bersih
+
+            return response()->json([
+                'success' => true,
+                'jadwal' => $jadwalOptions
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in getJadwalOptions: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal memuat opsi jadwal.'], 500);
+        }
+    }
+
     private function generateDetailMessage($count, $semester, $prodi, $golongan)
     {
         if ($count == 0) {
@@ -288,6 +345,12 @@ class PengumumanController extends Controller
                 $pathLampiran = $request->file('file_lampiran')->store('lampiran-pengumuman', 'public');
             }
 
+            if ($request->tipe === 'Materi Tambahan' && !$request->hasFile('file_lampiran')) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Untuk tipe "Materi Tambahan", Anda wajib melampirkan file.');
+            }
+
             // Query jadwal sesuai filter
             $jadwalQuery = JadwalKuliah::where('id_user', $dosenId);
 
@@ -332,26 +395,70 @@ class PengumumanController extends Controller
 
             // Buat notifikasi dalam batch
             DB::transaction(function () use ($mahasiswaIds, $dosenId, $request, $pathLampiran) {
+                switch ($request->tipe) {
+                    case 'Informasi Umum':
+                        // Sesuai permintaan, biarkan null
+                        $urlTujuan = null;
+                        break;
+
+                    case 'Tugas Baru':
+                        // Arahkan ke URL E-Learning, ganti jika perlu
+                        $urlTujuan = 'https://elearning-jti.polije.ac.id/';
+                        break;
+
+                    case 'Materi Tambahan':
+                        // Buat URL download untuk file yang di-upload
+                        if ($pathLampiran) {
+                            $urlTujuan = asset('storage/' . $pathLampiran);
+                        }
+                        break;
+
+                    case 'Perkuliahan Ditiadakan':
+                        // Arahkan ke halaman jadwal kuliah mahasiswa
+                        $urlTujuan = route('jadwal-kuliah.index'); // Ganti nama route jika berbeda
+                        break;
+                }
+
+                $mahasiswas = User::whereIn('id', $mahasiswaIds)->get();
                 $notifikasiBatch = [];
                 $now = now();
 
-                foreach ($mahasiswaIds as $mahasiswaId) {
-                    $notifikasiBatch[] = [
-                        'id_user' => $mahasiswaId,
+                foreach ($mahasiswas as $mahasiswa) {
+                    $dataUntukNotifikasi = [
+                        'id_user' => $mahasiswa->id,
                         'sender_id' => $dosenId,
                         'tipe' => $request->tipe,
                         'konten' => $request->konten,
-                        'url_tujuan' => $pathLampiran ? asset('storage/' . $pathLampiran) : null,
+                        'url_tujuan' => $urlTujuan,
                         'read_at' => null,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
+                    $notifikasiBatch[] = $dataUntukNotifikasi;
                 }
 
-                // Insert dalam chunk untuk performa yang lebih baik
-                collect($notifikasiBatch)->chunk(100)->each(function ($chunk) {
-                    Notifikasi::insert($chunk->toArray());
-                });
+                if (!empty($notifikasiBatch)) {
+                    Notifikasi::insert($notifikasiBatch);
+                }
+
+                // 3. Ambil kembali notifikasi yang BARU saja dibuat untuk di-dispatch
+                // Ini penting untuk mendapatkan ID notifikasi dan timestamp yang konsisten
+                $notifikasiBaru = Notifikasi::where('sender_id', $dosenId)
+                    ->where('created_at', $now)
+                    ->whereIn('id_user', $mahasiswaIds)
+                    ->get();
+
+                // Buat map untuk pencarian cepat: userId => notifikasi
+                $notifikasiMap = $notifikasiBaru->keyBy('id_user');
+
+                // 4. Loop lagi melalui objek mahasiswa untuk dispatch event
+                foreach ($mahasiswas as $mahasiswa) {
+                    // Cek apakah ada notifikasi yang sesuai di map
+                    if (isset($notifikasiMap[$mahasiswa->id])) {
+                        $notifikasiUntukEvent = $notifikasiMap[$mahasiswa->id];
+                        NotifikasiMahasiswaBaru::dispatch($mahasiswa, $notifikasiUntukEvent);
+                    }
+                }
             });
 
             $jumlahTerkirim = $mahasiswaIds->count();

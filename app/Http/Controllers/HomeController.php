@@ -80,7 +80,9 @@ class HomeController extends Controller
         $daftarProdi = $daftarProdi = ProgramStudi::select('id', 'name')->distinct()->get();
         foreach ($daftarProdi as $programStudi) {
             $totalMahasiswa = User::where('id_prodi', $programStudi->id)->where('role', 'mahasiswa')->count();
+
             $sudahPresensi = Presensi::where('tanggal', Carbon::today())
+                ->where('status', 'Hadir') // <-- TAMBAHKAN BARIS INI
                 ->whereHas('user', function ($query) use ($programStudi) {
                     $query->where('id_prodi', $programStudi->id);
                 })

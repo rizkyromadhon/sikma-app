@@ -8,6 +8,7 @@ use App\Models\Presensi;
 use App\Models\JadwalKuliah;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Notifikasi;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardDosenController extends Controller
@@ -46,7 +47,6 @@ class DashboardDosenController extends Controller
 
         $prodiIds = $jadwalDosen->pluck('id_prodi')->unique();
 
-        // 2. Hitung semua mahasiswa yang id_prodi-nya ada di dalam daftar prodi tersebut
         $totalMahasiswa = User::where('role', 'mahasiswa')
             ->whereIn('id_prodi', $prodiIds)
             ->count();
@@ -58,12 +58,28 @@ class DashboardDosenController extends Controller
 
         $persentaseKehadiran = ($totalPresensi > 0) ? ($totalHadir / $totalPresensi) * 100 : 0;
 
+        $notifications = Notifikasi::where('id_user', $dosenId)
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($notif) {
+                $notif->created_at_human = $notif->created_at->diffForHumans();
+                return $notif;
+            });
+
+        // HITUNG JUMLAH NOTIFIKASI YANG BELUM DIBACA
+        $unreadNotificationsCount = Notifikasi::where('id_user', $dosenId)
+            ->whereNull('read_at')
+            ->count();
+
         return view("dosen.dashboard.index", [
             'jumlahMataKuliah' => $jumlahMataKuliah,
             'totalMahasiswa' => $totalMahasiswa,
             'jamMengajarPerMinggu' => $jamMengajarPerMinggu,
             'persentaseKehadiran' => $persentaseKehadiran,
             'jumlahKelasHariIni' => $jumlahKelasHariIni,
+            'notifications' => $notifications,
+            'unreadNotificationsCount' => $unreadNotificationsCount,
         ]);
     }
 

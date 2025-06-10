@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Notifications\ResetPasswordNotification;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Notifikasi;
 
 class User extends Authenticatable
 {
@@ -51,7 +53,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_rofile_complete' => 'boolean',
+            'is_profile_complete' => 'boolean',
         ];
     }
 
@@ -78,5 +80,10 @@ class User extends Authenticatable
     public function golongan()
     {
         return $this->belongsTo(Golongan::class, 'id_golongan');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notifikasi::class);
     }
 }

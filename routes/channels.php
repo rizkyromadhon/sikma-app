@@ -19,3 +19,12 @@ Broadcast::channel('kelas.{jadwalId}', function ($user, $jadwalId) {
     // Izinkan akses hanya jika ID user yang login SAMA DENGAN ID dosen di jadwal tersebut
     return (int) $user->id === (int) $jadwal->id_user;
 });
+
+Broadcast::channel('notifikasi-dosen.{dosenId}', function ($user, $dosenId) {
+    // Hanya izinkan jika ID user yang sedang login SAMA DENGAN ID pada nama channel.
+    return (int) $user->id === (int) $dosenId;
+});
+
+Broadcast::channel('notifikasi.{userId}', function ($user, $userId) {
+    return (int) $user->id === (int) $userId;
+});

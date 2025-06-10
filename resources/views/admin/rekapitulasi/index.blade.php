@@ -198,11 +198,7 @@
                     <table class="w-full border border-transparent dark:border-gray-700 dark-mode-transition">
                         <thead class="bg-gray-100 dark:bg-gray-900/30 dark-mode-transition">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" @change="toggleSelectAll()"
-                                        :checked="selectedStudents.length === students.length && students.length > 0"
-                                        class="rounded border-gray-300 text-gray-900 focus:ring-gray-900">
-                                </th>
+
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 dark-mode-transition uppercase tracking-wider">
                                     Mahasiswa</th>
@@ -249,12 +245,6 @@
                             <template x-if="!isLoading && students.length > 0">
                                 <template x-for="student in students" :key="student.id">
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/85 transition-colors duration-200">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <input type="checkbox" :value="student.id"
-                                                @change="toggleStudent(student.id)"
-                                                :checked="selectedStudents.includes(student.id)"
-                                                class="rounded border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-200 focus:ring-gray-900 dark:focus:ring-gray-200">
-                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 <div class="h-10 w-10 rounded-full bg-gray-900 dark:bg-gray-800 flex items-center justify-center text-white font-medium"
@@ -361,117 +351,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="flex flex-col lg:flex-row gap-6">
-                <div class="lg:w-2/3">
-                    <div
-                        class="bg-white dark:bg-gray-900/80 dark:border-transparent rounded-xl shadow-sm border border-gray-200 p-6 w-full">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-4 flex items-center">
-                            <i class="fas fa-chart-bar mr-4 text-blue-600 dark:text-blue-500"></i>
-                            Tren Kehadiran
-                        </h3>
-                        <div class="space-y-4">
-                            <div
-                                class="h-[430px] w-full bg-gradient-to-br from-blue-50 dark:from-blue-800/60 to-indigo-100 dark:to-indigo-900/60 rounded-lg flex items-center justify-center border border-blue-200 dark:border-transparent">
-                                <div class="text-center">
-                                    <i class="fas fa-chart-line text-4xl text-blue-500 dark:text-blue-500 mb-3"></i>
-                                    <p class="text-lg text-blue-600 dark:text-blue-400 font-medium">Grafik Kehadiran
-                                        Mingguan</p>
-                                    <p class="text-sm text-blue-400 dark:text-blue-200">(Data real-time - Placeholder untuk
-                                        grafik aktual)</p>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div
-                                    class="text-center p-3 bg-green-50 dark:bg-green-900/60 rounded-lg border border-green-200 dark:border-green-700">
-                                    <p class="text-2xl font-bold text-green-700 dark:text-green-400"
-                                        x-text="stats.persenRataRataHadirMingguan + '%'"></p>
-                                    <p class="text-xs text-green-600 dark:text-green-300">Rata-rata hadir minggu ini</p>
-                                </div>
-                                <div
-                                    class="text-center p-3 bg-blue-50 dark:bg-blue-900/60 rounded-lg border border-blue-200 dark:border-blue-700">
-                                    <p class="text-2xl font-bold text-blue-700 dark:text-blue-400"
-                                        x-text="stats.weeklyGrowthDisplay"></p>
-                                    <p class="text-xs text-blue-600 dark:text-blue-300">Dari minggu lalu (Placeholder)</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lg:w-1/3 flex flex-col gap-6">
-                    <div
-                        class="bg-white dark:bg-gray-900/60 dark:border-transparent dark-mode-transition rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-1">
-                        <div
-                            class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 dark-mode-transition bg-gradient-to-r from-green-50 dark:from-green-900/60 to-teal-50 dark:to-green-800">
-                            <h3
-                                class="text-md font-semibold text-gray-900 dark:text-gray-200 dark-mode-transition flex items-center gap-3">
-                                <i
-                                    class="fas fa-trophy text-yellow-500 dark:text-yellow-400 dark-mode-transition text-lg"></i>
-                                Kehadiran Terbaik Mahasiswa
-                            </h3>
-                        </div>
-                        <div class="p-4 space-y-2 h-full max-h-60 overflow-y-auto custom-scrollbar">
-                            <template x-if="!topStudents || topStudents.length === 0">
-                                <p class="text-sm text-gray-500 dark:text-gray-300 text-center py-4">Data kehadiran terbaik
-                                    belum tersedia.
-                                </p>
-                            </template>
-                            <template x-for="(student, index) in topStudents" :key="student.id">
-                                <div
-                                    class="flex items-center justify-between p-3 hover:bg-gray-100/80 dark:hover:bg-gray-900/80 dark-mode-transition rounded-lg transition-colors duration-150 ease-in-out">
-                                    <div class="flex items-center">
-                                        <span
-                                            class="text-xs font-semibold text-gray-500 dark:text-gray-200 dark-mode-transition w-7 text-center mr-2 tabular-nums"
-                                            x-text="index + 1 + '.'"></span>
-                                        <div class="h-9 w-9 rounded-full bg-teal-600 dark:bg-teal-900 dark-mode-transition flex items-center justify-center text-white text-sm font-semibold mr-3 flex-shrink-0"
-                                            x-text="student.initials ? student.initials : (student.name ? student.name.substring(0,1).toUpperCase() : '?')">
-                                        </div>
-                                        <div class="flex-grow">
-                                            <p class="text-sm text-gray-800 dark:text-gray-200 dark-mode-transition font-semibold leading-tight"
-                                                x-text="student.name"></p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 dark-mode-transition leading-tight"
-                                                x-text="student.nim"></p>
-                                            <p class="text-xs text-teal-700 dark:text-teal-500 dark-mode-transition leading-tight"
-                                                x-text="'Hadir: ' + student.hadir_count + ' dari ' + student.total_relevant_days + ' hari relevan'">
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <span
-                                        class="text-sm font-bold text-green-600 dark:text-green-400 dark-mode-transition tabular-nums"
-                                        x-text="parseFloat(student.attendance_percentage).toFixed(1) + '%'">
-                                    </span>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                    <div
-                        class="bg-white dark:bg-gray-900/60 rounded-xl shadow-sm border dark:border-transparent border-gray-200 overflow-hidden flex-1 dark-mode-transition">
-                        <div
-                            class="px-6 py-4 border-b border-gray-200 dark:border-transparent bg-gradient-to-r from-purple-50 dark:from-purple-900/60 to-white dark:to-purple-800 dark-mode-transition">
-                            <h3 class="text-md font-semibold text-gray-900 dark:text-gray-200 flex items-center gap-3">
-                                <i
-                                    class="fas fa-history text-purple-600 dark:text-gray-200 text-md dark-mode-transition"></i>
-                                Aktivitas Terbaru
-                            </h3>
-                        </div>
-
-                        <div class="p-4 space-y-2 h-full max-h-60 overflow-y-auto custom-scrollbar">
-                            <template x-if="recentActivities.length === 0">
-                                <p
-                                    class="text-sm text-gray-500 dark:text-gray-300 dark-mode-transition text-center items-center justify-center py-4">
-                                    Tidak ada aktivitas
-                                    terbaru.</p>
-                            </template>
-
-                            <template x-for="activity in recentActivities" :key="activity.id">
-                                {{-- Konten Aktivitas Terbaru akan dirender di sini jika ada data --}}
-                            </template>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Detail Modal -->
@@ -479,84 +358,84 @@
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto"
-            @click.self="closeDetailModal()" style="display: none;" {{-- Tetap gunakan ini untuk mencegah flicker awal --}}>
-
-            {{-- Panel Modal Utama --}}
-            <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col" {{-- HAPUS x-show="showDetailModal" DARI SINI --}}
+            class="fixed inset-0 bg-black/60 dark:bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto"
+            @click.self="closeDetailModal()" style="display: none;">
+            <div class="bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col"
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 transform scale-95"
                 x-transition:enter-end="opacity-100 transform scale-100"
                 x-transition:leave="transition ease-in duration-200"
                 x-transition:leave-start="opacity-100 transform scale-100"
                 x-transition:leave-end="opacity-0 transform scale-95" @click.stop>
-
-                {{-- Header Modal --}}
-                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-                    <h3 class="text-xl font-semibold text-gray-900">Detail Mahasiswa</h3>
-                    <button @click="closeDetailModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <div
+                    class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-200">Detail Mahasiswa</h3>
+                    <button @click="closeDetailModal()"
+                        class="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-500 transition-colors">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
-
-                {{-- Konten Modal (Scrollable) --}}
                 <div class="p-6 space-y-6 overflow-y-auto flex-grow">
-                    {{-- Konten tetap menggunakan x-if untuk memastikan selectedStudent ada datanya --}}
                     <template x-if="selectedStudent">
-                        <div> {{-- Wrapper tambahan untuk konten --}}
-                            {{-- Info Dasar Mahasiswa --}}
+                        <div>
                             <div class="flex items-center space-x-4">
                                 <div
-                                    class="h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+                                    class="h-16 w-16 rounded-full bg-blue-600 dark:bg-gradient-to-t dark:from-slate-600 dark:to-slate-400 flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
                                     <span x-text="selectedStudent.initials"></span>
                                 </div>
                                 <div>
-                                    <h4 class="text-xl font-bold text-gray-900" x-text="selectedStudent.name"></h4>
-                                    <p class="text-sm text-gray-600" x-text="selectedStudent.nim"></p>
-                                    <p class="text-xs text-gray-500"
-                                        x-text="(selectedStudent.program || '') + (selectedStudent.semester ? ' - Semester ' + selectedStudent.semester : '')">
+                                    <h4 class="text-xl font-bold text-gray-900 dark:text-gray-200"
+                                        x-text="selectedStudent.name"></h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400" x-text="selectedStudent.nim"></p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-300"
+                                        x-text="(selectedStudent.program || '') + (selectedStudent.semester ? ' - ' + selectedStudent.semester : '')">
                                     </p>
                                 </div>
                             </div>
 
-                            {{-- Informasi Kehadiran & Status Hari Ini (Grid) --}}
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                                {{-- Informasi Kehadiran (Kiri) --}}
-                                <div class="bg-gray-50 rounded-lg p-4 space-y-2 border border-gray-200">
-                                    <h5 class="text-sm font-semibold text-gray-700 mb-1">Informasi Kehadiran</h5>
+                                <div
+                                    class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 space-y-2 border border-gray-200 dark:border-gray-700">
+                                    <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-400 mb-1">Informasi
+                                        Kehadiran</h5>
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Total Hadir:</span>
-                                        <span class="font-medium text-gray-800"
+                                        <span class="text-gray-600 dark:text-gray-300">Total Hadir:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200"
                                             x-text="selectedStudent.totalPresent || 0"></span>
                                     </div>
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Total Tidak Hadir:</span>
-                                        <span class="font-medium text-gray-800"
+                                        <span class="text-gray-600 dark:text-gray-300">Total Tidak Hadir:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200"
                                             x-text="selectedStudent.totalAbsent || 0"></span>
                                     </div>
                                     <div class="flex justify-between text-sm">
-                                        <span class="text-gray-600">Total Izin/Sakit:</span>
-                                        <span class="font-medium text-gray-800"
+                                        <span class="text-gray-600 dark:text-gray-300">Total Izin/Sakit:</span>
+                                        <span class="font-medium text-gray-800 dark:text-gray-200"
                                             x-text="selectedStudent.totalExcused || 0"></span>
                                     </div>
                                     <div class="flex justify-between text-sm border-t border-gray-300 pt-2 mt-2">
-                                        <span class="text-gray-600">Persentase Kehadiran:</span>
-                                        <span class="font-bold text-blue-600"
+                                        <span class="text-gray-600 dark:text-gray-300">Persentase Kehadiran:</span>
+                                        <span class="font-bold text-blue-600 dark:text-blue-400"
                                             x-text="(selectedStudent.attendanceRate !== undefined ? selectedStudent.attendanceRate + '%' : '0%')"></span>
                                     </div>
                                 </div>
 
-                                {{-- Status Hari Ini (Kanan) --}}
-                                <div class="bg-gray-50 rounded-lg p-4 text-center border border-gray-200">
-                                    <h5 class="text-sm font-semibold text-gray-700 mb-2">Status Hari Ini</h5>
+                                <div
+                                    class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-700">
+                                    <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Status Hari Ini
+                                    </h5>
                                     <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold mb-1"
                                         :class="{
-                                            'bg-green-100 text-green-700': selectedStudent.status === 'Hadir',
-                                            'bg-red-100 text-red-700': selectedStudent.status === 'Tidak Hadir',
-                                            'bg-yellow-100 text-yellow-700': selectedStudent.status === 'Izin' ||
+                                            'bg-green-100 dark:bg-green-900/60 text-green-700 dark:text-green-300': selectedStudent
+                                                .status === 'Hadir',
+                                            'bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300': selectedStudent
+                                                .status === 'Tidak Hadir',
+                                            'bg-yellow-100 dark:bg-yellow-900/60 text-yellow-700 dark:text-yellow-300': selectedStudent
+                                                .status === 'Izin' ||
                                                 selectedStudent.status === 'Sakit' || selectedStudent
                                                 .status === 'Izin/Sakit',
-                                            'bg-gray-200 text-gray-700': !selectedStudent.status || selectedStudent
+                                            'bg-gray-200 dark:bg-slate-300 text-gray-700 dark:text-gray-600': !
+                                                selectedStudent.status || selectedStudent
                                                 .status === 'Belum Presensi'
                                         }">
                                         <i class="mr-1.5 text-xs"
@@ -571,28 +450,30 @@
                                             }"></i>
                                         <span x-text="selectedStudent.status || 'Belum Presensi'"></span>
                                     </div>
-                                    <p class="text-xs text-gray-500"
+                                    <p class="text-xs text-gray-500 dark:text-gray-200"
                                         x-text="selectedStudent.time ? 'Waktu: ' + selectedStudent.time : ''">
                                     </p>
                                 </div>
                             </div>
 
-                            {{-- Riwayat Kehadiran Minggu Ini --}}
                             <div class="mt-6">
-                                <h5 class="text-sm font-semibold text-gray-700 mb-2">Riwayat Kehadiran Minggu ini</h5>
+                                <h5 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Riwayat Kehadiran
+                                    Minggu ini</h5>
                                 <div class="flex flex-row gap-2 w-full">
                                     <template x-for="day in selectedStudent.attendanceHistory || []"
                                         :key="day.date">
-                                        {{-- Konten riwayat per hari --}}
                                         <div class="text-center p-2 rounded-lg border text-xs flex-1"
                                             :class="{
-                                                'bg-green-100 border-green-300 text-green-700': day
+                                                'bg-green-100 dark:bg-green-900/80 border-green-300 dark:border-green-600 text-green-700 dark:text-green-200': day
                                                     .status === 'Hadir',
-                                                'bg-red-100 border-red-300 text-red-700': day.status === 'Tidak Hadir',
-                                                'bg-yellow-100 border-yellow-300 text-yellow-700': day
+                                                'bg-red-100 dark:bg-red-900/80 border-red-300 dark:border-red-600 text-red-700 dark:text-red-200': day
+                                                    .status === 'Tidak Hadir',
+                                                'bg-yellow-100 dark:bg-yellow-900/80 border-yellow-300 dark:border-yellow-600 text-yellow-700 dark:text-yellow-200': day
                                                     .status === 'Izin' || day.status === 'Sakit' || day
                                                     .status === 'Izin/Sakit',
-                                                'bg-gray-100 border-gray-300 text-gray-500': !day.status || day
+                                                'bg-gray-100 dark:bg-gray-400 border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-700':
+                                                    !day
+                                                    .status || day
                                                     .status === 'Belum Presensi'
                                             }">
                                             <div class="font-medium uppercase" x-text="day.dayName"></div>
@@ -621,7 +502,6 @@
                         </div>
                     </template>
                 </div>
-                {{-- Akhir Konten Modal --}}
             </div>
         </div>
 
@@ -629,10 +509,10 @@
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto"
+            class="fixed inset-0 bg-black/60 dark:bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto"
             @click.self="closeExportPdfModal()" style="display: none;">
 
-            <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col"
+            <div class="bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col"
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 transform scale-95"
                 x-transition:enter-end="opacity-100 transform scale-100"
@@ -640,74 +520,88 @@
                 x-transition:leave-start="opacity-100 transform scale-100"
                 x-transition:leave-end="opacity-0 transform scale-95" @click.stop>
 
-                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-                    <h3 class="text-xl font-semibold text-gray-900">Export Rekapitulasi Kehadiran ke Pdf</h3>
-                    <button @click="closeExportPdfModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <div
+                    class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-200">Export Rekapitulasi Kehadiran ke Pdf
+                    </h3>
+                    <button @click="closeExportPdfModal()"
+                        class="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-500 transition-colors">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
 
                 <div class="p-6 space-y-4 overflow-y-auto flex-grow">
                     <div>
-                        <label for="exportProgram" class="block text-sm font-medium text-gray-700 mb-2">Program
+                        <label for="exportProgram"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Program
                             Studi</label>
                         <select id="exportProgram" x-model="exportFilters.program"
-                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                            <option value="">Semua Program Studi</option>
+                            class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark:focus:ring-gray-400 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                            <option value="" class="dark:bg-gray-800 dark:hover:bg-gray-700">Semua Program Studi
+                            </option>
                             <template x-for="prodi in programStudis" :key="prodi.id">
-                                <option :value="prodi.id" x-text="prodi.name"></option>
+                                <option :value="prodi.id" x-text="prodi.name"
+                                    class="dark:bg-gray-800 dark:hover:bg-gray-700"></option>
                             </template>
                         </select>
                     </div>
 
                     <div>
-                        <label for="exportSemester" class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                        <label for="exportSemester"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Semester</label>
                         <select id="exportSemester" x-model="exportFilters.semester" @change="updateMonthRangeOptions()"
-                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                            <option value="">Semua Semester</option>
+                            class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark:focus:ring-gray-400 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                            <option value="" class="dark:bg-gray-800 dark:hover:bg-gray-700">Semua Semester</option>
                             <template x-for="semester in semesters" :key="semester.id">
-                                <option :value="semester.id" x-text="semester.display_name"></option>
+                                <option :value="semester.id" x-text="semester.display_name"
+                                    class="dark:bg-gray-800 dark:hover:bg-gray-700"></option>
                             </template>
                         </select>
                     </div>
 
                     <div x-show="exportFilters.semester">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Rentang Bulan</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Rentang
+                            Bulan</label>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label for="exportMonthFrom" class="sr-only">Bulan Mulai</label>
                                 <select id="exportMonthFrom" x-model="exportFilters.monthFrom"
-                                    class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                                    <option value="">Pilih Bulan Mulai</option>
+                                    class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark:focus:ring-gray-400 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                                    <option value="" class="dark:bg-gray-800 dark:hover:bg-gray-700">Pilih Bulan
+                                        Mulai</option>
                                     {{-- Menggunakan filteredMonthOptions --}}
                                     <template x-for="month in filteredMonthOptions" :key="month.value">
-                                        <option :value="month.value" x-text="month.name"></option>
+                                        <option :value="month.value" x-text="month.name"
+                                            class="dark:bg-gray-800 dark:hover:bg-gray-700"></option>
                                     </template>
                                 </select>
                             </div>
                             <div>
                                 <label for="exportMonthTo" class="sr-only">Bulan Akhir</label>
                                 <select id="exportMonthTo" x-model="exportFilters.monthTo"
-                                    class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                                    <option value="">Pilih Bulan Akhir</option>
-                                    {{-- Menggunakan filteredMonthOptions --}}
+                                    class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-700 dark:focus:ring-gray-400 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                                    <option value="" class="dark:bg-gray-800 dark:hover:bg-gray-700">Pilih Bulan
+                                        Akhir</option>
                                     <template x-for="month in filteredMonthOptions" :key="month.value">
-                                        <option :value="month.value" x-text="month.name"></option>
+                                        <option :value="month.value" x-text="month.name"
+                                            class="dark:bg-gray-800 dark:hover:bg-gray-700"></option>
                                     </template>
                                 </select>
                             </div>
                         </div>
-                        <p x-show="!exportFilters.semester" class="text-sm text-gray-500 mt-2">Pilih semester terlebih
+                        <p x-show="!exportFilters.semester" class="text-sm text-gray-500 dark:text-gray-200 mt-2">Pilih
+                            semester terlebih
                             dahulu untuk menentukan rentang bulan.</p>
                     </div>
 
                 </div>
 
-                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 flex-shrink-0">
+                <div
+                    class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3 flex-shrink-0">
                     <button @click="closeExportPdfModal()"
-                        class="px-4 py-2 bg-transparent text-sm text-gray-800 border rounded-lg hover:bg-gray-800 hover:text-white transition-colors">Batal</button>
+                        class="px-4 py-2 bg-transparent text-sm text-gray-800 dark:text-gray-200 border rounded-lg hover:bg-gray-800 hover:text-white transition-colors">Batal</button>
                     <button @click="triggerExportPdf()"
-                        class="px-4 py-2 bg-red-600 text-sm text-white rounded-lg hover:bg-red-700 transition-colors">Export</button>
+                        class="px-4 py-2 bg-red-600 dark:bg-red-700 text-sm text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-800 transition-colors">Export</button>
                 </div>
             </div>
         </div>
@@ -716,10 +610,10 @@
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0"
-            class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 overflow-y-auto"
+            class="fixed inset-0 bg-black/60 dark:bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto"
             @click.self="closeExportExcelModal()" style="display: none;">
 
-            <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col"
+            <div class="bg-white dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-2xl max-w-lg w-full max-h-[95vh] flex flex-col"
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 transform scale-95"
                 x-transition:enter-end="opacity-100 transform scale-100"
@@ -727,76 +621,90 @@
                 x-transition:leave-start="opacity-100 transform scale-100"
                 x-transition:leave-end="opacity-0 transform scale-95" @click.stop>
 
-                <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-                    <h3 class="text-xl font-semibold text-gray-900">Export Rekapitulasi Kehadiran ke Excel</h3>
-                    <button @click="closeExportExcelModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <div
+                    class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-200">Export Rekapitulasi Kehadiran ke
+                        Excel</h3>
+                    <button @click="closeExportExcelModal()"
+                        class="text-gray-400 dark:text-gray-300 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
 
                 <div class="p-6 space-y-4 overflow-y-auto flex-grow">
+
                     <div>
-                        <span class="text-red-800 text-xs mb-2">* Filter export excel
-                            tidak bisa
-                            menggunakan semua semester.</span>
-                    </div>
-                    <div>
-                        <label for="exportProgram" class="block text-sm font-medium text-gray-700 mb-2">Program
+                        <label for="exportProgram"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Program
                             Studi</label>
                         <select id="exportProgram" x-model="exportFilters.program"
-                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                            <option value="">Semua Program Studi</option>
+                            class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition-all duration-200">
+                            <option value="" class="dark:bg-gray-800 dark:hover:bg-gray-700">Semua Program Studi
+                            </option>
                             <template x-for="prodi in programStudis" :key="prodi.id">
-                                <option :value="prodi.id" x-text="prodi.name"></option>
+                                <option :value="prodi.id" x-text="prodi.name"
+                                    class="dark:bg-gray-800 dark:hover:bg-gray-700"></option>
                             </template>
                         </select>
                     </div>
 
                     <div>
-                        <label for="exportSemester" class="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                        <label for="exportSemester"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Semester</label>
                         <select id="exportSemester" x-model="exportFilters.semester" @change="updateMonthRangeOptions()"
-                            class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
+                            class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition-all duration-200">
                             <template x-for="semester in semesters" :key="semester.id">
-                                <option :value="semester.id" x-text="semester.display_name"></option>
+                                <option :value="semester.id" x-text="semester.display_name"
+                                    class="dark:bg-gray-800 dark:hover:bg-gray-700"></option>
                             </template>
                         </select>
                     </div>
 
                     <div x-show="exportFilters.semester">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Rentang Bulan</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Rentang
+                            Bulan</label>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label for="exportMonthFrom" class="sr-only">Bulan Mulai</label>
                                 <select id="exportMonthFrom" x-model="exportFilters.monthFrom"
-                                    class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                                    <option value="">Pilih Bulan Mulai</option>
+                                    class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition-all duration-200">
+                                    <option value="" class="dark:bg-gray-800 dark:hover:bg-gray-700">Pilih Bulan
+                                        Mulai</option>
                                     <template x-for="month in filteredMonthOptions" :key="month.value">
-                                        <option :value="month.value" x-text="month.name"></option>
+                                        <option :value="month.value" x-text="month.name"
+                                            class="dark:bg-gray-800 dark:hover:bg-gray-700"></option>
                                     </template>
                                 </select>
                             </div>
                             <div>
                                 <label for="exportMonthTo" class="sr-only">Bulan Akhir</label>
                                 <select id="exportMonthTo" x-model="exportFilters.monthTo"
-                                    class="text-sm w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all duration-200">
-                                    <option value="">Pilih Bulan Akhir</option>
+                                    class="text-sm w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-400 focus:border-transparent transition-all duration-200">
+                                    <option value="" class="dark:bg-gray-800 dark:hover:bg-gray-700">Pilih Bulan
+                                        Akhir</option>
                                     <template x-for="month in filteredMonthOptions" :key="month.value">
-                                        <option :value="month.value" x-text="month.name"></option>
+                                        <option :value="month.value" x-text="month.name"
+                                            class="dark:bg-gray-800 dark:hover:bg-gray-700"></option>
                                     </template>
                                 </select>
                             </div>
                         </div>
-                        <p x-show="!exportFilters.semester" class="text-sm text-gray-500 mt-2">Pilih semester terlebih
+                        <p x-show="!exportFilters.semester" class="text-sm text-gray-500 dark:text-gray-200 mt-2">Pilih
+                            semester terlebih
                             dahulu untuk menentukan rentang bulan.</p>
                     </div>
+                    <span class="text-red-800 dark:text-red-600 text-xs mb-2">* Filter export excel
+                        tidak bisa
+                        menggunakan semua semester.</span>
 
                 </div>
 
-                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 flex-shrink-0">
+                <div
+                    class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3 flex-shrink-0">
                     <button @click="closeExportExcelModal()"
-                        class="px-4 py-2 bg-transparent border text-sm text-gray-800 rounded-lg hover:bg-gray-800 hover:text-white transition-colors">Batal</button>
+                        class="px-4 py-2 bg-transparent border text-sm text-gray-800 dark:text-white rounded-lg hover:bg-gray-800 hover:text-white transition-colors">Batal</button>
                     <button @click="triggerExportExcel()"
-                        class="px-4 py-2 bg-green-600 text-sm text-white rounded-lg hover:bg-green-800 transition-colors">Export</button>
+                        class="px-4 py-2 bg-green-600 dark:bg-green-700 text-sm text-white rounded-lg hover:bg-green-800 dark:hover:bg-green-800 transition-colors">Export</button>
                 </div>
             </div>
         </div>
@@ -822,8 +730,6 @@
                     persenHadirToday: 0,
                     persenTidakHadirToday: 0,
                     persenIzinToday: 0,
-                    persenRataRataHadirMingguan: 85, // default
-                    weeklyGrowthDisplay: '+0.0%' // default
                 },
 
                 // Filters
@@ -846,8 +752,6 @@
                 students: [], // This will be populated by API
                 programStudis: [], // Populated by loadServerData
                 semesters: [], // Populated by loadServerData
-                topStudents: [], // Placeholder
-                recentActivities: [], // Placeholder
 
                 monthNames: [
                     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -916,9 +820,7 @@
                                 }
                             }
                         });
-                        await this.loadStudents();
-                        // await this.loadTopStudents(); // Placeholder
-                        // await this.loadRecentActivities(); // Placeholder
+                        await this.loadStudents(); // await this.loadTopStudents(); // Placeholder
                     } catch (error) {
                         console.error('Error loading initial data:', error);
                         alert('Gagal memuat data awal. Silakan coba lagi.');
@@ -936,12 +838,6 @@
                         this.semesters = @json($semesters);
                     @endif
 
-                    @if (isset($topStudentsData))
-                        this.topStudents = @json($topStudentsData);
-                    @else
-                        this.topStudents = [];
-                    @endif
-
                     this.stats = {
                         ...this.stats, // Keep any defaults if not overridden
                         totalMahasiswa: {{ $totalMahasiswa ?? 0 }},
@@ -951,8 +847,6 @@
                         persenHadirToday: {{ $persenHadirToday ?? 0 }},
                         persenTidakHadirToday: {{ $persenTidakHadirToday ?? 0 }},
                         persenIzinToday: {{ $persenIzinToday ?? 0 }},
-                        persenRataRataHadirMingguan: {{ $persenRataRataHadirMingguan ?? 85 }},
-                        // weeklyGrowthDisplay can be calculated/passed from PHP if needed
                     };
 
                     // Set filters from request if they were passed by PHP (e.g., on page reload with query params)
@@ -986,13 +880,11 @@
                             page: this.pagination.currentPage
                         });
 
-                        //                            IMPORTANT: Replace with your actual route
                         const response = await fetch(`{{ route('admin.rekapitulasi.filter') }}?${params.toString()}`, {
                             method: 'GET',
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
                                 'Accept': 'application/json',
-                                // 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Not typically needed for GET
                             }
                         });
 
@@ -1036,16 +928,6 @@
                         .substring(0, 2);
                 },
 
-
-                async loadRecentActivities() {
-                    // Placeholder - Implement API call if needed
-                    this
-                        .recentActivities = [{
-                            id: 1,
-                            description: 'Mahasiswa X ditandai Hadir',
-                            time: '10 menit lalu'
-                        }, ];
-                },
 
                 applyFilters() {
                     this.pagination.currentPage = 1;
@@ -1228,13 +1110,11 @@
                 getMaxMonth() {
                     if (!this.exportFilters.semester) return 12;
                     const selectedSemester = this.semesters.find(s => s.id == this.exportFilters.semester);
-                    // Pastikan end_date ada sebelum mencoba parse
                     return selectedSemester && selectedSemester.end_date ? new Date(selectedSemester.end_date).getMonth() +
                         1 : 12;
                 },
 
                 get filteredMonthOptions() {
-                    // Jika tidak ada semester yang dipilih di filter export, tampilkan semua bulan
                     if (!this.exportFilters.semester) {
                         return this.monthNames.map((name, index) => ({
                             name: name,
@@ -1243,7 +1123,6 @@
                     }
 
                     const selectedSemesterObj = this.semesters.find(s => s.id == this.exportFilters.semester);
-                    // Jika semester yang dipilih tidak ditemukan atau tidak punya tanggal, tampilkan semua bulan sebagai fallback
                     if (!selectedSemesterObj || !selectedSemesterObj.start_date || !selectedSemesterObj.end_date) {
                         return this.monthNames.map((name, index) => ({
                             name: name,
@@ -1257,7 +1136,6 @@
                     let availableMonths = [];
 
                     if (minMonth <= maxMonth) {
-                        // Kasus 1: Rentang bulan dalam tahun kalender yang sama (misal: Februari - Juli)
                         for (let m = minMonth; m <= maxMonth; m++) {
                             availableMonths.push({
                                 name: this.monthNames[m - 1],
@@ -1271,9 +1149,7 @@
                                 value: m
                             });
                         }
-                        // Bulan dari Januari hingga maxMonth
                         for (let m = 1; m <= maxMonth; m++) {
-                            // Hindari duplikasi jika sudah ada di loop pertama (seharusnya tidak terjadi dengan minMonth > maxMonth)
                             if (!availableMonths.some(existing => existing.value === m)) {
                                 availableMonths.push({
                                     name: this.monthNames[m - 1],

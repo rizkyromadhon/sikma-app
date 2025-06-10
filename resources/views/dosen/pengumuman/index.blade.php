@@ -122,6 +122,28 @@
                                     <option value="Perkuliahan Ditiadakan">Perkuliahan Ditiadakan</option>
                                 </select>
                             </div>
+                            <div id="jadwal-kuliah-container" class="space-y-3 hidden">
+                                <label for="jadwal_kuliah_ditiadakan"
+                                    class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                    <svg class="w-4 h-4 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    Pilih Jadwal yang Ditiadakan
+                                </label>
+                                <select name="jadwal_kuliah_ditiadakan" id="jadwal_kuliah_ditiadakan"
+                                    class="w-full px-4 py-3 text-sm border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white transition-all">
+                                    <option value="">Pilih Jadwal</option>
+                                    @foreach ($jadwalOptions as $jadwal)
+                                        {{-- TAMBAHKAN atribut data-short-name di bawah ini --}}
+                                        <option value="{{ $jadwal->display_name }}"
+                                            data-short-name="{{ $jadwal->short_name }}">
+                                            {{ $jadwal->display_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
                             <!-- Konten Pengumuman -->
                             <div class="space-y-3">
@@ -188,40 +210,9 @@
                 </div>
 
                 <!-- Sidebar: Riwayat & Quick Actions -->
-                <div class="xl:col-span-2 order-1 xl:order-2 space-y-8">
-
+                <div class="col-span-2 order-2 space-y-8">
                     <div
-                        class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
-                        <div class="p-6 border-b border-gray-200 dark:border-slate-700">
-                            <h4 class="text-lg font-bold text-gray-900 dark:text-white">Gunakan Template</h4>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Isi form dengan cepat.</p>
-                        </div>
-                        <div class="p-6 space-y-3">
-                            <button type="button"
-                                class="template-btn w-full text-left p-3 rounded-md bg-gray-50 dark:bg-slate-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                                data-tipe="Perkuliahan Ditiadakan"
-                                data-konten="Diberitahukan kepada seluruh mahasiswa bahwa perkuliahan untuk hari ini ditiadakan. Terima kasih.">
-                                <p class="font-semibold text-sm text-blue-800 dark:text-blue-300">❌ Perkuliahan Ditiadakan
-                                </p>
-                            </button>
-                            <button type="button"
-                                class="template-btn w-full text-left p-3 rounded-md bg-gray-50 dark:bg-slate-700/50 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
-                                data-tipe="Tugas Baru"
-                                data-konten="Diberitahukan ada tugas baru yang dapat diakses di platform e-learning. Harap perhatikan batas waktu pengumpulan. Terima kasih.">
-                                <p class="font-semibold text-sm text-green-800 dark:text-green-300">📝 Tugas Baru</p>
-                            </button>
-                            <button type="button"
-                                class="template-btn w-full text-left p-3 rounded-md bg-gray-50 dark:bg-slate-700/50 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
-                                data-tipe="Materi Tambahan"
-                                data-konten="Materi tambahan untuk pertemuan selanjutnya sudah diunggah ke platform e-learning. Harap dipelajari sebelum kelas dimulai.">
-                                <p class="font-semibold text-sm text-purple-800 dark:text-purple-300">📚 Materi Tambahan
-                                </p>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div
-                        class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+                        class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden h-[59rem]">
                         <div class="p-6 border-b border-gray-200 dark:border-slate-700">
                             <div class="flex items-center justify-between">
                                 <h4 class="text-lg font-bold text-gray-900 dark:text-white">Riwayat Terbaru</h4>
@@ -232,7 +223,7 @@
                             </div>
                         </div>
 
-                        <div class="max-h-[33rem] overflow-y-auto custom-scrollbar">
+                        <div class="max-h-[50rem] overflow-y-auto custom-scrollbar">
                             @forelse ($riwayatPengumuman as $riwayat)
                                 <div
                                     class="p-4 border-b border-gray-50 dark:border-slate-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
@@ -312,13 +303,81 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Character counter untuk textarea
-
+            const semesterSelect = document.getElementById('semester');
+            const prodiSelect = document.getElementById('prodi');
+            const golonganSelect = document.getElementById('golongan');
             const textarea = document.getElementById('konten');
             const charCount = document.getElementById('char-count');
             const templateButtons = document.querySelectorAll('.template-btn');
             const tipeSelect = document.getElementById('tipe');
             const kontenTextarea = document.getElementById('konten');
+            const jadwalContainer = document.getElementById('jadwal-kuliah-container');
+            const jadwalSelect = document.getElementById('jadwal_kuliah_ditiadakan');
+            const jumlahMahasiswaEl = document.getElementById('jumlah-mahasiswa');
+            const charCountEl = document.getElementById('char-count');
+
+            function toggleJadwalDropdown() {
+                if (tipeSelect.value === 'Perkuliahan Ditiadakan') {
+                    jadwalContainer.classList.remove('hidden');
+                } else {
+                    jadwalContainer.classList.add('hidden');
+                    if (kontenTextarea.value.includes(
+                            "Diberitahukan kepada seluruh mahasiswa bahwa perkuliahan untuk")) {
+                        kontenTextarea.value = '';
+                        kontenTextarea.dispatchEvent(new Event('input', {
+                            bubbles: true
+                        }));
+                    }
+                }
+            }
+
+            function updateJadwalOptions() {
+                const semester = semesterSelect.value;
+                const prodi = prodiSelect.value;
+
+                jadwalSelect.innerHTML = '<option value="">Memuat jadwal...</option>';
+
+                fetch('{{ route('dosen.pengumuman.getJadwalOptions') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCSRFToken(),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            semester,
+                            prodi
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        jadwalSelect.innerHTML = '<option value="">-- Pilih Jadwal --</option>';
+                        if (data.success && data.jadwal) {
+                            data.jadwal.forEach(jadwal => {
+                                const option = new Option(jadwal.display_name, jadwal.display_name);
+                                option.dataset.shortName = jadwal.short_name;
+                                jadwalSelect.add(option);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error fetching jadwal options:', error));
+            }
+
+            tipeSelect.addEventListener('change', toggleJadwalDropdown);
+
+            jadwalSelect.addEventListener('change', function() {
+                if (this.value) { // Jika ada jadwal yang dipilih
+                    const jadwalText = this.options[this.selectedIndex].dataset.shortName;
+                    const newKonten =
+                        `Diberitahukan kepada seluruh mahasiswa bahwa perkuliahan untuk '${jadwalText}' pada hari ini ditiadakan. Terima kasih.`;
+                    kontenTextarea.value = newKonten;
+
+                    // Trigger event input agar character counter ter-update
+                    kontenTextarea.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                }
+            });
 
             templateButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -549,9 +608,17 @@
             }
 
             // --- Event listeners untuk filter ---
-            const semesterSelect = document.getElementById('semester');
-            const prodiSelect = document.getElementById('prodi');
-            const golonganSelect = document.getElementById('golongan');
+            semesterSelect.addEventListener('change', function() {
+                updateGolonganOptions();
+                updateJadwalOptions(); // Panggil update jadwal di sini
+            });
+
+            prodiSelect.addEventListener('change', function() {
+                updateGolonganOptions();
+                updateJadwalOptions(); // Panggil update jadwal di sini juga
+            });
+
+            golonganSelect.addEventListener('change', updateJumlahMahasiswa);
 
             if (semesterSelect) {
                 semesterSelect.addEventListener('change', function() {
@@ -581,6 +648,10 @@
             setTimeout(() => {
                 updateGolonganOptions();
             }, 100);
+
+            toggleJadwalDropdown();
+            updateJadwalOptions(); // Panggil sekali saat dimuat
+            updateGolonganOptions();
         });
     </script>
 

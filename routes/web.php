@@ -36,6 +36,7 @@ use App\Http\Controllers\Dosen\KelolaPresensiController;
 use App\Http\Controllers\Dosen\PengajuanIzinController;
 use App\Http\Controllers\Dosen\PengumumanController;
 use App\Http\Controllers\Dosen\RekapKehadiranController;
+use App\Http\Controllers\NotifikasiController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -94,8 +95,14 @@ Route::get('/pengajuan-izin', [PengajuanIzinController::class, 'indexMahasiswa']
 Route::get('/pengajuan-izin/create', [PengajuanIzinController::class, 'create'])->name('mahasiswa.izin.create');
 Route::post('/pengajuan-izin', [PengajuanIzinController::class, 'store'])->name('mahasiswa.izin.store');
 
+Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifikasi.index')->middleware('auth');
+Route::post('/notifikasi/mark-as-read', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.markAllAsRead')->middleware('auth');
+Route::get('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'readAndRedirect'])
+    ->name('notifikasi.read')->middleware('auth');
+
 Route::middleware(['auth', 'dosen'])->group(function () {
     Route::get('/dosen/dashboard', [DashboardDosenController::class, 'index'])->name('dosen.dashboard');
+    Route::post('/dosen/notifikasi/mark-as-read', [NotifikasiController::class, 'markAllAsReadDosen'])->name('notifikasi.markAllAsReadDosen');
 
     Route::get('/dosen/jadwal', [JadwalDosenController::class, 'index'])->name('dosen.jadwal.index');
 
@@ -117,6 +124,7 @@ Route::middleware(['auth', 'dosen'])->group(function () {
     Route::post('/dosen/pengumuman', [PengumumanController::class, 'store'])->name('dosen.pengumuman.store');
     Route::post('/dosen/pengumuman/get-mahasiswa', [PengumumanController::class, 'getMahasiswa'])->name('dosen.pengumuman.getMahasiswa');
     Route::post('/dosen/pengumuman/get-golongan-options', [PengumumanController::class, 'getGolonganOptions'])->name('dosen.pengumuman.getGolonganOptions');
+    Route::post('/dosen/pengumuman/get-jadwal-options', [PengumumanController::class, 'getJadwalOptions'])->name('dosen.pengumuman.getJadwalOptions');
 });
 
 // Routes Admin
