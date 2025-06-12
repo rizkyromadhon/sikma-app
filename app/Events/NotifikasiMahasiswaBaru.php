@@ -15,7 +15,7 @@ use Illuminate\Queue\SerializesModels;
 class NotifikasiMahasiswaBaru implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
+    public $broadcastQueue = null;
     public Notifikasi $notifikasi;
     public User $user;
 

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class MahasiswaController extends Controller
 {
@@ -98,8 +99,8 @@ class MahasiswaController extends Controller
             if (empty($semester->display_name)) {
                 return PHP_INT_MAX;
             }
-            return $semester->display_name; 
-        })->values(); 
+            return $semester->display_name;
+        })->values();
         $programStudi = ProgramStudi::all();
         $golonganData = Golongan::orderBy('nama_golongan')->get()->groupBy('id_prodi');
 
@@ -160,6 +161,7 @@ class MahasiswaController extends Controller
 
     public function edit($id)
     {
+        $user = User::where('role', 'mahasiswa')->findOrFail($id);
         $allSemestersForFilter = Semester::all(); // Ambil semua semester
 
         $semesters = $allSemestersForFilter->sortBy(function ($semester) {
@@ -171,16 +173,17 @@ class MahasiswaController extends Controller
             }
             return $semester->display_name; // Fallback ke pengurutan string jika tidak ada angka
         })->values(); // ->values() untuk mereset keys array setelah sorting
-        $user = User::where('role', 'mahasiswa')->where('id', $id)->first();
+        // $user = User::where('role', 'mahasiswa')->where('id', $id)->first();
         $programStudi = ProgramStudi::all();
 
-        $golonganData = Golongan::where('id_prodi', $user->id_prodi)->get();
+        $golonganData = Golongan::orderBy('nama_golongan')->get()->groupBy('id_prodi');
 
         return view('admin.mahasiswa.edit', compact('user', 'semesters', 'programStudi', 'golonganData'));
     }
 
     public function update(Request $request, $id)
     {
+        $user = User::where('role', 'mahasiswa')->findOrFail($id);
         $prevPage = $request->get('page');
 
         // Validasi input
@@ -189,6 +192,8 @@ class MahasiswaController extends Controller
             'email' => [
                 'required',
                 'email',
+                // PERBAIKAN: Aturan unique yang benar untuk update
+                Rule::unique('users')->ignore($user->id),
                 'regex:/^[a-zA-Z0-9._%+-]+@gmail\.com$/'
             ],
             'nim' => 'required',

@@ -1,5 +1,5 @@
 <x-layout :isOldPassword="$isOldPassword">
-    <div id="home-page" class="bg-gray-50 dark:bg-gray-900/20 dark-mode-transition py-2 sm:py-4 rounded-md" x-data
+    <div id="home-page" class="bg-white dark:bg-gray-900/20 dark-mode-transition py-2 sm:py-4 rounded-md" x-data
         x-bind:class="{ 'overflow-hidden': $store.loading.value }">
 
         <div class="mx-auto">

@@ -16,7 +16,7 @@
             <form action="{{ route('admin.mahasiswa.update', [$user->id, 'page' => request()->get('page')]) }}"
                 enctype="multipart/form-data" method="post" class="flex gap-6">
                 @csrf
-                @method('POST')
+                @method('PUT')
                 <div class="bg-white dark:bg-black dark:border dark:border-gray-700 p-4 shadow w-full">
                     <div class="flex gap-4">
                         <div class="flex flex-col flex-1 gap-4 mb-4">
@@ -77,7 +77,7 @@
                                     @foreach ($programStudi as $prodi)
                                         <option value="{{ $prodi->id }}"
                                             class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
-                                            {{ $user->id_prodi == $prodi->id ? 'selected' : '' }}>
+                                            {{ old('id_prodi', $user->id_prodi) == $prodi->id ? 'selected' : '' }}>
                                             {{ $prodi->name }}
                                         </option>
                                     @endforeach
@@ -89,13 +89,6 @@
                                     class="block text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition">Golongan</label>
                                 <select name="id_golongan" id="golongan"
                                     class="block w-full px-2 py-2 border border-gray-300 dark:border-gray-700 dark-mode-transition rounded-md shadow-sm focus:outline-none sm:text-sm transition h-10">
-                                    @foreach ($golonganData as $golongan)
-                                        <option value="{{ $golongan->id }}"
-                                            class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition"
-                                            {{ $user->id_golongan == $golongan->id ? 'selected' : '' }}>
-                                            {{ $golongan->nama_golongan }}
-                                        </option>
-                                    @endforeach
                                 </select>
                             </div>
                             <div class="flex flex-col gap-2">
@@ -147,6 +140,73 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ================== LOGIKA DROPDOWN DINAMIS ==================
+            const prodiSelect = document.getElementById('program_studi');
+            const golonganSelect = document.getElementById('golongan');
+
+            // 1. Simpan data golongan yang dikirim dari controller ke dalam variabel JavaScript
+            const golonganData = @json($golonganData);
+
+            // 2. Simpan ID golongan user saat ini
+            const currentUserGolonganId = {{ old('id_golongan', $user->id_golongan) ?? 'null' }};
+
+            // 3. Buat fungsi untuk memperbarui dropdown golongan
+            function updateGolonganDropdown(selectedProdiId) {
+                // Kosongkan pilihan yang ada
+                golonganSelect.innerHTML = '';
+
+                // Ambil daftar golongan yang sesuai dengan prodi yang dipilih
+                const golonganForProdi = golonganData[selectedProdiId] || [];
+
+                // Jika tidak ada golongan untuk prodi tersebut, tampilkan pesan
+                if (golonganForProdi.length === 0) {
+                    const option = new Option('Tidak ada golongan', '');
+                    option.disabled = true;
+                    option.className = 'dark:text-gray-200 dark:bg-black/90';
+                    golonganSelect.add(option);
+                    return;
+                }
+
+                // Isi dropdown dengan golongan yang baru
+                golonganForProdi.forEach(golongan => {
+                    const option = new Option(golongan.nama_golongan, golongan.id);
+                    // Tandai sebagai 'selected' jika ID-nya cocok dengan data user
+                    option.className = 'dark:text-gray-200 dark:bg-black/90';
+                    if (golongan.id === currentUserGolonganId) {
+                        option.selected = true;
+                    }
+                    golonganSelect.add(option);
+                });
+            }
+
+            // 4. Tambahkan event listener untuk memanggil fungsi saat prodi berubah
+            prodiSelect.addEventListener('change', function() {
+                updateGolonganDropdown(this.value);
+            });
+
+            // 5. Panggil fungsi saat halaman pertama kali dimuat untuk mengisi data awal
+            updateGolonganDropdown(prodiSelect.value);
+
+
+            // ================== LOGIKA PREVIEW GAMBAR ==================
+            const fileInput = document.querySelector('input[name="foto"]');
+            const previewImage = document.getElementById('preview-image');
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        previewImage.src = evt.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+    </script>
+
+    {{-- <script>
         const fileInput = document.querySelector('input[name="foto"]');
         const previewImage = document.getElementById('preview-image');
 
@@ -160,5 +220,5 @@
                 reader.readAsDataURL(file);
             }
         });
-    </script>
+    </script> --}}
 @endsection

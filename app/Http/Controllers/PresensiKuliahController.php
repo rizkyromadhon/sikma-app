@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Throwable;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Golongan;
@@ -18,6 +19,7 @@ use App\Events\KehadiranDiperbarui;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Events\PresensiUntukMonitoring;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -214,135 +216,156 @@ class PresensiKuliahController extends Controller
 
     public function store(Request $request)
     {
-        // Validasi input UID
-        $validated = $request->validate([
-            'uid' => 'required'
-        ]);
+        try { // Mulai blok try-catch
+            $validated = $request->validate([
+                'uid' => 'required'
+            ]);
 
-        $userUid = $validated['uid'];
+            $userUid = $validated['uid'];
+            $user = User::where('role', 'mahasiswa')->where('uid', $userUid)->first();
 
-        // Cari user berdasarkan UID dan role mahasiswa
-        $user = User::where('role', 'mahasiswa')->where('uid', $userUid)->first();
-
-        // Jika user tidak ditemukan
-        if (!$user) {
-            return response()->json([
-                'message' => 'User tidak terdaftar.'
-            ], 404);
-        }
-
-        // Ambil nama belakang user untuk pesan
-        $parts = explode(' ', trim($user->name));
-        $lastName = end($parts);
-
-        // Waktu saat ini
-        $now = Carbon::now();
-        $hariIni = $now->translatedFormat('l');
-        $jamSekarang = $now->format('H:i:s');
-        $tanggalSekarang = $now->format('Y-m-d');
-
-        $jadwal = JadwalKuliah::with('matakuliah')
-            ->where('id_prodi', $user->id_prodi)
-            ->where('id_golongan', $user->id_golongan)
-            ->where('id_semester', $user->id_semester)
-            ->where('hari', $hariIni)
-            ->whereTime('jam_selesai', '>=', $jamSekarang) // Memastikan jadwal belum benar-benar berakhir
-            ->orderBy('jam_mulai', 'asc')                 // Ambil jadwal paling awal yang relevan
-            ->first();
-
-        if (!$jadwal) {
-            return response()->json([
-                'message' => 'Maaf ' . $lastName . ', tidak ada jadwal kuliah yang aktif saat ini.'
-            ], 400);
-        }
-
-        $jamMulaiJadwal = Carbon::parse($jadwal->jam_mulai);
-        $jamSelesaiJadwal = Carbon::parse($jadwal->jam_selesai);
-
-        $batasAwalPresensi = $jamMulaiJadwal->copy()->subMinutes(10);
-        $batasAkhirToleransi = $jamMulaiJadwal->copy()->addMinutes(15); // Sesuai logika toleransi awal
-
-        $namaMatkul = 'mata kuliah ini'; // Default
-        if (isset($jadwal->matakuliah)) {
-            if (isset($jadwal->matakuliah->name)) { // Sesuai preferensi dari feedback Anda
-                $namaMatkul = $jadwal->matakuliah->name;
-            } elseif (isset($jadwal->matakuliah->name)) {
-                $namaMatkul = $jadwal->matakuliah->name;
+            if (!$user) {
+                $dataSend = [
+                    'message' => 'Kartu RFID belum terdaftar.',
+                    'uid' => $userUid
+                ];
+                $dataEsp = [
+                    'message' => 'User not found.',
+                    'uid' => $userUid
+                ];
+                PresensiUntukMonitoring::dispatch('not_found', $dataSend);
+                return response()->json($dataEsp, 404);
             }
-        }
 
-        $sudahPresensi = Presensi::where('user_id', $user->id)
-            ->where('id_jadwal_kuliah', $jadwal->id)
-            ->where('tanggal', $tanggalSekarang)
-            ->exists();
+            $parts = explode(' ', trim($user->name));
+            $lastName = end($parts);
 
-        if ($sudahPresensi) {
-            return response()->json([
-                'message' => 'Maaf ' . $lastName . ', Anda sudah melakukan presensi untuk ' . $namaMatkul . ' hari ini.'
-            ], 400);
-        }
+            $now = Carbon::now();
+            $hariIni = $now->translatedFormat('l');
+            $jamSekarang = $now->format('H:i:s');
+            $tanggalSekarang = $now->format('Y-m-d');
 
-        if ($now->lessThan($batasAwalPresensi)) {
-            return response()->json([
-                'message' => 'Maaf ' . $lastName . ', presensi untuk ' . $namaMatkul . ' baru dibuka pukul ' . $batasAwalPresensi->format('H:i') . '.'
-            ], 400);
-        }
+            Log::info('Mencari jadwal untuk:', [
+                'user_id' => $user->id,
+                'user_name' => $user->name,
+                'hari_dicari' => $hariIni,
+                'jam_sekarang' => $jamSekarang,
+                'prodi_id' => $user->id_prodi,
+                'golongan_id' => $user->id_golongan,
+                'semester_id' => $user->id_semester
+            ]);
 
-        if ($now->greaterThan($batasAkhirToleransi)) {
-            if ($now->greaterThan($jamSelesaiJadwal)) {
-                return response()->json([
-                    'message' => 'Maaf ' . $lastName . ', jadwal kuliah untuk ' . $namaMatkul . ' sudah berakhir pada pukul ' . $jamSelesaiJadwal->format('H:i') . '.'
-                ], 400);
+            $jadwal = JadwalKuliah::with('matakuliah', 'ruangan')
+                ->where('id_prodi', $user->id_prodi)
+                ->where('id_golongan', $user->id_golongan)
+                ->where('id_semester', $user->id_semester)
+                ->where('hari', $hariIni)
+                ->whereTime('jam_selesai', '>=', $jamSekarang)
+                ->orderBy('jam_mulai', 'asc')
+                ->first();
+
+            $userData = [
+                'foto' => $user->foto ?? '',
+                'nama' => $user->name,
+                'nim' => $user->nim,
+                'semester' => optional($user->semester)->display_name ?? '-',
+                'prodi' => optional($user->programStudi)->name ?? '-',
+                'golongan' => optional($user->golongan)->nama_golongan ?? '-',
+                'ruangan' => optional(optional($jadwal)->ruangan)->name ?? '-',
+                'jadwal' => null,
+            ];
+
+            if (!$jadwal) {
+                $userData['message'] = 'Maaf ' . $user->name . ', tidak ada jadwal kuliah yang aktif saat ini.';
+                PresensiUntukMonitoring::dispatch('failed', $userData);
+                // broadcast(new PresensiUntukMonitoring('failed', $userData));
+                return response()->json(['status' => 'error', 'message' => 'Tidak ada jadwal'], 400);
             }
-            return response()->json([
-                'message' => 'Maaf ' . $lastName . ', Anda terlambat untuk melakukan presensi ' . $namaMatkul . '. Batas toleransi adalah pukul ' . $batasAkhirToleransi->format('H:i') . '.'
-            ], 400);
-        }
 
-        if ($now->greaterThan($batasAkhirToleransi)) {
-            // Periksa juga apakah keterlambatan ini masih dalam jam kuliah atau sudah lewat jam selesai
-            if ($now->greaterThan($jamSelesaiJadwal)) {
-                return response()->json([
-                    'message' => 'Maaf ' . $lastName . ', jadwal kuliah untuk ' . $namaMatkul . ' sudah berakhir pada pukul ' . $jamSelesaiJadwal->format('H:i') . '.'
-                ], 400);
+            if (!$jadwal->matakuliah) {
+                $errorMessage = 'Data mata kuliah untuk jadwal ini tidak ditemukan.';
+                Log::error($errorMessage . ' Jadwal ID: ' . $jadwal->id);
+                return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan data di server.'], 500);
             }
+
+            $namaMatkul = $jadwal->matakuliah->name;
+
+            $userData['jadwal'] = [
+                'mata_kuliah' => $namaMatkul,
+                'jam_mulai' => Carbon::parse($jadwal->jam_mulai)->format('H:i'),
+                'jam_selesai' => Carbon::parse($jadwal->jam_selesai)->format('H:i'),
+            ];
+
+            $jamMulaiJadwal = Carbon::parse($jadwal->jam_mulai);
+            $jamSelesaiJadwal = Carbon::parse($jadwal->jam_selesai);
+            $batasAwalPresensi = $jamMulaiJadwal->copy()->subMinutes(10);
+            $batasAkhirToleransi = $jamMulaiJadwal->copy()->addMinutes(15);
+
+            $sudahPresensi = Presensi::where('user_id', $user->id)
+                ->where('id_jadwal_kuliah', $jadwal->id)
+                ->where('tanggal', $tanggalSekarang)
+                ->exists();
+
+            if ($sudahPresensi) {
+                $userData['message'] = 'Maaf ' . $user->name . ', Anda sudah presensi untuk ' . $namaMatkul . ' hari ini.';
+                PresensiUntukMonitoring::dispatch('sudah_presensi', $userData);
+                // broadcast(new PresensiUntukMonitoring('failed', $userData));
+                return response()->json(['status' => 'exist', 'message' => 'Sudah presensi'], 400);
+            }
+
+            if ($now->lessThan($batasAwalPresensi)) {
+                $userData['message'] = 'Maaf ' . $user->name . ', presensi untuk ' . $namaMatkul . ' baru dibuka pukul ' . $batasAwalPresensi->format('H:i') . '.';
+                PresensiUntukMonitoring::dispatch('failed', $userData);
+                // broadcast(new PresensiUntukMonitoring('failed', $userData));
+                return response()->json(['status' => 'error', 'message' => 'Belum dibuka'], 400);
+            }
+
+            if ($now->greaterThan($batasAkhirToleransi)) {
+                $pesan = $now->greaterThan($jamSelesaiJadwal)
+                    ? 'Maaf ' . $user->name . ', jadwal kuliah untuk ' . $namaMatkul . ' sudah berakhir.'
+                    : 'Maaf ' . $user->name . ', Anda terlambat. Batas toleransi adalah pukul ' . $batasAkhirToleransi->format('H:i') . '.';
+                $userData['message'] = $pesan;
+                PresensiUntukMonitoring::dispatch('failed', $userData);
+                // broadcast(new PresensiUntukMonitoring('failed', $userData));
+                return response()->json(['status' => 'error', 'message' => 'Anda terlambat'], 400);
+            }
+
+            $presensi = Presensi::create([
+                'user_id' => $user->id,
+                'id_matkul' => $jadwal->id_matkul,
+                'id_jadwal_kuliah' => $jadwal->id,
+                'waktu_presensi' => $now,
+                'tanggal' => $tanggalSekarang,
+                'status' => 'Hadir'
+            ]);
+
+            $userData['message'] = 'Hai ' . $user->name . ', presensi berhasil dicatat.';
+            // broadcast(new PresensiUntukMonitoring('success', $userData));
+            PresensiUntukMonitoring::dispatch('success', $userData);
+
+            if (class_exists(PresensiCreated::class)) {
+                broadcast(new PresensiCreated($presensi))->toOthers();
+            }
+
+            if ($presensi->jadwalKuliah) {
+                Log::info('Mencoba mengirim event KehadiranDiperbarui untuk jadwal ID: ' . $presensi->jadwalKuliah->id);
+                broadcast(new KehadiranDiperbarui($presensi->jadwalKuliah))->toOthers();
+            }
+
             return response()->json([
-                'message' => 'Maaf ' . $lastName . ', Anda terlambat untuk melakukan presensi ' . $namaMatkul . '. Batas toleransi adalah pukul ' . $batasAkhirToleransi->format('H:i') . '.'
-            ], 400);
-        }
+                'status' => 'success',
+                'message' => 'Presensi berhasil'
+            ], 200);
+        } catch (Throwable $th) { // Tangkap semua jenis error
+            // Catat error sebenarnya di log server untuk debugging
+            Log::error('Error pada API Presensi: ' . $th->getMessage() . ' di baris ' . $th->getLine());
 
-        if ($now->greaterThan($jamSelesaiJadwal)) {
+            // Kirim respons JSON yang aman ke alat
             return response()->json([
-                'message' => 'Maaf ' . $lastName . ', jadwal kuliah untuk ' . $namaMatkul . ' sudah berakhir pada pukul ' . $jamSelesaiJadwal->format('H:i') . '.'
-            ], 400);
+                'status' => 'server_error',
+                'message' => 'Terjadi kesalahan pada server.'
+            ], 500); // Gunakan status code 500 untuk server error
         }
-
-
-        // Jika semua pengecekan lolos, simpan presensi
-        $presensi = Presensi::create([
-            'user_id' => $user->id,
-            'id_matkul' => $jadwal->id_matkul, // Pastikan field ini sesuai dengan model JadwalKuliah Anda
-            'id_jadwal_kuliah' => $jadwal->id,
-            'waktu_presensi' => $now, // Simpan waktu presensi lengkap dengan tanggal dan jam
-            'tanggal' => $tanggalSekarang, // Simpan tanggal presensi
-            'status' => 'Hadir' // Atau status lain sesuai kebutuhan
-        ]);
-
-        // Broadcast event jika menggunakan Laravel Echo atau sejenisnya
-        if (class_exists(PresensiCreated::class)) {
-            broadcast(new PresensiCreated($presensi))->toOthers();
-        }
-
-        if ($presensi->jadwalKuliah) {
-            Log::info('Mencoba mengirim event KehadiranDiperbarui untuk jadwal ID: ' . $presensi->jadwalKuliah->id);
-
-            // [DIPERBAIKI] Gunakan broadcast() agar dikirim langsung tanpa antrean
-            broadcast(new KehadiranDiperbarui($presensi->jadwalKuliah))->toOthers();
-        }
-
-        return response()->json([
-            'message' => 'Hai ' . $lastName . ', presensi berhasil dicatat.'
-        ], 200);
     }
     public function download($format)
     {

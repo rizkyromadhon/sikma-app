@@ -12,7 +12,7 @@ use App\Models\Presensi;
 class PresensiCreated implements ShouldBroadcast
 {
     use InteractsWithSockets, SerializesModels;
-
+    public $broadcastQueue = null;
     public $presensi;
     public $jadwalKuliah;
 
@@ -45,4 +45,3 @@ class PresensiCreated implements ShouldBroadcast
         ];
     }
 }
-

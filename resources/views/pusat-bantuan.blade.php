@@ -1,6 +1,5 @@
 <x-layout>
-    <div
-        class="bg-gray-50 dark:bg-black border border-gray-200 dark:border-gray-700 rounded-md text-gray-800 dark:text-gray-100 dark-mode-transition">
+    <div class="bg-white dark:bg-black rounded-md text-gray-800 dark:text-gray-100 dark-mode-transition">
         <!-- Header -->
         <header class="text-gray-950 dark:text-gray-100 dark-mode-transition py-10 text-center">
             <h1 class="text-3xl font-bold">Pusat Bantuan</h1>

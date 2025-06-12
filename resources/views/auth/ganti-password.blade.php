@@ -1,7 +1,8 @@
 <x-layout>
     <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
         <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-            <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Silahkan Ganti Password</h2>
+            <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 dark:text-gray-200">Silahkan
+                Ganti Password</h2>
         </div>
 
         <div class="top-1/2 left-1/2 transform sm:mx-auto sm:w-full sm:max-w-sm mt-6">
@@ -9,7 +10,8 @@
                 @csrf
                 @method('POST')
                 @if ($errors->any())
-                    <div class="p-4 bg-red-100 border-2 text-red-500 rounded flex items-center gap-2 w-full mb-4">
+                    <div
+                        class="p-4 bg-red-100 dark:bg-red-900/50 border-2 text-red-500 dark:text-red-300 rounded flex items-center gap-2 w-full mb-4">
                         <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
                         <div>
                             @foreach ($errors->all() as $error)
@@ -21,27 +23,28 @@
                 @endif
                 <div>
                     <input type="password" name="oldPassword" id="oldPassword" required
-                        class="block w-full bg-white px-3 py-3 text-base text-gray-900 border-l-1 border-r-1 border-t-1 border-b-1 rounded-t-md border-gray-300 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
+                        class="block w-full bg-white dark:bg-gray-900 px-3 py-3 text-base text-gray-900 dark:text-gray-200 border-l-1 border-r-1 border-t-1 border-b-1 rounded-t-md border-gray-300 dark:border-gray-700 outline-gray-300 placeholder:text-gray-600/50 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                         placeholder="Password lama">
                     <div x-data="{ showPassword: false }" class="flex">
                         <div class="w-5/6">
                             <input :type="showPassword ? 'text' : 'password'" name="password" id="password"
                                 autocomplete="current-password" required
-                                class="block w-full bg-white px-3 py-3 text-base text-gray-900 border-l-1 border-gray-300 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
+                                class="block w-full bg-white dark:bg-gray-900 px-3 py-3 text-base text-gray-900 dark:text-gray-200 border-l-1 border-gray-300 dark:border-gray-700 outline-gray-300 placeholder:text-gray-600/50 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                                 placeholder="Password baru">
 
                         </div>
-                        <div class="w-1/6 flex items-center justify-center border-r-1 border-gray-300">
+                        <div
+                            class="w-1/6 flex items-center justify-center bg-white dark:bg-gray-900 border-r-1 border-gray-300 dark:border-gray-700">
                             <button type="button" @click="showPassword = !showPassword"
                                 class="text-gray-500 hover:text-gray-700">
-                                <svg x-show="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
+                                <svg x-cloak x-show="!showPassword" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" />
                                     <circle cx="12" cy="12" r="3" />
                                 </svg>
 
-                                <svg x-show="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
+                                <svg x-cloak x-show="showPassword" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
                                     <path
@@ -51,7 +54,7 @@
                         </div>
                     </div>
                     <input type="password" name="password_confirmation" id="password_confirmation" required
-                        class="block w-full bg-white px-3 py-3 text-base text-gray-900 border-r-1 border-l-1 border-b-1 border-t-1 border-gray-300 rounded-bl-md placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
+                        class="block w-full bg-white dark:bg-gray-900 px-3 py-3 text-base text-gray-900 dark:text-gray-200 border-r-1 border-l-1 border-b-1 border-t-1 border-gray-300 dark:border-gray-700 rounded-bl-md placeholder:text-gray-600/50 dark:placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-gray-800 sm:text-sm/6"
                         placeholder="Konfirmasi password baru">
                 </div>
 

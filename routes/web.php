@@ -36,9 +36,11 @@ use App\Http\Controllers\Dosen\KelolaPresensiController;
 use App\Http\Controllers\Dosen\PengajuanIzinController;
 use App\Http\Controllers\Dosen\PengumumanController;
 use App\Http\Controllers\Dosen\RekapKehadiranController;
+use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\NotifikasiController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring.index');
 
 Route::get('/jadwal-kuliah', [JadwalKelasController::class, 'index'])->name('jadwal-kuliah.index');
 
@@ -71,9 +73,6 @@ Route::get('/register', function () {
 });
 Route::post('/register', [RegisterController::class, 'register'])->name('register');
 
-// Route::get('/profile', function () {
-//     return view('profile');
-// })->middleware('auth')->name('profile');
 Route::get('/profile', [ProfileController::class, 'index'])->middleware('auth')->name('profile');
 Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
@@ -99,6 +98,7 @@ Route::get('/notifikasi', [NotifikasiController::class, 'index'])->name('notifik
 Route::post('/notifikasi/mark-as-read', [NotifikasiController::class, 'markAllAsRead'])->name('notifikasi.markAllAsRead')->middleware('auth');
 Route::get('/notifikasi/{notifikasi}/read', [NotifikasiController::class, 'readAndRedirect'])
     ->name('notifikasi.read')->middleware('auth');
+
 
 Route::middleware(['auth', 'dosen'])->group(function () {
     Route::get('/dosen/dashboard', [DashboardDosenController::class, 'index'])->name('dosen.dashboard');
@@ -137,7 +137,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/mahasiswa/create', [MahasiswaController::class, 'create'])->name('admin.mahasiswa.create');
     Route::post('/admin/mahasiswa/store', [MahasiswaController::class, 'store'])->name('admin.mahasiswa.store');
     Route::get('/admin/mahasiswa/{id}/edit', [MahasiswaController::class, 'edit'])->name('admin.mahasiswa.edit');
-    Route::post('/admin/mahasiswa/{id}/update', [MahasiswaController::class, 'update'])->name('admin.mahasiswa.update');
+    Route::put('/admin/mahasiswa/{id}/update', [MahasiswaController::class, 'update'])->name('admin.mahasiswa.update');
     Route::delete('/admin/mahasiswa/{id}/destroy', [MahasiswaController::class, 'destroy'])->name('admin.mahasiswa.destroy');
 
     // Semester Routes

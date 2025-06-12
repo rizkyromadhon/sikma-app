@@ -99,7 +99,6 @@
         </div>
     </main>
 
-
     <!-- Notifikasi -->
     @if (session('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
@@ -108,15 +107,12 @@
         </div>
     @endif
 
-
-
     @if (session('error'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
             class="fixed left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:-translate-x-0 w-[320px] md:w-auto z-50 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-100 px-4 py-2 rounded-md shadow-lg backdrop-blur-sm {{ $isOldPassword ? ' top-36 md:top-30' : ' top-20' }}">
             <strong>Gagal.</strong> {{ session('error') }}
         </div>
     @endif
-
 
     @if (session('info'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition
@@ -180,24 +176,28 @@
         </div>
     </div>
 
-    <div @class([
-        'fixed bottom-6 z-[9998]',
-        'right-6' => request()->is('admin/*') || request()->is('dosen/*'),
-        'left-6' => !request()->is('admin/*') && !request()->is('dosen/*'),
-    ])>
-        <button @click="toggleDarkMode()"
-            class="group bg-gray-800 dark:bg-gray-900/50 text-gray-200 dark:text-gray-200 border border-gray-900 dark:border-gray-200 w-12 h-12 rounded-full shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center transition-all duration-300 ease-in-out cursor-pointer backdrop-blur-sm">
+    @if (!request()->is('monitoring'))
+        <div @class([
+            'fixed bottom-6 z-[9998]',
+            'right-6' => request()->is('admin/*') || request()->is('dosen/*'),
+            'left-6' => !request()->is('admin/*') && !request()->is('dosen/*'),
+        ])>
+            <button @click="toggleDarkMode()"
+                class="group bg-gray-800 dark:bg-gray-900/50 text-gray-200 dark:text-gray-200 border border-gray-900 dark:border-gray-200 w-12 h-12 rounded-full shadow-lg hover:shadow-xl hover:scale-105 flex items-center justify-center transition-all duration-300 ease-in-out cursor-pointer backdrop-blur-sm">
 
-            <i class="fas fa-sun text-white transition-all duration-300 ease-in-out"
-                :class="darkMode ? 'opacity-0 rotate-180 scale-0' : 'opacity-100 rotate-0 scale-100'"></i>
+                <i class="fas fa-sun text-white transition-all duration-300 ease-in-out"
+                    :class="darkMode ? 'opacity-0 rotate-180 scale-0' : 'opacity-100 rotate-0 scale-100'"></i>
 
-            <i class="fas fa-moon text-white absolute transition-all duration-300 ease-in-out"
-                :class="darkMode ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-180 scale-0'"></i>
-        </button>
-    </div>
+                <i class="fas fa-moon text-white absolute transition-all duration-300 ease-in-out"
+                    :class="darkMode ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-180 scale-0'"></i>
+            </button>
+        </div>
+    @endif
+
 
     @if (
-        !request()->is('admin/*') &&
+        !request()->is('monitoring') &&
+            !request()->is('admin/*') &&
             !request()->is('dosen/*') &&
             (!Auth::check() || (Auth::check() && Auth::user()->role != 'admin' && Auth::user()->role != 'dosen')))
         <div class="fixed bottom-6 right-6 z-[9998]">

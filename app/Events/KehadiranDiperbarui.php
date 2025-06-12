@@ -12,7 +12,7 @@ use Illuminate\Queue\SerializesModels;
 class KehadiranDiperbarui implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
+    public $broadcastQueue = null;
     protected $jadwal;
 
     public function __construct(JadwalKuliah $jadwal)
