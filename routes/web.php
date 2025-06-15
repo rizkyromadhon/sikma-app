@@ -62,8 +62,10 @@ Route::get('/login', function () {
 })->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login')->name('login');
 
-Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/lupa-password', [ForgotPasswordController::class, 'lupaPassword'])->name('lupa-password');
+Route::post('/lupa-password/store', [ForgotPasswordController::class, 'store'])->name('lupa-password.store');
+Route::get('/password-baru/{token}', [ForgotPasswordController::class, 'passwordBaru'])->name('password-baru');
+Route::post('/password-baru', [ForgotPasswordController::class, 'passwordBaruStore'])->name('password-baru.store');
 
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
@@ -82,7 +84,7 @@ Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 Route::get('/ganti-password', [ProfileController::class, 'changePassword'])->name('ganti-password');
 Route::post('/update-password', [ProfileController::class, 'updatePassword'])->name('update-password');
 
-Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle']);
+Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
 
 Route::post('/laporan', [LaporanController::class, 'store'])->name('laporan.store');

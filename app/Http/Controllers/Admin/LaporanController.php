@@ -2,25 +2,60 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Events\NotifikasiMahasiswaBaru;
 use App\Models\User;
 use App\Models\Laporan;
+use App\Models\Notifikasi;
+use App\Mail\AdminReplyMail;
 use App\Models\ProgramStudi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
-use App\Models\Notifikasi;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Events\NotifikasiMahasiswaBaru;
+use App\Notifications\AdminPasswordResetNotification;
+use Illuminate\Support\Facades\Password;
 
 class LaporanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    // public function index()
+    // {
+    //     $laporan = Laporan::with('programStudi')->orderByRaw("FIELD(status, 'Belum Ditangani', 'Sedang Diproses', 'Selesai')")->paginate(8);
+    //     return view('admin.laporan.index', compact('laporan'));
+    // }
+
+    public function index(Request $request) // 1. Menerima Request
     {
-        $laporan = Laporan::with('programStudi')->orderByRaw("FIELD(status, 'Belum Ditangani', 'Sedang Diproses', 'Selesai')")->paginate(8);
-        return view('admin.laporan.index', compact('laporan'));
+        // 2. Ambil semua TIPE laporan yang unik dari database untuk mengisi dropdown filter.
+        $unique_types = Laporan::query()
+            ->select('tipe')
+            ->distinct()
+            ->pluck('tipe');
+
+        // 3. Mulai membangun query, jangan langsung eksekusi.
+        $query = Laporan::with('programStudi');
+
+        // 4. Terapkan filter HANYA JIKA ada parameter 'tipe' di URL.
+        //    Fungsi when() sangat ideal untuk filter kondisional seperti ini.
+        $query->when($request->filled('tipe'), function ($q) use ($request) {
+            return $q->where('tipe', $request->query('tipe'));
+        });
+
+        // Terapkan urutan custom Anda yang sudah ada
+        $query->orderByRaw("FIELD(status, 'Belum Ditangani', 'Sedang Diproses', 'Selesai')")
+            ->latest(); // Tambahkan latest() sebagai urutan sekunder
+
+        // 5. Eksekusi query dengan paginasi DAN pertahankan query string (filter)
+        $laporan = $query->paginate(8)->withQueryString();
+
+        // 6. Kirim data laporan DAN daftar tipe unik ke view.
+        return view('admin.laporan.index', [
+            'laporan' => $laporan,
+            'tipes'   => $unique_types,
+        ]);
     }
 
     /**
@@ -61,6 +96,7 @@ class LaporanController extends Controller
                 'nim' => $request->nim,
                 'id_prodi' => $request->id_prodi,
                 'email' => $request->email,
+                'tipe' => 'laporan'
             ];
         }
 
@@ -134,7 +170,7 @@ class LaporanController extends Controller
         $laporan = Laporan::findOrFail($id);
 
         $laporan = Laporan::with('user')->findOrFail($id);
-        $laporan->balasan = $request->balasan;
+        $laporan->balasan = $request->balasan ?: 'Tindakan telah diproses oleh admin.';
 
         if ($aksi == 'proses') {
             $laporan->status = 'Sedang Diproses';
@@ -144,10 +180,31 @@ class LaporanController extends Controller
             $tipeNotifikasi = 'Laporan Anda Telah Selesai';
         }
 
-        $laporan->save();
-        try {
-            $mahasiswa = $laporan->user;
 
+
+        $mahasiswa = $laporan->user;
+
+        if ($laporan->tipe === 'lupa_password') {
+            try {
+                $pesanDariAdmin = $request->balasan;
+
+                // Gunakan metode sendResetLink dengan closure untuk mengirim notifikasi kustom
+                Password::broker()->sendResetLink(
+                    ['email' => $mahasiswa->email],
+                    function ($user, $token) use ($pesanDariAdmin) {
+                        $user->notify(new AdminPasswordResetNotification($token, $pesanDariAdmin));
+                    }
+                );
+            } catch (\Exception $e) {
+                Log::error('Gagal mengirim email reset password otomatis: ' . $e->getMessage());
+                $laporan->save(); // Tetap simpan status laporan
+                return back()->with('info', 'Status laporan diperbarui, tapi notifikasi email GAGAL dikirim. Cek konfigurasi.');
+            }
+        }
+
+        $laporan->save();
+
+        try {
             if ($mahasiswa) {
                 $kontenNotifikasi = "Tanggapan untuk laporan Anda: \"{$laporan->pesan}\". Pesan dari admin: \"{$request->balasan}\"";
 
@@ -156,7 +213,7 @@ class LaporanController extends Controller
                     'sender_id' => Auth::id(),
                     'tipe'      => $tipeNotifikasi,
                     'konten'    => $kontenNotifikasi,
-                    'url_tujuan' => route('mahasiswa.pesan'),
+                    'url_tujuan' => route('mahasiswa.pesan'), // pastikan route ini ada
                 ]);
 
                 NotifikasiMahasiswaBaru::dispatch($mahasiswa, $notifikasi);
@@ -164,7 +221,6 @@ class LaporanController extends Controller
         } catch (\Exception $e) {
             Log::error('Gagal mengirim notifikasi update status laporan: ' . $e->getMessage());
         }
-
         return back()->with('success', 'Status laporan diperbarui.');
     }
 

@@ -9,6 +9,27 @@
     <div class="px-6">
         <div x-data="{ activeModal: null }"
             class="overflow-x-auto bg-white dark:bg-black border dark-mode-transition border-gray-200 dark:border-gray-700 rounded-xl shadow mb-4">
+            <form action="{{ route('admin.laporan.index') }}" method="GET">
+                <div class="mx-auto px-6 mb-4 flex space-x-4 mt-4">
+                    <!-- Filter Program Studi -->
+                    <div class="flex-1">
+                        <label for="tipe"
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition">Tipe</label>
+                        <select name="tipe" id="tipe" onchange="this.form.submit()"
+                            class="mt-2 block px-2 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none sm:text-sm transition w-fit">
+                            <option value=""
+                                class="dark:text-gray-200 dark:bg-black/90 backdrop-blur-xs dark-mode-transition">Semua
+                                Laporan</option>
+                            @foreach ($tipes as $tipe)
+                                <option value="{{ $tipe }}" {{ request('tipe') == $tipe ? 'selected' : '' }}
+                                    class="bg-white dark:bg-black/90 backdrop-blur-xs dark:text-gray-200 dark-mode-transition">
+                                    {{ Str::title(str_replace('_', ' ', $tipe)) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </form>
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 dark-mode-transition">
                 <thead class="bg-gray-100 dark:bg-gray-900/30 dark-mode-transition dark:border-t dark:border-gray-700">
                     <tr>
@@ -18,6 +39,9 @@
                         <th
                             class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
                             Nama</th>
+                        <th
+                            class="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
+                            Tipe</th>
                         <th
                             class="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200 dark-mode-transition uppercase">
                             NIM</th>
@@ -46,6 +70,7 @@
                             <td class="px-4 py-3 text-center">
                                 {{ ($laporan->currentPage() - 1) * $laporan->perPage() + $loop->iteration }}.</td>
                             <td class="px-6 py-3 text-left">{{ $item->nama_lengkap }}</td>
+                            <td class="px-6 py-3 text-left">{{ Str::title(str_replace('_', ' ', $item->tipe)) }}</td>
                             <td class="px-4 py-3 text-left">{{ $item->nim }}</td>
                             <td class="px-6 py-3 text-left">{{ $item->programStudi->name }}</td>
                             <td class="px-6 py-3 text-left">{{ $item->email }}</td>
@@ -66,46 +91,60 @@
                             </td>
                             <td class="px-6 py-2 text-center flex gap-2 items-center justify-center">
                                 @if ($item->status == 'Belum Ditangani')
-                                    {{-- Tombol Proses --}}
                                     <button @click="activeModal='proses{{ $item->id }}'"
                                         class="text-sm text-white py-2 rounded-md w-18 bg-gray-800 dark:bg-black dark:border dark:border-gray-700 hover:bg-black dark:hover:bg-gray-900 transition font-medium cursor-pointer dark-mode-transition">
                                         Proses
                                     </button>
-                                    <!-- Modal Proses -->
-                                    <div x-show="activeModal==='proses{{ $item->id }}'"
-                                        class="absolute inset-0 bg-gray-900/50 dark:bg-black/70 dark-mode-transition z-40 flex items-center justify-center"
+
+                                    <div x-show="activeModal==='proses{{ $item->id }}'" x-cloak
+                                        class="fixed inset-0 bg-gray-900/50 dark:bg-black/70 z-50 flex items-center justify-center p-4"
                                         x-transition.opacity.duration.200>
-                                        <div class="bg-white dark:bg-gray-900/60 backdrop-blur-sm p-6 rounded-lg shadow-lg max-w-lg w-full"
-                                            @click.away="isOpen = false">
-                                            <h2 class="text-xl font-semibold mb-4">Kirim Pesan ke {{ $item->nama_lengkap }}
+                                        <div class="bg-white dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-lg shadow-lg max-w-lg w-full"
+                                            @click.away="activeModal = null">
+
+                                            {{-- Judul Modal Dinamis --}}
+                                            <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                                                @if ($item->tipe == 'lupa_password')
+                                                    Balas Laporan Lupa Password
+                                                @else
+                                                    Balas Laporan Mahasiswa
+                                                @endif
                                             </h2>
+
+                                            {{-- Form dengan ACTION DINAMIS --}}
                                             <form
-                                                action="{{ route('laporan.aksi', ['id' => $item->id, 'aksi' => 'proses']) }}"
+                                                action="{{ route('laporan.aksi', ['id' => $item->id, 'aksi' => $item->tipe == 'lupa_password' ? 'selesai' : 'proses']) }}"
                                                 method="POST">
                                                 @csrf
-                                                @method('POST')
-                                                <input type="hidden" name="status" value="Sedang Diproses">
+
                                                 <div class="mb-4">
-                                                    <textarea name="balasan" id="balasan{{ $item->id }}" rows="4"
-                                                        class="w-full border border-gray-300 dark:border-gray-700 placeholder-gray-600/50 dark:placeholder-gray-400/50 rounded p-2"
-                                                        required placeholder="Laporan sedang diproses."></textarea>
+                                                    {{-- Textarea dengan PLACEHOLDER DINAMIS --}}
+                                                    <textarea name="balasan" id="balasan{{ $item->id }}" rows="5"
+                                                        class="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded p-2 text-gray-800 dark:text-gray-200 placeholder-gray-500"
+                                                        required
+                                                        placeholder="@if ($item->tipe == 'lupa_password') Tulis balasan di sini. PENTING: Jangan lupa sertakan link untuk reset password yang Anda buat secara manual. @elseLaporan sedang diproses... @endif"></textarea>
                                                 </div>
+
                                                 <div class="flex justify-end gap-2">
-                                                    <button type="submit"
-                                                        class="px-4 py-2 bg-gray-800 dark:bg-black dark:border dark:border-gray-700 dark:hover:bg-gray-900/40 text-white rounded hover:bg-gray-900 transition">Kirim</button>
                                                     <button type="button" @click="activeModal=null"
-                                                        class="px-4 py-2 bg-transparent dark:bg-gray-800 text-black dark:text-gray-200 rounded hover:bg-gray-900 dark:hover:bg-gray-900 border dark:border-gray-700 hover:text-white transition">Batal</button>
+                                                        class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">Batal</button>
+                                                    <button type="submit"
+                                                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                                                        @if ($item->tipe == 'lupa_password')
+                                                            Kirim Link Ganti Password ke Mahasiswa
+                                                        @else
+                                                            Kirim Balasan
+                                                        @endif
+                                                    </button>
                                                 </div>
                                             </form>
                                         </div>
                                     </div>
                                 @elseif ($item->status == 'Sedang Diproses')
-                                    {{-- Tombol Proses --}}
                                     <button @click="activeModal='selesai{{ $item->id }}'"
                                         class="text-sm text-white py-2 rounded-md w-18 bg-gray-800 dark:bg-black dark:border dark:border-gray-700 hover:bg-black dark:hover:bg-gray-900 transition font-medium cursor-pointer dark-mode-transition">
                                         Selesai
                                     </button>
-                                    <!-- Modal Proses -->
                                     <div x-show="activeModal==='selesai{{ $item->id }}'"
                                         class="absolute inset-0 bg-gray-900/50 dark:bg-black/70 dark-mode-transition z-40 flex items-center justify-center"
                                         x-transition.opacity.duration.200>

@@ -57,7 +57,7 @@
                 </div>
 
                 <div class="text-sm">
-                    <a href="{{ route('password.request') }}"
+                    <a href="{{ route('lupa-password') }}"
                         class="font-semibold text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-300 transition dark-mode-transition">Lupa
                         password?</a>
                 </div>
@@ -71,8 +71,8 @@
 
             <p class="text-center text-sm md:text-md py-6">atau</p>
 
-            <a href="#" tabindex="-1" onclick="event.preventDefault(); return false;"
-                class="mx-auto flex justify-center items-center gap-2 w-80 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100 shadow-sm transition opacity-50 cursor-not-allowed">
+            <a href="{{ route('login.google') }}"
+                class="mx-auto flex justify-center items-center gap-2 w-80 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-200 shadow-sm transition">
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="h-5 w-5">
                 Login dengan akun Google
             </a>

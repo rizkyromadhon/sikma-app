@@ -216,25 +216,20 @@
 
     <div x-show="showContactModal" x-cloak x-transition.opacity.duration.200
         class="fixed inset-0 z-[9999] flex items-center justify-center">
-        <!-- Overlay -->
         <div class="absolute inset-0 bg-black/50 dark:bg-black/70" @click="showContactModal = false">
         </div>
 
-        <!-- Modal Box -->
         <div x-data="formValidation()" x-show="showContactModal" x-transition.scale.duration.200
             class="relative bg-white dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 w-full max-w-xs md:max-w-md mx-auto rounded-md shadow-lg z-50 p-6">
 
-            <!-- Tombol Tutup -->
             <button @click="showContactModal = false"
                 class="absolute top-3 right-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xl transition-colors">&times;
             </button>
 
-            <!-- Judul -->
             <h2 class="text-xl font-semibold mb-4 text-center text-gray-700 dark:text-gray-100">Form Laporan ke
                 Admin
             </h2>
 
-            <!-- Form -->
             <form method="POST" action="{{ route('laporan.store') }}" @submit="handleSubmit">
                 @csrf
                 @method('POST')

@@ -23,10 +23,10 @@ export default defineConfig(({ mode }) => {
         server: {
             host: "0.0.0.0",
             hmr: {
-                host: "192.168.65.70",
+                host: "192.168.176.70",
             },
             cors: {
-                origin: "http://192.168.65.70:8000",
+                origin: "http://192.168.176.70:8000",
             },
         },
     };
